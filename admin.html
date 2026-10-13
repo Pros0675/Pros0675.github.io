@@ -1,86 +1,239 @@
 <!DOCTYPE html>
-<html>
+<html lang="sw">
 <head>
-  <title>Admin - Prosper Movies</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { background: #0a0a0a; color: #fff; font-family: Arial; padding: 20px; max-width: 600px; margin: 0 auto; }
-    h1 { color: #E50914; text-align: center; }
-    input, textarea { width: 100%; padding: 12px; margin: 8px 0; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 6px; font-size: 16px; }
-    button { width: 100%; background: #E50914; color: white; padding: 15px; border: none; border-radius: 6px; font-size: 18px; font-weight: bold; margin-top: 10px; }
-    .output { background: #1a1a1a; padding: 15px; border-radius: 6px; margin-top: 20px; border: 1px solid #E50914; }
-    .output textarea { height: 200px; font-family: monospace; font-size: 12px; }
-    .step { background: #1a1a1a; padding: 15px; border-left: 4px solid #E50914; margin: 15px 0; }
-    .success { color: #4CAF50; text-align: center; font-weight: bold; display: none; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Admin - Prosper Movies</title>
+<style>
+  :root{--bg:#0c0a0a;--panel:#181313;--line:#2c2222;--red:#e5262d;--text:#f4eeee;--muted:#a39898;--ok:#3ecf8e}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:20px 16px 60px}
+  .wrap{max-width:520px;margin:0 auto}
+  h1{font-size:1.5rem;margin-bottom:4px}
+  h2{font-size:1.1rem;margin:28px 0 12px}
+  .sub{color:var(--muted);margin-bottom:20px;font-size:.95rem}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+  label{display:block;font-size:.9rem;margin:14px 0 6px}
+  input,textarea{width:100%;background:#0f0c0c;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:12px;font:inherit;font-size:1rem}
+  input:focus,textarea:focus{outline:2px solid var(--red);border-color:transparent}
+  textarea{min-height:90px;resize:vertical}
+  button{font:inherit;cursor:pointer}
+  .btn{width:100%;margin-top:18px;padding:14px;border-radius:8px;border:none;background:var(--red);color:#fff;font-weight:700;font-size:1rem}
+  .btn:disabled{opacity:.6}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text);margin-top:0;width:auto;padding:8px 14px;font-weight:600}
+  .msg{margin-top:14px;font-size:.95rem;min-height:1.2em}
+  .msg.err{color:#ff6b6b}.msg.ok{color:var(--ok)}
+  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .preview{width:110px;margin-top:10px;border-radius:8px;display:block}
+  .row{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:none}
+  .row img,.row .ph{width:44px;height:64px;object-fit:cover;border-radius:6px;background:#241b1b;flex:none}
+  .row .t{flex:1;min-width:0}
+  .row .t b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .row .t span{color:var(--muted);font-size:.85rem}
+  .del{background:transparent;border:1px solid #5a2a2a;color:#ff8a8a;border-radius:8px;padding:8px 12px;font-weight:600}
+  small{color:var(--muted);display:block;margin-top:6px}
+  [hidden]{display:none!important}
+</style>
 </head>
 <body>
-  <h1>🎬 ADMIN - PROSPER MOVIES</h1>
-  <p style="text-align:center;color:#888;">Jaza fomu hii kuongeza movie mpya</p>
+<div class="wrap">
 
-  <input type="text" id="title" placeholder="Jina la Movie: Avatar 2">
-  <input type="text" id="year" placeholder="Mwaka: 2022">
-  <input type="text" id="genre" placeholder="Aina: Action, Drama">
-  <input type="text" id="image" placeholder="Link ya Picha ya Poster">
-  <input type="text" id="link" placeholder="Link ya Google Drive/Dropbox">
-  
-  <button onclick="generateCode()">TENGENEZA CODE</button>
+  <!-- LOGIN -->
+  <section id="loginView" hidden>
+    <h1>Admin - Prosper Movies</h1>
+    <p class="sub">Ingia ili kuongeza movies.</p>
+    <div class="box">
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="username" inputmode="email">
+      <label for="pass">Password</label>
+      <input id="pass" type="password" autocomplete="current-password">
+      <button class="btn" id="loginBtn" type="button">Ingia</button>
+      <div class="msg" id="loginMsg"></div>
+    </div>
+  </section>
 
-  <div class="output" id="output" style="display:none;">
-    <h3 style="color:#E50914;">✅ CODE YAKO IPO HAPA:</h3>
-    <p>1. Copy code yote hapa chini:</p>
-    <textarea id="codeOutput" readonly></textarea>
-    <button onclick="copyCode()" style="background:#4CAF50;">COPY CODE</button>
-    <div class="success" id="success">✅ Imecopy! Sasa fuata hatua chini</div>
-  </div>
+  <!-- ADMIN -->
+  <section id="adminView" hidden>
+    <div class="top">
+      <div>
+        <h1>Admin - Prosper Movies</h1>
+        <p class="sub">Ongeza movie mpya, itaonekana mara moja kwenye site.</p>
+      </div>
+      <button class="btn ghost" id="logoutBtn" type="button">Toka</button>
+    </div>
 
-  <div class="step" id="steps" style="display:none;">
-    <h3 style="color:#E50914;">HATUA ZA MWISHO:</h3>
-    <p><strong>1.</strong> Fungua <a href="https://github.com/Pros0675/Pros0675.github.io/edit/main/index.html" target="_blank" style="color:#E50914;">index.html kwenye GitHub</a></p>
-    <p><strong>2.</strong> Tafuta <code>&lt;!-- ONGEZA MOVIE MPYA HAPA --&gt;</code></p>
-    <p><strong>3.</strong> Paste code yako chini ya hapo</p>
-    <p><strong>4.</strong> Bonyeza <strong>"Commit changes"</strong></p>
-    <p><strong>5.</strong> Ndani ya sekunde 30 movie itaonekana live!</p>
-  </div>
+    <div class="box">
+      <label for="title">Jina la movie *</label>
+      <input id="title" type="text">
 
-  <script>
-    function generateCode() {
-      const title = document.getElementById('title').value;
-      const year = document.getElementById('year').value;
-      const genre = document.getElementById('genre').value;
-      const image = document.getElementById('image').value;
-      const link = document.getElementById('link').value;
+      <label for="year">Mwaka</label>
+      <input id="year" type="text" inputmode="numeric" placeholder="2026">
 
-      if(!title || !link) {
-        alert('Jaza angalau Jina la Movie na Link ya Download!');
+      <label for="price">Bei</label>
+      <input id="price" type="text" placeholder="Mfano: TSh 2,000 au Bure">
+
+      <label for="desc">Maelezo</label>
+      <textarea id="desc"></textarea>
+
+      <label for="posterFile">Picha ya movie (poster)</label>
+      <input id="posterFile" type="file" accept="image/*">
+      <small>Chagua picha kutoka kwenye simu yako. Inapunguzwa ukubwa kiotomatiki.</small>
+      <img id="preview" class="preview" alt="" hidden>
+
+      <label for="link">Link ya kutazama (hiari)</label>
+      <input id="link" type="url" inputmode="url" placeholder="https://...">
+
+      <button class="btn" id="saveBtn" type="button">Hifadhi movie</button>
+      <div class="msg" id="saveMsg"></div>
+    </div>
+
+    <h2>Movies zilizopo</h2>
+    <div class="box" id="list"><div class="sub">Inapakia...</div></div>
+  </section>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, addDoc, deleteDoc, doc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAMt3bDm-DtkwAHizrs6f2EB8rsXAu9FKs",
+    authDomain: "prosper-movie-36bfb.firebaseapp.com",
+    projectId: "prosper-movie-36bfb",
+    storageBucket: "prosper-movie-36bfb.firebasestorage.app",
+    messagingSenderId: "869131612157",
+    appId: "1:869131612157:web:bc17324ea27647d7b3b394"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const $ = id => document.getElementById(id);
+
+  let posterData = "";
+  let unsub = null;
+
+  function say(el, text, type){ el.textContent = text; el.className = "msg " + (type || ""); }
+
+  /* ---- Login ---- */
+  $("loginBtn").onclick = async () => {
+    say($("loginMsg"), "Inaingia...");
+    try {
+      await signInWithEmailAndPassword(auth, $("email").value.trim(), $("pass").value);
+      say($("loginMsg"), "");
+    } catch (e) {
+      say($("loginMsg"), "Email au password si sahihi.", "err");
+    }
+  };
+  $("pass").addEventListener("keydown", e => { if (e.key === "Enter") $("loginBtn").click(); });
+  $("logoutBtn").onclick = () => signOut(auth);
+
+  onAuthStateChanged(auth, user => {
+    $("loginView").hidden = !!user;
+    $("adminView").hidden = !user;
+    if (unsub) { unsub(); unsub = null; }
+    if (user) startList();
+  });
+
+  /* ---- Poster: resize on the phone, keep it small ---- */
+  $("posterFile").onchange = async e => {
+    const f = e.target.files[0];
+    posterData = "";
+    $("preview").hidden = true;
+    if (!f) return;
+    try {
+      const bmp = await createImageBitmap(f);
+      const w = 400;
+      const h = Math.round(bmp.height * (w / bmp.width));
+      const c = document.createElement("canvas");
+      c.width = w; c.height = h;
+      c.getContext("2d").drawImage(bmp, 0, 0, w, h);
+      posterData = c.toDataURL("image/jpeg", 0.8);
+      $("preview").src = posterData;
+      $("preview").hidden = false;
+    } catch (err) {
+      say($("saveMsg"), "Picha hii haikusomeka. Jaribu nyingine.", "err");
+    }
+  };
+
+  /* ---- Save ---- */
+  $("saveBtn").onclick = async () => {
+    const title = $("title").value.trim();
+    if (!title) return say($("saveMsg"), "Weka jina la movie.", "err");
+    const link = $("link").value.trim();
+    if (link && !/^https?:\/\//i.test(link)) return say($("saveMsg"), "Link lazima ianze na https://", "err");
+
+    $("saveBtn").disabled = true;
+    say($("saveMsg"), "Inahifadhi...");
+    try {
+      await addDoc(collection(db, "movies"), {
+        title,
+        year: $("year").value.trim(),
+        price: $("price").value.trim(),
+        description: $("desc").value.trim(),
+        poster: posterData,
+        link,
+        createdAt: serverTimestamp()
+      });
+      ["title","year","price","desc","link"].forEach(id => $(id).value = "");
+      $("posterFile").value = "";
+      posterData = "";
+      $("preview").hidden = true;
+      say($("saveMsg"), "Imehifadhiwa. Movie ipo live sasa.", "ok");
+    } catch (e) {
+      console.error(e);
+      say($("saveMsg"), "Imeshindwa kuhifadhi. Angalia Firestore rules na mtandao.", "err");
+    }
+    $("saveBtn").disabled = false;
+  };
+
+  /* ---- List + delete ---- */
+  function startList(){
+    const q = query(collection(db, "movies"), orderBy("createdAt", "desc"));
+    unsub = onSnapshot(q, snap => {
+      const box = $("list");
+      box.replaceChildren();
+      if (snap.empty) {
+        const d = document.createElement("div");
+        d.className = "sub"; d.textContent = "Bado hakuna movie.";
+        box.appendChild(d);
         return;
       }
-
-      const code = `
-      <!-- MOVIE: ${title} -->
-      <div class="movie-card">
-        <div class="movie-poster">
-          <img src="${image}" alt="${title}">
-          <div class="badge">BURE</div>
-        </div>
-        <div class="movie-info">
-          <div class="movie-title">${title}</div>
-          <div class="movie-meta">${genre} • ${year}</div>
-          <a href="${link}" class="download-link" target="_blank">DOWNLOAD</a>
-        </div>
-      </div>`;
-
-      document.getElementById('codeOutput').value = code.trim();
-      document.getElementById('output').style.display = 'block';
-      document.getElementById('steps').style.display = 'block';
-    }
-
-    function copyCode() {
-      const code = document.getElementById('codeOutput');
-      code.select();
-      document.execCommand('copy');
-      document.getElementById('success').style.display = 'block';
-    }
-  </script>
+      snap.forEach(s => {
+        const m = s.data();
+        const row = document.createElement("div");
+        row.className = "row";
+        if (m.poster) {
+          const im = document.createElement("img"); im.src = m.poster; im.alt = "";
+          row.appendChild(im);
+        } else {
+          const ph = document.createElement("div"); ph.className = "ph";
+          row.appendChild(ph);
+        }
+        const t = document.createElement("div");
+        t.className = "t";
+        const b = document.createElement("b"); b.textContent = m.title || "";
+        const sp = document.createElement("span");
+        sp.textContent = [m.year, m.price].filter(Boolean).join("  |  ");
+        t.append(b, sp);
+        const del = document.createElement("button");
+        del.className = "del"; del.type = "button"; del.textContent = "Futa";
+        del.onclick = async () => {
+          if (!confirm('Futa "' + (m.title || "movie hii") + '"?')) return;
+          try { await deleteDoc(doc(db, "movies", s.id)); }
+          catch (e) { alert("Imeshindwa kufuta."); }
+        };
+        row.append(t, del);
+        box.appendChild(row);
+      });
+    }, err => {
+      console.error(err);
+      $("list").textContent = "Imeshindwa kupakia orodha.";
+    });
+  }
+</script>
 </body>
 </html>
