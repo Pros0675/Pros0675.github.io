@@ -9,31 +9,31 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #000; color: #fff; font-family: Arial, sans-serif; }
     header { background: #000; padding: 15px 20px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
-.logo { font-size: 20px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
-.logo span { color: #fff; }
-.logo span.red { color: #E50914; }
-.nav-links { display: flex; gap: 15px; font-size: 14px; }
-.nav-links a { color: #aaa; text-decoration: none; }
-.hero { padding: 40px 20px 20px 20px; }
-.hero h1 { font-size: 38px; font-weight: 900; line-height: 1.1; margin-bottom: 20px; }
-.hero h1.red { color: #E50914; }
-.search-box { position: relative; margin-bottom: 30px; }
-.search-box input { width: 100%; padding: 14px 14px 14px 45px; border-radius: 8px; border: none; background: #1a1a1a; color: white; font-size: 16px; }
-.search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #777; }
-.container { padding: 0 20px; }
-.movies-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
-.movie-card { position: relative; border-radius: 8px; overflow: hidden; background: #1a1a1a; }
-.movie-poster { width: 100%; height: 220px; background: linear-gradient(180deg, #2a0000 0%, #000 100%); display: flex; align-items: center; justify-content: center; }
-.movie-poster i { font-size: 50px; color: #444; }
-.movie-poster img { width: 100%; height: 100%; object-fit: cover; }
-.badge { position: absolute; bottom: 8px; left: 8px; background: #E50914; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-.movie-info { padding: 10px; }
-.movie-title { font-size: 14px; font-weight: bold; margin-bottom: 4px; }
-.movie-meta { color: #777; font-size: 12px; }
-.download-link { display: block; margin-top: 8px; background: #E50914; color: white; text-align: center; padding: 8px; border-radius: 5px; text-decoration: none; font-size: 13px; font-weight: bold; }
-.download-link:hover { background: #ff0a16; }
-.empty-state { text-align: center; padding: 60px 20px; color: #555; }
-.empty-state i { font-size: 60px; margin-bottom: 15px; color: #222; }
+   .logo { font-size: 20px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+   .logo span { color: #fff; }
+   .logo span.red { color: #E50914; }
+   .nav-links { display: flex; gap: 15px; font-size: 14px; }
+   .nav-links a { color: #aaa; text-decoration: none; }
+   .hero { padding: 40px 20px 20px 20px; }
+   .hero h1 { font-size: 38px; font-weight: 900; line-height: 1.1; margin-bottom: 20px; }
+   .hero h1.red { color: #E50914; }
+   .search-box { position: relative; margin-bottom: 30px; }
+   .search-box input { width: 100%; padding: 14px 14px 14px 45px; border-radius: 8px; border: none; background: #1a1a1a; color: white; font-size: 16px; }
+   .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #777; }
+   .container { padding: 0 20px; }
+   .movies-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+   .movie-card { position: relative; border-radius: 8px; overflow: hidden; background: #1a1a1a; }
+   .movie-poster { width: 100%; height: 220px; background: linear-gradient(180deg, #2a0000 0%, #000 100%); display: flex; align-items: center; justify-content: center; position: relative; }
+   .movie-poster i { font-size: 50px; color: #444; }
+   .movie-poster img { width: 100%; height: 100%; object-fit: cover; }
+   .badge { position: absolute; bottom: 8px; left: 8px; background: #E50914; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+   .movie-info { padding: 10px; }
+   .movie-title { font-size: 14px; font-weight: bold; margin-bottom: 4px; }
+   .movie-meta { color: #777; font-size: 12px; }
+   .download-link { display: block; margin-top: 8px; background: #E50914; color: white; text-align: center; padding: 8px; border-radius: 5px; text-decoration: none; font-size: 13px; font-weight: bold; }
+   .download-link:hover { background: #ff0a16; }
+   .empty-state { text-align: center; padding: 60px 20px; color: #555; grid-column: 1 / -1; }
+   .empty-state i { font-size: 60px; margin-bottom: 15px; color: #222; }
     footer { text-align: center; padding: 40px 20px; color: #555; font-size: 13px; margin-top: 50px; }
     @media (min-width: 768px) {.hero h1 { font-size: 50px; }.movies-grid { grid-template-columns: repeat(5, 1fr); } }
   </style>
@@ -45,7 +45,7 @@
       <span>PROSPER</span> <span class="red">MOVIES</span>
     </div>
     <div class="nav-links">
-      <!-- Admin imefichwa — hakuna mtu ataiona -->
+      <!-- HAKUNA ADMIN HAPA — SIRI YAKO -->
     </div>
   </header>
 
@@ -91,15 +91,17 @@
         }
       }
 
-      // Ficha "empty state" kama kuna movie
-      if (visibleCount > 0 || cards.length > 0) {
-        emptyState.style.display = "none";
-      } else {
+      if (cards.length > 0 && visibleCount === 0) {
         emptyState.style.display = "block";
+        emptyState.innerHTML = '<i class="fas fa-search"></i><p>Hakuna movie iliyopatikana.</p>';
+      } else if (cards.length === 0) {
+        emptyState.style.display = "block";
+        emptyState.innerHTML = '<i class="fas fa-film"></i><p>Bado hakuna movie. Nenda Admin uongeze.</p>';
+      } else {
+        emptyState.style.display = "none";
       }
     }
 
-    // Angalia kama kuna movie wakati page inapoload
     window.onload = function() {
       let cards = document.getElementsByClassName('movie-card');
       let emptyState = document.getElementById('emptyState');
