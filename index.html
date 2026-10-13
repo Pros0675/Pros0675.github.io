@@ -7,156 +7,450 @@
 <title>Prosper Movies</title>
 <style>
   :root {
-    --bg: #0b1220; --panel: #141c2e; --panel2: #1a2438; --line: #243049;
-    --text: #e8eefc; --muted: #8b9bb8; --accent: #5b6cff; --warn: #f5a623;
-    --ok: #3ecf8e; --radius: 14px;
+    --bg: #0b1220;
+    --panel: #141c2e;
+    --panel2: #1a2438;
+    --line: #243049;
+    --text: #e8eefc;
+    --muted: #8b9bb8;
+    --accent: #5b6cff;
+    --warn: #f5a623;
+    --ok: #3ecf8e;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; min-height: 100vh; line-height: 1.45; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+    line-height: 1.45;
+  }
   button, input { font: inherit; }
   [hidden] { display: none !important; }
 
   .topbar {
-    position: sticky; top: 0; z-index: 40;
-    background: rgba(11,18,32,.92); backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--line); padding: 12px 16px;
-    display: flex; align-items: center; gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: rgba(11,18,32,.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
-  .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.05rem; white-space: nowrap; }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 1.05rem;
+    white-space: nowrap;
+  }
   .logo-badge {
-    width: 34px; height: 34px; border-radius: 10px;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
     background: linear-gradient(135deg, #5b6cff, #8b5cf6);
-    display: grid; place-items: center; color: #fff;
+    display: grid;
+    place-items: center;
+    color: #fff;
   }
   .logo span { color: #a5b4fc; font-weight: 600; }
-  .search-wrap { flex: 1; display: flex; gap: 8px; max-width: 520px; margin: 0 auto; }
+  .search-wrap {
+    flex: 1;
+    display: flex;
+    gap: 8px;
+    max-width: 520px;
+    margin: 0 auto;
+  }
   .search-wrap input {
-    flex: 1; min-width: 0; background: var(--panel); border: 1px solid var(--line);
-    border-radius: 999px; color: var(--text); padding: 11px 16px; outline: none;
+    flex: 1;
+    min-width: 0;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--text);
+    padding: 11px 16px;
+    outline: none;
   }
   .search-wrap input:focus { border-color: var(--accent); }
   .search-wrap button {
-    background: var(--accent); color: #fff; border: none; border-radius: 999px;
-    padding: 0 18px; font-weight: 700; cursor: pointer;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 0 18px;
+    font-weight: 700;
+    cursor: pointer;
   }
 
-  main { max-width: 1100px; margin: 0 auto; padding: 18px 14px 80px; }
-  .section-title { display: flex; align-items: center; gap: 8px; font-size: 1.05rem; font-weight: 700; margin: 8px 0 14px; }
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 18px 14px 80px;
+  }
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 8px 0 14px;
+  }
   .section-title .dot { color: var(--ok); }
-  .chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 16px; }
-  .chip {
-    flex: none; background: var(--panel); border: 1px solid var(--line); color: var(--text);
-    border-radius: 999px; padding: 7px 14px; cursor: pointer; font-size: .9rem;
+  .chips {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    margin-bottom: 16px;
   }
-  .chip.on { background: var(--accent); border-color: var(--accent); }
-  #status { text-align: center; color: var(--muted); padding: 40px 12px; }
+  .chip {
+    flex: none;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 7px 14px;
+    cursor: pointer;
+    font-size: .9rem;
+  }
+  .chip.on {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  #status {
+    text-align: center;
+    color: var(--muted);
+    padding: 40px 12px;
+  }
 
-  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  @media (min-width: 640px) { .grid { grid-template-columns: repeat(3, 1fr); gap: 16px; } }
-  @media (min-width: 900px) { .grid { grid-template-columns: repeat(4, 1fr); gap: 18px; } }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  @media (min-width: 640px) {
+    .grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  }
+  @media (min-width: 900px) {
+    .grid { grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  }
 
   .card {
-    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
-    overflow: hidden; cursor: pointer; text-align: left; color: inherit; padding: 0; position: relative;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    text-align: left;
+    color: inherit;
+    padding: 0;
+    position: relative;
   }
-  .poster { aspect-ratio: 2/3; width: 100%; object-fit: cover; display: block; background: #0f1624; }
+  .poster {
+    aspect-ratio: 2/3;
+    width: 100%;
+    object-fit: cover;
+    display: block;
+    background: #0f1624;
+  }
   .noposter {
-    aspect-ratio: 2/3; display: grid; place-items: center; background: #0f1624;
-    color: var(--muted); font-size: .85rem; padding: 10px; text-align: center;
+    aspect-ratio: 2/3;
+    display: grid;
+    place-items: center;
+    background: #0f1624;
+    color: var(--muted);
+    font-size: .85rem;
+    padding: 10px;
+    text-align: center;
   }
   .play-overlay {
-    position: absolute; inset: 0 0 auto 0; aspect-ratio: 2/3;
-    display: grid; place-items: center; background: rgba(0,0,0,.35); opacity: 0; transition: opacity .15s;
+    position: absolute;
+    inset: 0 0 auto 0;
+    aspect-ratio: 2/3;
+    display: grid;
+    place-items: center;
+    background: rgba(0,0,0,.35);
+    opacity: 0;
+    transition: opacity .15s;
   }
-  .card:hover .play-overlay, .card:focus-visible .play-overlay { opacity: 1; }
+  .card:hover .play-overlay,
+  .card:focus-visible .play-overlay { opacity: 1; }
   .play-circle {
-    width: 48px; height: 48px; border-radius: 50%; background: var(--accent);
-    display: grid; place-items: center; box-shadow: 0 8px 24px rgba(91,108,255,.45);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 8px 24px rgba(91,108,255,.45);
   }
-  .play-circle svg { width: 18px; height: 18px; fill: #fff; margin-left: 2px; }
+  .play-circle svg {
+    width: 18px;
+    height: 18px;
+    fill: #fff;
+    margin-left: 2px;
+  }
   .info { padding: 10px 11px 12px; }
-  .info b { display: block; font-size: .92rem; line-height: 1.25; }
-  .meta { margin-top: 4px; font-size: .78rem; color: var(--muted); }
+  .info b {
+    display: block;
+    font-size: .92rem;
+    line-height: 1.25;
+  }
+  .meta {
+    margin-top: 4px;
+    font-size: .78rem;
+    color: var(--muted);
+  }
   .more {
-    display: block; margin: 22px auto 0; background: transparent; color: var(--text);
-    border: 1px solid var(--accent); border-radius: 10px; padding: 12px 28px; font-weight: 700; cursor: pointer;
+    display: block;
+    margin: 22px auto 0;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 12px 28px;
+    font-weight: 700;
+    cursor: pointer;
   }
 
   .sheet-backdrop {
-    position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.72);
-    display: flex; align-items: flex-end; justify-content: center;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(0,0,0,.72);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
   }
-  @media (min-width: 720px) { .sheet-backdrop { align-items: center; padding: 20px; } }
+  @media (min-width: 720px) {
+    .sheet-backdrop { align-items: center; padding: 20px; }
+  }
   .sheet {
-    background: var(--panel); width: min(100%, 520px); max-height: 92vh; overflow: auto;
-    border-radius: 18px 18px 0 0; border: 1px solid var(--line);
+    background: var(--panel);
+    width: min(100%, 520px);
+    max-height: 92vh;
+    overflow: auto;
+    border-radius: 18px 18px 0 0;
+    border: 1px solid var(--line);
   }
-  @media (min-width: 720px) { .sheet { border-radius: 18px; } }
-  .sheet-hero { position: relative; width: 100%; max-height: 42vh; overflow: hidden; background: #0a0f1a; }
-  .sheet-hero img { width: 100%; max-height: 42vh; object-fit: cover; display: block; }
+  @media (min-width: 720px) {
+    .sheet { border-radius: 18px; }
+  }
+  .sheet-hero {
+    position: relative;
+    width: 100%;
+    max-height: 42vh;
+    overflow: hidden;
+    background: #0a0f1a;
+  }
+  .sheet-hero img {
+    width: 100%;
+    max-height: 42vh;
+    object-fit: cover;
+    display: block;
+  }
   .sheet-close {
-    position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; border-radius: 50%;
-    background: rgba(0,0,0,.55); border: 1px solid rgba(255,255,255,.15); color: #fff; font-size: 1.2rem; cursor: pointer;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0,0,0,.55);
+    border: 1px solid rgba(255,255,255,.15);
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
   }
   .sheet-body { padding: 16px 18px 24px; }
-  .sheet-body h2 { font-size: 1.45rem; line-height: 1.2; }
-  .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
-  .badge {
-    background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
-    padding: 4px 10px; font-size: .82rem; color: var(--muted);
+  .sheet-body h2 {
+    font-size: 1.45rem;
+    line-height: 1.2;
   }
-  .badge.star { color: #fbbf24; border-color: #5a4a1a; background: #2a2208; }
-  .genres { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-  .genre { background: #1e2a4a; color: #a5b4fc; border-radius: 999px; padding: 4px 12px; font-size: .8rem; }
-  .plot { margin-top: 14px; color: #c5d0e6; font-size: .95rem; line-height: 1.55; }
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+    align-items: center;
+  }
+  .badge {
+    background: var(--panel2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: .82rem;
+    color: var(--muted);
+  }
+  .badge.star {
+    color: #fbbf24;
+    border-color: #5a4a1a;
+    background: #2a2208;
+  }
+  .genres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .genre {
+    background: #1e2a4a;
+    color: #a5b4fc;
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: .8rem;
+  }
+  .plot {
+    margin-top: 14px;
+    color: #c5d0e6;
+    font-size: .95rem;
+    line-height: 1.55;
+  }
   .play-btn {
-    display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;
-    margin-top: 18px; padding: 14px; background: linear-gradient(135deg, #5b6cff, #7c5cfc);
-    color: #fff; border: none; border-radius: 12px; font-weight: 800; font-size: 1.05rem; cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    margin-top: 18px;
+    padding: 14px;
+    background: linear-gradient(135deg, #5b6cff, #7c5cfc);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 1.05rem;
+    cursor: pointer;
     box-shadow: 0 10px 28px rgba(91,108,255,.35);
   }
-  .play-btn svg { width: 18px; height: 18px; fill: currentColor; }
+  .play-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+  }
 
   .player-backdrop {
-    position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.88);
-    display: flex; align-items: center; justify-content: center; padding: 10px;
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: rgba(0,0,0,.88);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
   }
   .player-box {
-    width: min(100%, 900px); background: var(--panel); border-radius: 16px;
-    border: 1px solid var(--line); overflow: hidden;
+    width: min(100%, 900px);
+    background: var(--panel);
+    border-radius: 16px;
+    border: 1px solid var(--line);
+    overflow: hidden;
   }
   .player-head {
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    padding: 12px 14px; border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
   }
-  .player-head h3 { font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .player-head h3 {
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .player-head .x {
-    width: 34px; height: 34px; border-radius: 50%; background: transparent;
-    border: 1px solid var(--line); color: var(--text); cursor: pointer; font-size: 1.1rem;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 1.1rem;
   }
-  .servers { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 14px; }
+  .servers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 14px;
+  }
   .srv {
-    background: var(--panel2); border: 1px solid var(--line); color: var(--text);
-    border-radius: 10px; padding: 8px 14px; cursor: pointer; font-size: .9rem; font-weight: 600;
+    background: var(--panel2);
+    border: 1px solid var(--line);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: .9rem;
+    font-weight: 600;
   }
-  .srv.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .srv.on {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
   .help {
-    margin: 0 14px 12px; background: #1a1520; border: 1px solid #3a2a18;
-    border-radius: 12px; padding: 12px 14px;
+    margin: 0 14px 12px;
+    background: #1a1520;
+    border: 1px solid #3a2a18;
+    border-radius: 12px;
+    padding: 12px 14px;
   }
-  .help strong { display: block; margin-bottom: 4px; color: #fcd34d; }
-  .help p { color: #d6c4a0; font-size: .88rem; }
+  .help strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #fcd34d;
+  }
+  .help p {
+    color: #d6c4a0;
+    font-size: .88rem;
+  }
   .help .switch {
-    display: block; width: 100%; margin-top: 10px; background: var(--warn); color: #1a1200;
-    border: none; border-radius: 10px; padding: 11px; font-weight: 800; cursor: pointer;
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    background: var(--warn);
+    color: #1a1200;
+    border: none;
+    border-radius: 10px;
+    padding: 11px;
+    font-weight: 800;
+    cursor: pointer;
   }
-  .frame-wrap { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; }
-  .frame-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .frame-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #000;
+  }
+  .frame-wrap iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
   .frame-loading {
-    position: absolute; inset: 0; display: grid; place-items: center;
-    color: var(--muted); background: #000; font-size: .95rem;
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--muted);
+    background: #000;
+    font-size: .95rem;
   }
-  footer { text-align: center; color: var(--muted); font-size: .8rem; padding: 20px 12px 28px; }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: .8rem;
+    padding: 20px 12px 28px;
+  }
 </style>
 </head>
 <body>
@@ -222,181 +516,280 @@
 
 <script>
 (function () {
-  const API_KEY = "d0349ee";
-  const API = "https://www.omdbapi.com/";
-  const CHIPS = ["Action", "Comedy", "Horror", "Sci-Fi", "Batman", "Avengers", "Inception", "Fast"];
-  const SERVERS = [
-    { name: "Server 1", url: id => `https://vidsrc.sh/embed/movie/${id}` },
-    { name: "Server 2", url: id => `https://vidsrc.xyz/embed/movie?imdb=${id}` },
-    { name: "Server 3", url: id => `https://embed.su/embed/movie/${id}` },
-    { name: "Server 4", url: id => `https://player.videasy.to/movie/${id}` },
-    { name: "Server 5", url: id => `https://multiembed.mov/?video_id=${id}` }
+  var API_KEY = "d0349ee";
+  var API = "https://www.omdbapi.com/";
+  var CHIPS = ["Action", "Comedy", "Horror", "Sci-Fi", "Batman", "Avengers", "Inception", "Fast"];
+  var SERVERS = [
+    { name: "Server 1", url: function (id) { return "https://vidsrc.sh/embed/movie/" + id; } },
+    { name: "Server 2", url: function (id) { return "https://vidsrc.xyz/embed/movie?imdb=" + id; } },
+    { name: "Server 3", url: function (id) { return "https://embed.su/embed/movie/" + id; } },
+    { name: "Server 4", url: function (id) { return "https://player.videasy.to/movie/" + id; } },
+    { name: "Server 5", url: function (id) { return "https://multiembed.mov/?video_id=" + id; } }
   ];
 
-  const $ = id => document.getElementById(id);
-  let term = "Action", page = 1, total = 0, shown = 0, busy = false;
-  let currentId = null, currentTitle = "", currentSrv = 0;
+  function $(id) { return document.getElementById(id); }
 
-  async function api(params) {
-    const url = API + "?apikey=" + API_KEY + "&" + new URLSearchParams(params);
-    const r = await fetch(url);
-    return r.json();
+  var term = "Action";
+  var page = 1;
+  var total = 0;
+  var shown = 0;
+  var busy = false;
+  var currentId = null;
+  var currentTitle = "";
+  var currentSrv = 0;
+
+  function api(params) {
+    var qs = new URLSearchParams(params);
+    return fetch(API + "?apikey=" + API_KEY + "&" + qs.toString()).then(function (r) {
+      return r.json();
+    });
   }
-  function clean(v) { return v && v !== "N/A" ? v : ""; }
+
+  function clean(v) {
+    return v && v !== "N/A" ? v : "";
+  }
 
   function card(m) {
-    const b = document.createElement("button");
-    b.className = "card"; b.type = "button";
+    var b = document.createElement("button");
+    b.className = "card";
+    b.type = "button";
+
     if (clean(m.Poster)) {
-      const img = document.createElement("img");
-      img.className = "poster"; img.loading = "lazy"; img.alt = m.Title;
-      img.referrerPolicy = "no-referrer"; img.src = m.Poster;
+      var img = document.createElement("img");
+      img.className = "poster";
+      img.loading = "lazy";
+      img.alt = m.Title || "";
+      img.referrerPolicy = "no-referrer";
+      img.src = m.Poster;
       b.appendChild(img);
     } else {
-      const d = document.createElement("div");
-      d.className = "noposter"; d.textContent = m.Title;
+      var d = document.createElement("div");
+      d.className = "noposter";
+      d.textContent = m.Title || "";
       b.appendChild(d);
     }
-    const ov = document.createElement("div"); ov.className = "play-overlay";
+
+    var ov = document.createElement("div");
+    ov.className = "play-overlay";
     ov.innerHTML = '<div class="play-circle"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>';
     b.appendChild(ov);
-    const info = document.createElement("div"); info.className = "info";
-    const t = document.createElement("b"); t.textContent = m.Title;
-    const meta = document.createElement("div"); meta.className = "meta";
+
+    var info = document.createElement("div");
+    info.className = "info";
+    var t = document.createElement("b");
+    t.textContent = m.Title || "";
+    var meta = document.createElement("div");
+    meta.className = "meta";
     meta.textContent = (m.Year || "") + (m.Type ? " · " + m.Type : "");
-    info.append(t, meta); b.appendChild(info);
-    b.onclick = () => openDetail(m.imdbID);
+    info.appendChild(t);
+    info.appendChild(meta);
+    b.appendChild(info);
+
+    b.onclick = function () {
+      openDetail(m.imdbID);
+    };
     return b;
   }
 
-  async function load(reset) {
+  function load(reset) {
     if (busy) return;
     busy = true;
-    if (reset) { page = 1; shown = 0; $("grid").replaceChildren(); $("more").hidden = true; }
+    if (reset) {
+      page = 1;
+      shown = 0;
+      $("grid").replaceChildren();
+      $("more").hidden = true;
+    }
     $("status").hidden = false;
     $("status").textContent = "Inatafuta...";
-    try {
-      const d = await api({ s: term, type: "movie", page });
-      if (d.Response === "True") {
-        total = parseInt(d.totalResults, 10) || 0;
-        d.Search.forEach(m => $("grid").appendChild(card(m)));
-        shown += d.Search.length;
-        $("status").hidden = true;
-        $("more").hidden = shown >= total;
-      } else if (reset) {
-        $("status").textContent = d.Error === "Movie not found!"
-          ? "Hakuna movie iliyopatikana. Jaribu jina lingine."
-          : ("Kuna tatizo: " + (d.Error || "unknown"));
-      } else { $("more").hidden = true; }
-    } catch (e) {
-      $("status").hidden = false;
-      $("status").textContent = "Imeshindwa kuunganisha. Angalia mtandao.";
-    }
-    busy = false;
+
+    api({ s: term, type: "movie", page: String(page) })
+      .then(function (d) {
+        if (d.Response === "True") {
+          total = parseInt(d.totalResults, 10) || 0;
+          (d.Search || []).forEach(function (m) {
+            $("grid").appendChild(card(m));
+          });
+          shown += (d.Search || []).length;
+          $("status").hidden = true;
+          $("more").hidden = shown >= total;
+        } else if (reset) {
+          $("status").textContent =
+            d.Error === "Movie not found!"
+              ? "Hakuna movie iliyopatikana. Jaribu jina lingine."
+              : "Kuna tatizo: " + (d.Error || "unknown");
+        } else {
+          $("more").hidden = true;
+        }
+      })
+      .catch(function () {
+        $("status").hidden = false;
+        $("status").textContent = "Imeshindwa kuunganisha. Angalia mtandao.";
+      })
+      .finally(function () {
+        busy = false;
+      });
   }
 
   function search(t) {
     t = (t || "").trim();
     if (!t) return;
-    term = t; $("q").value = t;
-    document.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.textContent === t));
+    term = t;
+    $("q").value = t;
+    document.querySelectorAll(".chip").forEach(function (c) {
+      c.classList.toggle("on", c.textContent === t);
+    });
     load(true);
   }
 
-  \( ("go").onclick = () => search( \)("q").value);
-  \( ("q").addEventListener("keydown", e => { if (e.key === "Enter") search( \)("q").value); });
-  $("more").onclick = () => { page++; load(false); };
+  $("go").onclick = function () {
+    search($("q").value);
+  };
+  $("q").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") search($("q").value);
+  });
+  $("more").onclick = function () {
+    page++;
+    load(false);
+  };
 
-  CHIPS.forEach(c => {
-    const b = document.createElement("button");
-    b.className = "chip"; b.type = "button"; b.textContent = c;
-    b.onclick = () => search(c);
+  CHIPS.forEach(function (c) {
+    var b = document.createElement("button");
+    b.className = "chip";
+    b.type = "button";
+    b.textContent = c;
+    b.onclick = function () {
+      search(c);
+    };
     $("chips").appendChild(b);
   });
 
-  const sheet = $("sheet");
-  $("dClose").onclick = () => { sheet.hidden = true; document.body.style.overflow = ""; };
-  sheet.addEventListener("click", e => {
-    if (e.target === sheet) { sheet.hidden = true; document.body.style.overflow = ""; }
+  var sheet = $("sheet");
+  $("dClose").onclick = function () {
+    sheet.hidden = true;
+    document.body.style.overflow = "";
+  };
+  sheet.addEventListener("click", function (e) {
+    if (e.target === sheet) {
+      sheet.hidden = true;
+      document.body.style.overflow = "";
+    }
   });
 
-  async function openDetail(id) {
+  function openDetail(id) {
     currentId = id;
     $("dTitle").textContent = "Inapakia...";
     $("dPoster").hidden = true;
-    $("dBadges").replaceChildren(); $("dGenres").replaceChildren();
-    $("dPlot").textContent = ""; $("dPlay").disabled = true;
-    sheet.hidden = false; document.body.style.overflow = "hidden";
-    try {
-      const m = await api({ i: id, plot: "full" });
-      if (m.Response !== "True") { $("dTitle").textContent = "Imeshindwa kupakia maelezo."; return; }
-      currentTitle = m.Title || "Movie";
-      $("dTitle").textContent = m.Title || "";
-      if (clean(m.Poster)) {
-        $("dPoster").referrerPolicy = "no-referrer";
-        $("dPoster").src = m.Poster; $("dPoster").hidden = false;
-      }
-      const badges = $("dBadges");
-      if (clean(m.imdbRating)) {
-        const s = document.createElement("span");
-        s.className = "badge star"; s.textContent = "★ " + m.imdbRating + "/10";
-        badges.appendChild(s);
-      }
-      [m.Year, m.Runtime, m.Rated].filter(clean).forEach(v => {
-        const s = document.createElement("span");
-        s.className = "badge"; s.textContent = v; badges.appendChild(s);
-      });
-      if (clean(m.Genre)) {
-        m.Genre.split(",").forEach(g => {
-          const s = document.createElement("span");
-          s.className = "genre"; s.textContent = g.trim();
-          $("dGenres").appendChild(s);
+    $("dBadges").replaceChildren();
+    $("dGenres").replaceChildren();
+    $("dPlot").textContent = "";
+    $("dPlay").disabled = true;
+    sheet.hidden = false;
+    document.body.style.overflow = "hidden";
+
+    api({ i: id, plot: "full" })
+      .then(function (m) {
+        if (m.Response !== "True") {
+          $("dTitle").textContent = "Imeshindwa kupakia maelezo.";
+          return;
+        }
+        currentTitle = m.Title || "Movie";
+        $("dTitle").textContent = m.Title || "";
+        if (clean(m.Poster)) {
+          $("dPoster").referrerPolicy = "no-referrer";
+          $("dPoster").src = m.Poster;
+          $("dPoster").hidden = false;
+        }
+        var badges = $("dBadges");
+        if (clean(m.imdbRating)) {
+          var s = document.createElement("span");
+          s.className = "badge star";
+          s.textContent = "★ " + m.imdbRating + "/10";
+          badges.appendChild(s);
+        }
+        [m.Year, m.Runtime, m.Rated].filter(clean).forEach(function (v) {
+          var s2 = document.createElement("span");
+          s2.className = "badge";
+          s2.textContent = v;
+          badges.appendChild(s2);
         });
-      }
-      $("dPlot").textContent = clean(m.Plot) || "Hakuna maelezo.";
-      $("dPlay").disabled = false;
-    } catch (e) { $("dTitle").textContent = "Imeshindwa kuunganisha."; }
+        if (clean(m.Genre)) {
+          m.Genre.split(",").forEach(function (g) {
+            var gEl = document.createElement("span");
+            gEl.className = "genre";
+            gEl.textContent = g.trim();
+            $("dGenres").appendChild(gEl);
+          });
+        }
+        $("dPlot").textContent = clean(m.Plot) || "Hakuna maelezo.";
+        $("dPlay").disabled = false;
+      })
+      .catch(function () {
+        $("dTitle").textContent = "Imeshindwa kuunganisha.";
+      });
   }
 
-  $("dPlay").onclick = () => { if (currentId) openPlayer(currentId, currentTitle, 0); };
+  $("dPlay").onclick = function () {
+    if (currentId) openPlayer(currentId, currentTitle, 0);
+  };
 
   function openPlayer(id, title, srvIndex) {
-    currentId = id; currentTitle = title || "Movie"; currentSrv = srvIndex || 0;
+    currentId = id;
+    currentTitle = title || "Movie";
+    currentSrv = srvIndex || 0;
     $("pTitle").textContent = currentTitle;
-    renderServers(); loadServer(currentSrv);
-    $("player").hidden = false; document.body.style.overflow = "hidden";
+    renderServers();
+    loadServer(currentSrv);
+    $("player").hidden = false;
+    document.body.style.overflow = "hidden";
   }
 
   function renderServers() {
-    const box = $("servers"); box.replaceChildren();
-    SERVERS.forEach((s, i) => {
-      const b = document.createElement("button");
+    var box = $("servers");
+    box.replaceChildren();
+    SERVERS.forEach(function (s, i) {
+      var b = document.createElement("button");
       b.className = "srv" + (i === currentSrv ? " on" : "");
-      b.type = "button"; b.textContent = s.name;
-      b.onclick = () => { currentSrv = i; renderServers(); loadServer(i); };
+      b.type = "button";
+      b.textContent = s.name;
+      b.onclick = function () {
+        currentSrv = i;
+        renderServers();
+        loadServer(i);
+      };
       box.appendChild(b);
     });
   }
 
   function loadServer(i) {
-    const frame = $("frame"), loadEl = $("frameLoad");
-    loadEl.hidden = false; frame.src = "about:blank";
-    const url = SERVERS[i].url(currentId);
-    setTimeout(() => {
-      frame.onload = () => { loadEl.hidden = true; };
+    var frame = $("frame");
+    var loadEl = $("frameLoad");
+    loadEl.hidden = false;
+    frame.src = "about:blank";
+    var url = SERVERS[i].url(currentId);
+    setTimeout(function () {
+      frame.onload = function () {
+        loadEl.hidden = true;
+      };
       frame.src = url;
-      setTimeout(() => { loadEl.hidden = true; }, 4000);
+      setTimeout(function () {
+        loadEl.hidden = true;
+      }, 4000);
     }, 80);
   }
 
-  $("pClose").onclick = () => {
-    $("frame").src = "about:blank"; $("player").hidden = true;
+  $("pClose").onclick = function () {
+    $("frame").src = "about:blank";
+    $("player").hidden = true;
     document.body.style.overflow = $("sheet").hidden ? "" : "hidden";
   };
-  $("player").addEventListener("click", e => { if (e.target === $("player")) $("pClose").click(); });
-  $("switchSrv").onclick = () => {
+  $("player").addEventListener("click", function (e) {
+    if (e.target === $("player")) $("pClose").click();
+  });
+  $("switchSrv").onclick = function () {
     currentSrv = (currentSrv + 1) % SERVERS.length;
-    renderServers(); loadServer(currentSrv);
+    renderServers();
+    loadServer(currentSrv);
   };
 
   search("Action");
