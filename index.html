@@ -2,154 +2,405 @@
 <html lang="sw">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prosper Movies - Tazama. Nunua. Furahia.</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<title>Prosper Movies</title>
 <style>
-  :root{
-    --bg:#0c0a0a; --panel:#181313; --line:#2c2222;
-    --red:#e5262d; --text:#f4eeee; --muted:#a39898;
+  :root {
+    --bg: #0b1220; --panel: #141c2e; --panel2: #1a2438; --line: #243049;
+    --text: #e8eefc; --muted: #8b9bb8; --accent: #5b6cff; --warn: #f5a623;
+    --ok: #3ecf8e; --radius: 14px;
   }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
-  header{padding:48px 20px 28px;text-align:center;border-bottom:3px solid var(--red)}
-  .brand{font-size:.95rem;font-weight:700;letter-spacing:.35em;color:var(--red)}
-  h1{margin-top:10px;font-size:clamp(2rem,9vw,3.6rem);font-weight:900;line-height:1.05}
-  main{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
-  #status{text-align:center;color:var(--muted);padding:40px 10px}
-  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
-  @media(min-width:700px){.grid{grid-template-columns:repeat(4,1fr);gap:18px}}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;text-align:left;color:inherit;font:inherit;padding:0}
-  .card:focus-visible{outline:2px solid var(--red);outline-offset:2px}
-  .poster{aspect-ratio:2/3;width:100%;object-fit:cover;display:block;background:#241b1b}
-  .noposter{aspect-ratio:2/3;display:flex;align-items:center;justify-content:center;background:#241b1b;color:var(--muted);font-size:.85rem;padding:10px;text-align:center}
-  .info{padding:10px 12px 12px}
-  .info b{display:block;font-size:.95rem;line-height:1.25}
-  .meta{margin-top:4px;font-size:.8rem;color:var(--muted)}
-  .price{color:var(--red);font-weight:700}
-  dialog{border:none;border-radius:12px;background:var(--panel);color:var(--text);width:min(92vw,460px);padding:0;margin:auto}
-  dialog::backdrop{background:rgba(0,0,0,.78)}
-  .dposter{width:100%;max-height:48vh;object-fit:cover;display:block}
-  .dbody{padding:18px}
-  .dbody h2{font-size:1.4rem;line-height:1.2}
-  .dbody p{margin-top:12px;line-height:1.55;color:#d8cfcf;white-space:pre-wrap}
-  .actions{display:flex;gap:10px;margin-top:18px}
-  .btn{flex:1;text-align:center;padding:13px;border-radius:8px;font-weight:700;border:1px solid var(--red);background:var(--red);color:#fff;text-decoration:none;font-size:1rem;cursor:pointer;font-family:inherit}
-  .btn.ghost{background:transparent;color:var(--text);border-color:var(--line)}
-  footer{text-align:center;color:var(--muted);font-size:.8rem;padding:24px}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; min-height: 100vh; line-height: 1.45; }
+  button, input { font: inherit; }
+  [hidden] { display: none !important; }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 40;
+    background: rgba(11,18,32,.92); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line); padding: 12px 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.05rem; white-space: nowrap; }
+  .logo-badge {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: linear-gradient(135deg, #5b6cff, #8b5cf6);
+    display: grid; place-items: center; color: #fff;
+  }
+  .logo span { color: #a5b4fc; font-weight: 600; }
+  .search-wrap { flex: 1; display: flex; gap: 8px; max-width: 520px; margin: 0 auto; }
+  .search-wrap input {
+    flex: 1; min-width: 0; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 999px; color: var(--text); padding: 11px 16px; outline: none;
+  }
+  .search-wrap input:focus { border-color: var(--accent); }
+  .search-wrap button {
+    background: var(--accent); color: #fff; border: none; border-radius: 999px;
+    padding: 0 18px; font-weight: 700; cursor: pointer;
+  }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 18px 14px 80px; }
+  .section-title { display: flex; align-items: center; gap: 8px; font-size: 1.05rem; font-weight: 700; margin: 8px 0 14px; }
+  .section-title .dot { color: var(--ok); }
+  .chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 16px; }
+  .chip {
+    flex: none; background: var(--panel); border: 1px solid var(--line); color: var(--text);
+    border-radius: 999px; padding: 7px 14px; cursor: pointer; font-size: .9rem;
+  }
+  .chip.on { background: var(--accent); border-color: var(--accent); }
+  #status { text-align: center; color: var(--muted); padding: 40px 12px; }
+
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  @media (min-width: 640px) { .grid { grid-template-columns: repeat(3, 1fr); gap: 16px; } }
+  @media (min-width: 900px) { .grid { grid-template-columns: repeat(4, 1fr); gap: 18px; } }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    overflow: hidden; cursor: pointer; text-align: left; color: inherit; padding: 0; position: relative;
+  }
+  .poster { aspect-ratio: 2/3; width: 100%; object-fit: cover; display: block; background: #0f1624; }
+  .noposter {
+    aspect-ratio: 2/3; display: grid; place-items: center; background: #0f1624;
+    color: var(--muted); font-size: .85rem; padding: 10px; text-align: center;
+  }
+  .play-overlay {
+    position: absolute; inset: 0 0 auto 0; aspect-ratio: 2/3;
+    display: grid; place-items: center; background: rgba(0,0,0,.35); opacity: 0; transition: opacity .15s;
+  }
+  .card:hover .play-overlay, .card:focus-visible .play-overlay { opacity: 1; }
+  .play-circle {
+    width: 48px; height: 48px; border-radius: 50%; background: var(--accent);
+    display: grid; place-items: center; box-shadow: 0 8px 24px rgba(91,108,255,.45);
+  }
+  .play-circle svg { width: 18px; height: 18px; fill: #fff; margin-left: 2px; }
+  .info { padding: 10px 11px 12px; }
+  .info b { display: block; font-size: .92rem; line-height: 1.25; }
+  .meta { margin-top: 4px; font-size: .78rem; color: var(--muted); }
+  .more {
+    display: block; margin: 22px auto 0; background: transparent; color: var(--text);
+    border: 1px solid var(--accent); border-radius: 10px; padding: 12px 28px; font-weight: 700; cursor: pointer;
+  }
+
+  .sheet-backdrop {
+    position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.72);
+    display: flex; align-items: flex-end; justify-content: center;
+  }
+  @media (min-width: 720px) { .sheet-backdrop { align-items: center; padding: 20px; } }
+  .sheet {
+    background: var(--panel); width: min(100%, 520px); max-height: 92vh; overflow: auto;
+    border-radius: 18px 18px 0 0; border: 1px solid var(--line);
+  }
+  @media (min-width: 720px) { .sheet { border-radius: 18px; } }
+  .sheet-hero { position: relative; width: 100%; max-height: 42vh; overflow: hidden; background: #0a0f1a; }
+  .sheet-hero img { width: 100%; max-height: 42vh; object-fit: cover; display: block; }
+  .sheet-close {
+    position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(0,0,0,.55); border: 1px solid rgba(255,255,255,.15); color: #fff; font-size: 1.2rem; cursor: pointer;
+  }
+  .sheet-body { padding: 16px 18px 24px; }
+  .sheet-body h2 { font-size: 1.45rem; line-height: 1.2; }
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
+  .badge {
+    background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 4px 10px; font-size: .82rem; color: var(--muted);
+  }
+  .badge.star { color: #fbbf24; border-color: #5a4a1a; background: #2a2208; }
+  .genres { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .genre { background: #1e2a4a; color: #a5b4fc; border-radius: 999px; padding: 4px 12px; font-size: .8rem; }
+  .plot { margin-top: 14px; color: #c5d0e6; font-size: .95rem; line-height: 1.55; }
+  .play-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;
+    margin-top: 18px; padding: 14px; background: linear-gradient(135deg, #5b6cff, #7c5cfc);
+    color: #fff; border: none; border-radius: 12px; font-weight: 800; font-size: 1.05rem; cursor: pointer;
+    box-shadow: 0 10px 28px rgba(91,108,255,.35);
+  }
+  .play-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+  .player-backdrop {
+    position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.88);
+    display: flex; align-items: center; justify-content: center; padding: 10px;
+  }
+  .player-box {
+    width: min(100%, 900px); background: var(--panel); border-radius: 16px;
+    border: 1px solid var(--line); overflow: hidden;
+  }
+  .player-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 12px 14px; border-bottom: 1px solid var(--line);
+  }
+  .player-head h3 { font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .player-head .x {
+    width: 34px; height: 34px; border-radius: 50%; background: transparent;
+    border: 1px solid var(--line); color: var(--text); cursor: pointer; font-size: 1.1rem;
+  }
+  .servers { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 14px; }
+  .srv {
+    background: var(--panel2); border: 1px solid var(--line); color: var(--text);
+    border-radius: 10px; padding: 8px 14px; cursor: pointer; font-size: .9rem; font-weight: 600;
+  }
+  .srv.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .help {
+    margin: 0 14px 12px; background: #1a1520; border: 1px solid #3a2a18;
+    border-radius: 12px; padding: 12px 14px;
+  }
+  .help strong { display: block; margin-bottom: 4px; color: #fcd34d; }
+  .help p { color: #d6c4a0; font-size: .88rem; }
+  .help .switch {
+    display: block; width: 100%; margin-top: 10px; background: var(--warn); color: #1a1200;
+    border: none; border-radius: 10px; padding: 11px; font-weight: 800; cursor: pointer;
+  }
+  .frame-wrap { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; }
+  .frame-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .frame-loading {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    color: var(--muted); background: #000; font-size: .95rem;
+  }
+  footer { text-align: center; color: var(--muted); font-size: .8rem; padding: 20px 12px 28px; }
 </style>
 </head>
 <body>
-<header>
-  <div class="brand">PROSPER MOVIES</div>
-  <h1>Tazama. Nunua. Furahia.</h1>
+
+<header class="topbar">
+  <div class="logo">
+    <div class="logo-badge">▶</div>
+    <div>Prosper <span>Movies</span></div>
+  </div>
+  <div class="search-wrap">
+    <input id="q" type="search" placeholder="Tafuta movie... (mf. Inception, Aven)" autocomplete="off">
+    <button id="go" type="button" aria-label="Tafuta">🔍</button>
+  </div>
 </header>
 
 <main>
-  <div id="status">Inapakia movies...</div>
+  <div class="section-title"><span class="dot">↗</span> Movies Maarufu</div>
+  <div class="chips" id="chips"></div>
+  <div id="status">Inapakia...</div>
   <div class="grid" id="grid"></div>
+  <button class="more" id="more" type="button" hidden>Ongeza zaidi</button>
 </main>
 
-<dialog id="dlg">
-  <img class="dposter" id="dPoster" alt="" hidden>
-  <div class="dbody">
-    <h2 id="dTitle"></h2>
-    <div class="meta" id="dMeta"></div>
-    <p id="dDesc"></p>
-    <div class="actions">
-      <a class="btn" id="dWatch" target="_blank" rel="noopener" hidden>Tazama</a>
-      <button class="btn ghost" id="dClose" type="button">Funga</button>
+<div class="sheet-backdrop" id="sheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true">
+    <div class="sheet-hero">
+      <img id="dPoster" alt="" hidden>
+      <button class="sheet-close" id="dClose" type="button" aria-label="Funga">×</button>
+    </div>
+    <div class="sheet-body">
+      <h2 id="dTitle">...</h2>
+      <div class="badges" id="dBadges"></div>
+      <div class="genres" id="dGenres"></div>
+      <p class="plot" id="dPlot"></p>
+      <button class="play-btn" id="dPlay" type="button">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        Play Movie
+      </button>
     </div>
   </div>
-</dialog>
+</div>
 
-<footer>&copy; 2026 Prosper Movies</footer>
+<div class="player-backdrop" id="player" hidden>
+  <div class="player-box">
+    <div class="player-head">
+      <h3 id="pTitle">Movie</h3>
+      <button class="x" id="pClose" type="button" aria-label="Funga">×</button>
+    </div>
+    <div class="servers" id="servers"></div>
+    <div class="help" id="helpBox">
+      <strong>Msaidizi wa Player</strong>
+      <p>Movie haichezi au unaona ads nyingi? Badilisha server. Kila server ina player tofauti.</p>
+      <button class="switch" id="switchSrv" type="button">Badilisha Server</button>
+    </div>
+    <div class="frame-wrap">
+      <div class="frame-loading" id="frameLoad">Inapakia player...</div>
+      <iframe id="frame" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="no-referrer"></iframe>
+    </div>
+  </div>
+</div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+<footer>&copy; 2026 Prosper Movies · Powered by OMDb</footer>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAMt3bDm-DtkwAHizrs6f2EB8rsXAu9FKs",
-    authDomain: "prosper-movie-36bfb.firebaseapp.com",
-    projectId: "prosper-movie-36bfb",
-    storageBucket: "prosper-movie-36bfb.firebasestorage.app",
-    messagingSenderId: "869131612157",
-    appId: "1:869131612157:web:bc17324ea27647d7b3b394"
-  };
+<script>
+(function () {
+  const API_KEY = "d0349ee";
+  const API = "https://www.omdbapi.com/";
+  const CHIPS = ["Action", "Comedy", "Horror", "Sci-Fi", "Batman", "Avengers", "Inception", "Fast"];
+  const SERVERS = [
+    { name: "Server 1", url: id => `https://vidsrc.sh/embed/movie/${id}` },
+    { name: "Server 2", url: id => `https://vidsrc.xyz/embed/movie?imdb=${id}` },
+    { name: "Server 3", url: id => `https://embed.su/embed/movie/${id}` },
+    { name: "Server 4", url: id => `https://player.videasy.to/movie/${id}` },
+    { name: "Server 5", url: id => `https://multiembed.mov/?video_id=${id}` }
+  ];
 
-  const db = getFirestore(initializeApp(firebaseConfig));
-  const grid = document.getElementById("grid");
-  const statusEl = document.getElementById("status");
-  const dlg = document.getElementById("dlg");
+  const $ = id => document.getElementById(id);
+  let term = "Action", page = 1, total = 0, shown = 0, busy = false;
+  let currentId = null, currentTitle = "", currentSrv = 0;
 
-  document.getElementById("dClose").onclick = () => dlg.close();
-  dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
-
-  function safeUrl(u){
-    try { const x = new URL(u); return (x.protocol === "https:" || x.protocol === "http:") ? x.href : ""; }
-    catch { return ""; }
+  async function api(params) {
+    const url = API + "?apikey=" + API_KEY + "&" + new URLSearchParams(params);
+    const r = await fetch(url);
+    return r.json();
   }
-  function metaText(m){
-    const parts = [];
-    if (m.year) parts.push(m.year);
-    if (m.price) parts.push(m.price);
-    return parts.join("  |  ");
-  }
+  function clean(v) { return v && v !== "N/A" ? v : ""; }
 
-  function openMovie(m){
-    document.getElementById("dTitle").textContent = m.title || "";
-    document.getElementById("dMeta").textContent = metaText(m);
-    document.getElementById("dDesc").textContent = m.description || "";
-    const p = document.getElementById("dPoster");
-    if (m.poster) { p.src = m.poster; p.hidden = false; } else { p.hidden = true; }
-    const w = document.getElementById("dWatch");
-    const link = safeUrl(m.link || "");
-    if (link) { w.href = link; w.hidden = false; } else { w.hidden = true; }
-    dlg.showModal();
-  }
-
-  function card(m){
+  function card(m) {
     const b = document.createElement("button");
-    b.className = "card";
-    b.type = "button";
-    if (m.poster) {
+    b.className = "card"; b.type = "button";
+    if (clean(m.Poster)) {
       const img = document.createElement("img");
-      img.className = "poster"; img.loading = "lazy"; img.alt = m.title || "";
-      img.src = m.poster;
+      img.className = "poster"; img.loading = "lazy"; img.alt = m.Title;
+      img.referrerPolicy = "no-referrer"; img.src = m.Poster;
       b.appendChild(img);
     } else {
       const d = document.createElement("div");
-      d.className = "noposter"; d.textContent = m.title || "";
+      d.className = "noposter"; d.textContent = m.Title;
       b.appendChild(d);
     }
-    const info = document.createElement("div");
-    info.className = "info";
-    const t = document.createElement("b");
-    t.textContent = m.title || "";
-    const meta = document.createElement("div");
-    meta.className = "meta";
-    meta.textContent = metaText(m);
-    info.append(t, meta);
-    b.appendChild(info);
-    b.onclick = () => openMovie(m);
+    const ov = document.createElement("div"); ov.className = "play-overlay";
+    ov.innerHTML = '<div class="play-circle"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>';
+    b.appendChild(ov);
+    const info = document.createElement("div"); info.className = "info";
+    const t = document.createElement("b"); t.textContent = m.Title;
+    const meta = document.createElement("div"); meta.className = "meta";
+    meta.textContent = (m.Year || "") + (m.Type ? " · " + m.Type : "");
+    info.append(t, meta); b.appendChild(info);
+    b.onclick = () => openDetail(m.imdbID);
     return b;
   }
 
-  const q = query(collection(db, "movies"), orderBy("createdAt", "desc"));
-  onSnapshot(q, snap => {
-    grid.replaceChildren();
-    if (snap.empty) {
-      statusEl.textContent = "Bado hakuna movie. Nenda Admin uongeze.";
-      statusEl.hidden = false;
-      return;
+  async function load(reset) {
+    if (busy) return;
+    busy = true;
+    if (reset) { page = 1; shown = 0; $("grid").replaceChildren(); $("more").hidden = true; }
+    $("status").hidden = false;
+    $("status").textContent = "Inatafuta...";
+    try {
+      const d = await api({ s: term, type: "movie", page });
+      if (d.Response === "True") {
+        total = parseInt(d.totalResults, 10) || 0;
+        d.Search.forEach(m => $("grid").appendChild(card(m)));
+        shown += d.Search.length;
+        $("status").hidden = true;
+        $("more").hidden = shown >= total;
+      } else if (reset) {
+        $("status").textContent = d.Error === "Movie not found!"
+          ? "Hakuna movie iliyopatikana. Jaribu jina lingine."
+          : ("Kuna tatizo: " + (d.Error || "unknown"));
+      } else { $("more").hidden = true; }
+    } catch (e) {
+      $("status").hidden = false;
+      $("status").textContent = "Imeshindwa kuunganisha. Angalia mtandao.";
     }
-    statusEl.hidden = true;
-    snap.forEach(doc => grid.appendChild(card(doc.data())));
-  }, err => {
-    console.error(err);
-    statusEl.textContent = "Imeshindwa kupakia movies. Angalia mtandao au Firestore rules.";
-    statusEl.hidden = false;
+    busy = false;
+  }
+
+  function search(t) {
+    t = (t || "").trim();
+    if (!t) return;
+    term = t; $("q").value = t;
+    document.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.textContent === t));
+    load(true);
+  }
+
+  \( ("go").onclick = () => search( \)("q").value);
+  \( ("q").addEventListener("keydown", e => { if (e.key === "Enter") search( \)("q").value); });
+  $("more").onclick = () => { page++; load(false); };
+
+  CHIPS.forEach(c => {
+    const b = document.createElement("button");
+    b.className = "chip"; b.type = "button"; b.textContent = c;
+    b.onclick = () => search(c);
+    $("chips").appendChild(b);
   });
+
+  const sheet = $("sheet");
+  $("dClose").onclick = () => { sheet.hidden = true; document.body.style.overflow = ""; };
+  sheet.addEventListener("click", e => {
+    if (e.target === sheet) { sheet.hidden = true; document.body.style.overflow = ""; }
+  });
+
+  async function openDetail(id) {
+    currentId = id;
+    $("dTitle").textContent = "Inapakia...";
+    $("dPoster").hidden = true;
+    $("dBadges").replaceChildren(); $("dGenres").replaceChildren();
+    $("dPlot").textContent = ""; $("dPlay").disabled = true;
+    sheet.hidden = false; document.body.style.overflow = "hidden";
+    try {
+      const m = await api({ i: id, plot: "full" });
+      if (m.Response !== "True") { $("dTitle").textContent = "Imeshindwa kupakia maelezo."; return; }
+      currentTitle = m.Title || "Movie";
+      $("dTitle").textContent = m.Title || "";
+      if (clean(m.Poster)) {
+        $("dPoster").referrerPolicy = "no-referrer";
+        $("dPoster").src = m.Poster; $("dPoster").hidden = false;
+      }
+      const badges = $("dBadges");
+      if (clean(m.imdbRating)) {
+        const s = document.createElement("span");
+        s.className = "badge star"; s.textContent = "★ " + m.imdbRating + "/10";
+        badges.appendChild(s);
+      }
+      [m.Year, m.Runtime, m.Rated].filter(clean).forEach(v => {
+        const s = document.createElement("span");
+        s.className = "badge"; s.textContent = v; badges.appendChild(s);
+      });
+      if (clean(m.Genre)) {
+        m.Genre.split(",").forEach(g => {
+          const s = document.createElement("span");
+          s.className = "genre"; s.textContent = g.trim();
+          $("dGenres").appendChild(s);
+        });
+      }
+      $("dPlot").textContent = clean(m.Plot) || "Hakuna maelezo.";
+      $("dPlay").disabled = false;
+    } catch (e) { $("dTitle").textContent = "Imeshindwa kuunganisha."; }
+  }
+
+  $("dPlay").onclick = () => { if (currentId) openPlayer(currentId, currentTitle, 0); };
+
+  function openPlayer(id, title, srvIndex) {
+    currentId = id; currentTitle = title || "Movie"; currentSrv = srvIndex || 0;
+    $("pTitle").textContent = currentTitle;
+    renderServers(); loadServer(currentSrv);
+    $("player").hidden = false; document.body.style.overflow = "hidden";
+  }
+
+  function renderServers() {
+    const box = $("servers"); box.replaceChildren();
+    SERVERS.forEach((s, i) => {
+      const b = document.createElement("button");
+      b.className = "srv" + (i === currentSrv ? " on" : "");
+      b.type = "button"; b.textContent = s.name;
+      b.onclick = () => { currentSrv = i; renderServers(); loadServer(i); };
+      box.appendChild(b);
+    });
+  }
+
+  function loadServer(i) {
+    const frame = $("frame"), loadEl = $("frameLoad");
+    loadEl.hidden = false; frame.src = "about:blank";
+    const url = SERVERS[i].url(currentId);
+    setTimeout(() => {
+      frame.onload = () => { loadEl.hidden = true; };
+      frame.src = url;
+      setTimeout(() => { loadEl.hidden = true; }, 4000);
+    }, 80);
+  }
+
+  $("pClose").onclick = () => {
+    $("frame").src = "about:blank"; $("player").hidden = true;
+    document.body.style.overflow = $("sheet").hidden ? "" : "hidden";
+  };
+  $("player").addEventListener("click", e => { if (e.target === $("player")) $("pClose").click(); });
+  $("switchSrv").onclick = () => {
+    currentSrv = (currentSrv + 1) % SERVERS.length;
+    renderServers(); loadServer(currentSrv);
+  };
+
+  search("Action");
+})();
 </script>
 </body>
 </html>
