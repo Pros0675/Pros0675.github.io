@@ -523,7 +523,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
     load(true);
   }
 
-  \( ("go").onclick = function () { search( \)("q").value); };
+  $("go").onclick = function () { search($("q").value); };
   $("q").addEventListener("keydown", function (e) {
     if (e.key === "Enter") search($("q").value);
   });
