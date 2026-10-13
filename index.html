@@ -1,25 +1,114 @@
-      <!-- MOVIE 1: MFANO -->
-      <div class="movie-card">
-        <div class="movie-poster">
-          <img src="https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg" alt="Avatar 2">
-          <div class="badge">BURE</div>
-        </div>
-        <div class="movie-info">
-          <div class="movie-title">Avatar: The Way of Water</div>
-          <div class="movie-meta">Action • 2022</div>
-          <a href="WEKA-LINK-YA-GOOGLE-DRIVE-HAPA-1" class="download-link" target="_blank">DOWNLOAD</a>
-        </div>
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <title>Prosper Movies - Tazama. Nunua. Furahia.</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #000; color: #fff; font-family: Arial, sans-serif; }
+    header { background: #000; padding: 15px 20px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
+.logo { font-size: 20px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+.logo span { color: #fff; }
+.logo span.red { color: #E50914; }
+.nav-links { display: flex; gap: 15px; font-size: 14px; }
+.nav-links a { color: #aaa; text-decoration: none; }
+.hero { padding: 40px 20px 20px 20px; }
+.hero h1 { font-size: 38px; font-weight: 900; line-height: 1.1; margin-bottom: 20px; }
+.hero h1.red { color: #E50914; }
+.search-box { position: relative; margin-bottom: 30px; }
+.search-box input { width: 100%; padding: 14px 14px 14px 45px; border-radius: 8px; border: none; background: #1a1a1a; color: white; font-size: 16px; }
+.search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #777; }
+.container { padding: 0 20px; }
+.movies-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+.movie-card { position: relative; border-radius: 8px; overflow: hidden; background: #1a1a1a; }
+.movie-poster { width: 100%; height: 220px; background: linear-gradient(180deg, #2a0000 0%, #000 100%); display: flex; align-items: center; justify-content: center; }
+.movie-poster i { font-size: 50px; color: #444; }
+.movie-poster img { width: 100%; height: 100%; object-fit: cover; }
+.badge { position: absolute; bottom: 8px; left: 8px; background: #E50914; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+.movie-info { padding: 10px; }
+.movie-title { font-size: 14px; font-weight: bold; margin-bottom: 4px; }
+.movie-meta { color: #777; font-size: 12px; }
+.download-link { display: block; margin-top: 8px; background: #E50914; color: white; text-align: center; padding: 8px; border-radius: 5px; text-decoration: none; font-size: 13px; font-weight: bold; }
+.download-link:hover { background: #ff0a16; }
+.empty-state { text-align: center; padding: 60px 20px; color: #555; }
+.empty-state i { font-size: 60px; margin-bottom: 15px; color: #222; }
+    footer { text-align: center; padding: 40px 20px; color: #555; font-size: 13px; margin-top: 50px; }
+    @media (min-width: 768px) {.hero h1 { font-size: 50px; }.movies-grid { grid-template-columns: repeat(5, 1fr); } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <i class="fas fa-film" style="color:#E50914;"></i>
+      <span>PROSPER</span> <span class="red">MOVIES</span>
+    </div>
+    <div class="nav-links">
+      <!-- Admin imefichwa — hakuna mtu ataiona -->
+    </div>
+  </header>
+
+  <div class="hero">
+    <h1>TAZAMA. NUNUA. <span class="red">FURAHIA.</span></h1>
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchInput" placeholder="Tafuta movie au aina (action, drama...)" onkeyup="searchMovie()">
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="movies-grid" id="movieGrid">
+
+      <!-- ONGEZA MOVIE MPYA HAPA -->
+
+      <div class="empty-state" id="emptyState">
+        <i class="fas fa-film"></i>
+        <p>Bado hakuna movie. Nenda Admin uongeze.</p>
       </div>
 
-      <!-- MOVIE 2: MFANO -->
-      <div class="movie-card">
-        <div class="movie-poster">
-          <img src="https://image.tmdb.org/t/p/w500/fiVW06jE7z9YnO4trhaMEdclSiC.jpg" alt="Fast X">
-          <div class="badge">BURE</div>
-        </div>
-        <div class="movie-info">
-          <div class="movie-title">Fast X</div>
-          <div class="movie-meta">Action • 2023</div>
-          <a href="WEKA-LINK-YA-GOOGLE-DRIVE-HAPA-2" class="download-link" target="_blank">DOWNLOAD</a>
-        </div>
-      </div>
+    </div>
+  </div>
+
+  <footer>
+    © 2026 Prosper Movies
+  </footer>
+
+  <script>
+    function searchMovie() {
+      let input = document.getElementById('searchInput').value.toLowerCase();
+      let cards = document.getElementsByClassName('movie-card');
+      let emptyState = document.getElementById('emptyState');
+      let visibleCount = 0;
+
+      for (let i = 0; i < cards.length; i++) {
+        let title = cards[i].getElementsByClassName('movie-title')[0].innerText.toLowerCase();
+        if (title.includes(input)) {
+          cards[i].style.display = "";
+          visibleCount++;
+        } else {
+          cards[i].style.display = "none";
+        }
+      }
+
+      // Ficha "empty state" kama kuna movie
+      if (visibleCount > 0 || cards.length > 0) {
+        emptyState.style.display = "none";
+      } else {
+        emptyState.style.display = "block";
+      }
+    }
+
+    // Angalia kama kuna movie wakati page inapoload
+    window.onload = function() {
+      let cards = document.getElementsByClassName('movie-card');
+      let emptyState = document.getElementById('emptyState');
+      if (cards.length === 0) {
+        emptyState.style.display = "block";
+      } else {
+        emptyState.style.display = "none";
+      }
+    }
+  </script>
+</body>
+</html>
