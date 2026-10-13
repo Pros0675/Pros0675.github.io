@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin - Prosper Movies</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { background: #0a0a0a; color: #fff; font-family: Arial; padding: 20px; max-width: 600px; margin: 0 auto; }
+    h1 { color: #E50914; text-align: center; }
+    input, textarea { width: 100%; padding: 12px; margin: 8px 0; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 6px; font-size: 16px; }
+    button { width: 100%; background: #E50914; color: white; padding: 15px; border: none; border-radius: 6px; font-size: 18px; font-weight: bold; margin-top: 10px; }
+    .output { background: #1a1a1a; padding: 15px; border-radius: 6px; margin-top: 20px; border: 1px solid #E50914; }
+    .output textarea { height: 200px; font-family: monospace; font-size: 12px; }
+    .step { background: #1a1a1a; padding: 15px; border-left: 4px solid #E50914; margin: 15px 0; }
+    .success { color: #4CAF50; text-align: center; font-weight: bold; display: none; }
+  </style>
+</head>
+<body>
+  <h1>🎬 ADMIN - PROSPER MOVIES</h1>
+  <p style="text-align:center;color:#888;">Jaza fomu hii kuongeza movie mpya</p>
+
+  <input type="text" id="title" placeholder="Jina la Movie: Avatar 2">
+  <input type="text" id="year" placeholder="Mwaka: 2022">
+  <input type="text" id="genre" placeholder="Aina: Action, Drama">
+  <input type="text" id="image" placeholder="Link ya Picha ya Poster">
+  <input type="text" id="link" placeholder="Link ya Google Drive/Dropbox">
+  
+  <button onclick="generateCode()">TENGENEZA CODE</button>
+
+  <div class="output" id="output" style="display:none;">
+    <h3 style="color:#E50914;">✅ CODE YAKO IPO HAPA:</h3>
+    <p>1. Copy code yote hapa chini:</p>
+    <textarea id="codeOutput" readonly></textarea>
+    <button onclick="copyCode()" style="background:#4CAF50;">COPY CODE</button>
+    <div class="success" id="success">✅ Imecopy! Sasa fuata hatua chini</div>
+  </div>
+
+  <div class="step" id="steps" style="display:none;">
+    <h3 style="color:#E50914;">HATUA ZA MWISHO:</h3>
+    <p><strong>1.</strong> Fungua <a href="https://github.com/Pros0675/Pros0675.github.io/edit/main/index.html" target="_blank" style="color:#E50914;">index.html kwenye GitHub</a></p>
+    <p><strong>2.</strong> Tafuta <code>&lt;!-- ONGEZA MOVIE MPYA HAPA --&gt;</code></p>
+    <p><strong>3.</strong> Paste code yako chini ya hapo</p>
+    <p><strong>4.</strong> Bonyeza <strong>"Commit changes"</strong></p>
+    <p><strong>5.</strong> Ndani ya sekunde 30 movie itaonekana live!</p>
+  </div>
+
+  <script>
+    function generateCode() {
+      const title = document.getElementById('title').value;
+      const year = document.getElementById('year').value;
+      const genre = document.getElementById('genre').value;
+      const image = document.getElementById('image').value;
+      const link = document.getElementById('link').value;
+
+      if(!title || !link) {
+        alert('Jaza angalau Jina la Movie na Link ya Download!');
+        return;
+      }
+
+      const code = `
+      <!-- MOVIE: ${title} -->
+      <div class="movie-card">
+        <div class="movie-poster">
+          <img src="${image}" alt="${title}">
+          <div class="badge">BURE</div>
+        </div>
+        <div class="movie-info">
+          <div class="movie-title">${title}</div>
+          <div class="movie-meta">${genre} • ${year}</div>
+          <a href="${link}" class="download-link" target="_blank">DOWNLOAD</a>
+        </div>
+      </div>`;
+
+      document.getElementById('codeOutput').value = code.trim();
+      document.getElementById('output').style.display = 'block';
+      document.getElementById('steps').style.display = 'block';
+    }
+
+    function copyCode() {
+      const code = document.getElementById('codeOutput');
+      code.select();
+      document.execCommand('copy');
+      document.getElementById('success').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
