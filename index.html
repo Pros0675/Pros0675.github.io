@@ -1,43 +1,132 @@
 <!DOCTYPE html>
-<html>
+<html lang="sw">
 <head>
-  <title>Prosper Movies</title>
+  <meta charset="UTF-8">
+  <title>Prosper Movies - Download Movie Bure</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { background: #0a0a0a; color: #fff; font-family: Arial; padding: 15px; margin: 0; }
-    h1 { color: #FFD700; text-align: center; margin-bottom: 5px; }
-    p.subtitle { text-align: center; color: #aaa; margin-top: 0; }
-    .movie { background: #1c1c1c; padding: 15px; margin: 15px 0; border-radius: 10px; border: 1px solid #333; }
-    .movie h3 { margin: 0 0 10px 0; color: #FFD700; }
-    .btn { background: #FFD700; color: #000; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; }
-    .footer { text-align: center; margin-top: 40px; color: #666; font-size: 14px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0d0d0d; color: #fff; font-family: 'Segoe UI', Arial, sans-serif; }
+    header { background: linear-gradient(135deg, #1a1a1a 0%, #000 100%); padding: 20px; text-align: center; border-bottom: 3px solid #FFD700; }
+   .logo { font-size: 32px; font-weight: 900; color: #FFD700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+   .logo i { margin-right: 10px; }
+   .subtitle { color: #aaa; margin-top: 5px; font-size: 14px; }
+   .search-box { padding: 15px; background: #1a1a1a; }
+   .search-box input { width: 100%; padding: 12px; border-radius: 25px; border: none; background: #2a2a2a; color: white; font-size: 16px; }
+   .container { padding: 15px; max-width: 1200px; margin: 0 auto; }
+   .section-title { font-size: 22px; margin: 20px 0 15px 0; color: #FFD700; border-left: 4px solid #FFD700; padding-left: 10px; }
+   .movies-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
+   .movie-card { background: #1c1c1c; border-radius: 12px; overflow: hidden; border: 1px solid #333; transition: transform 0.3s, box-shadow 0.3s; }
+   .movie-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(255,215,0,0.2); }
+   .movie-poster { width: 100%; height: 220px; background: #333; display: flex; align-items: center; justify-content: center; font-size: 50px; color: #555; }
+   .movie-poster img { width: 100%; height: 100%; object-fit: cover; }
+   .movie-info { padding: 12px; }
+   .movie-title { font-size: 15px; font-weight: bold; margin-bottom: 8px; height: 40px; overflow: hidden; }
+   .movie-year { color: #888; font-size: 13px; margin-bottom: 10px; }
+   .download-btn { display: block; width: 100%; background: #FFD700; color: #000; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; }
+   .download-btn i { margin-right: 5px; }
+   .download-btn:hover { background: #ffed4e; }
+    footer { text-align: center; padding: 30px 15px; color: #666; border-top: 1px solid #333; margin-top: 30px; }
+   .telegram-btn { background: #0088cc; color: white; padding: 12px 24px; border-radius: 25px; text-decoration: none; display: inline-block; margin: 10px 0; font-weight: bold; }
+    @media (max-width: 600px) {.movies-grid { grid-template-columns: repeat(2, 1fr); } }
   </style>
 </head>
 <body>
-  <h1>🎬 PROSPER MOVIES</h1>
-  <p class="subtitle">Download Movie Bure Kabisa</p>
+  <header>
+    <div class="logo"><i class="fas fa-film"></i>PROSPER MOVIES</div>
+    <div class="subtitle">Download Movies & Series Bure Kabisa</div>
+  </header>
 
-  <!-- MOVIE 1: BADILISHA JINA NA LINK -->
-  <div class="movie">
-    <h3>Avatar 2: The Way of Water</h3>
-    <a class="btn" href="WEKA-LINK-YA-TELEGRAM-HAPA-1">DOWNLOAD HD</a>
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="🔍 Tafuta movie..." onkeyup="searchMovie()">
   </div>
 
-  <!-- MOVIE 2: BADILISHA JINA NA LINK -->
-  <div class="movie">
-    <h3>Fast X</h3>
-    <a class="btn" href="WEKA-LINK-YA-TELEGRAM-HAPA-2">DOWNLOAD HD</a>
+  <div class="container">
+    <h2 class="section-title"><i class="fas fa-fire"></i> Movie Mpya</h2>
+
+    <div class="movies-grid" id="movieGrid">
+
+      <!-- MOVIE 1: BADILISHA PICHA, JINA, MWAKA, LINK -->
+      <div class="movie-card">
+        <div class="movie-poster">
+          <img src="https://i.imgur.com/example1.jpg" alt="Movie Poster">
+        </div>
+        <div class="movie-info">
+          <div class="movie-title">Avatar 2: The Way of Water</div>
+          <div class="movie-year">2022 • Action</div>
+          <a href="WEKA-LINK-YA-TELEGRAM-HAPA-1" class="download-btn">
+            <i class="fas fa-download"></i> DOWNLOAD
+          </a>
+        </div>
+      </div>
+
+      <!-- MOVIE 2: BADILISHA PICHA, JINA, MWAKA, LINK -->
+      <div class="movie-card">
+        <div class="movie-poster">
+          <img src="https://i.imgur.com/example2.jpg" alt="Movie Poster">
+        </div>
+        <div class="movie-info">
+          <div class="movie-title">Fast X</div>
+          <div class="movie-year">2023 • Action</div>
+          <a href="WEKA-LINK-YA-TELEGRAM-HAPA-2" class="download-btn">
+            <i class="fas fa-download"></i> DOWNLOAD
+          </a>
+        </div>
+      </div>
+
+      <!-- MOVIE 3: BADILISHA PICHA, JINA, MWAKA, LINK -->
+      <div class="movie-card">
+        <div class="movie-poster">
+          <img src="https://i.imgur.com/example3.jpg" alt="Movie Poster">
+        </div>
+        <div class="movie-info">
+          <div class="movie-title">John Wick 4</div>
+          <div class="movie-year">2023 • Action</div>
+          <a href="WEKA-LINK-YA-TELEGRAM-HAPA-3" class="download-btn">
+            <i class="fas fa-download"></i> DOWNLOAD
+          </a>
+        </div>
+      </div>
+
+      <!-- MOVIE 4: COPY HII KUONGEZA MOVIE NYINGINE -->
+      <div class="movie-card">
+        <div class="movie-poster">
+          <img src="https://i.imgur.com/example4.jpg" alt="Movie Poster">
+        </div>
+        <div class="movie-info">
+          <div class="movie-title">The Batman</div>
+          <div class="movie-year">2022 • Action</div>
+          <a href="WEKA-LINK-YA-TELEGRAM-HAPA-4" class="download-btn">
+            <i class="fas fa-download"></i> DOWNLOAD
+          </a>
+        </div>
+      </div>
+
+    </div>
   </div>
 
-  <!-- MOVIE 3: BADILISHA JINA NA LINK -->
-  <div class="movie">
-    <h3>John Wick 4</h3>
-    <a class="btn" href="WEKA-LINK-YA-TELEGRAM-HAPA-3">DOWNLOAD HD</a>
-  </div>
+  <footer>
+    <a href="https://t.me/WEKA-USERNAME-YA-CHANNEL-YAKO" class="telegram-btn">
+      <i class="fab fa-telegram"></i> Jiunge Telegram Yetu
+    </a>
+    <p style="margin-top: 20px;">© 2026 Prosper Movies</p>
+    <p>Link Mpya: <strong>Pros0675.github.io</strong></p>
+  </footer>
 
-  <div class="footer">
-    <p>© 2026 Prosper Movies</p>
-    <p>Link Mpya: Pros0675.github.io</p>
-  </div>
+  <script>
+    function searchMovie() {
+      let input = document.getElementById('searchInput').value.toLowerCase();
+      let cards = document.getElementsByClassName('movie-card');
+      for (let i = 0; i < cards.length; i++) {
+        let title = cards[i].getElementsByClassName('movie-title')[0].innerText.toLowerCase();
+        if (title.includes(input)) {
+          cards[i].style.display = "";
+        } else {
+          cards[i].style.display = "none";
+        }
+      }
+    }
+  </script>
 </body>
-</html>
+  </html>
