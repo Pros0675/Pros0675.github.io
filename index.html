@@ -1,116 +1,155 @@
 <!DOCTYPE html>
 <html lang="sw">
 <head>
-  <meta charset="UTF-8">
-  <title>Prosper Movies - Tazama. Nunua. Furahia.</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #000; color: #fff; font-family: Arial, sans-serif; }
-    header { background: #000; padding: 15px 20px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
-   .logo { font-size: 20px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
-   .logo span { color: #fff; }
-   .logo span.red { color: #E50914; }
-   .nav-links { display: flex; gap: 15px; font-size: 14px; }
-   .nav-links a { color: #aaa; text-decoration: none; }
-   .hero { padding: 40px 20px 20px 20px; }
-   .hero h1 { font-size: 38px; font-weight: 900; line-height: 1.1; margin-bottom: 20px; }
-   .hero h1.red { color: #E50914; }
-   .search-box { position: relative; margin-bottom: 30px; }
-   .search-box input { width: 100%; padding: 14px 14px 14px 45px; border-radius: 8px; border: none; background: #1a1a1a; color: white; font-size: 16px; }
-   .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #777; }
-   .container { padding: 0 20px; }
-   .movies-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
-   .movie-card { position: relative; border-radius: 8px; overflow: hidden; background: #1a1a1a; }
-   .movie-poster { width: 100%; height: 220px; background: linear-gradient(180deg, #2a0000 0%, #000 100%); display: flex; align-items: center; justify-content: center; position: relative; }
-   .movie-poster i { font-size: 50px; color: #444; }
-   .movie-poster img { width: 100%; height: 100%; object-fit: cover; }
-   .badge { position: absolute; bottom: 8px; left: 8px; background: #E50914; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-   .movie-info { padding: 10px; }
-   .movie-title { font-size: 14px; font-weight: bold; margin-bottom: 4px; }
-   .movie-meta { color: #777; font-size: 12px; }
-   .download-link { display: block; margin-top: 8px; background: #E50914; color: white; text-align: center; padding: 8px; border-radius: 5px; text-decoration: none; font-size: 13px; font-weight: bold; }
-   .download-link:hover { background: #ff0a16; }
-   .empty-state { text-align: center; padding: 60px 20px; color: #555; grid-column: 1 / -1; }
-   .empty-state i { font-size: 60px; margin-bottom: 15px; color: #222; }
-    footer { text-align: center; padding: 40px 20px; color: #555; font-size: 13px; margin-top: 50px; }
-    @media (min-width: 768px) {.hero h1 { font-size: 50px; }.movies-grid { grid-template-columns: repeat(5, 1fr); } }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prosper Movies - Tazama. Nunua. Furahia.</title>
+<style>
+  :root{
+    --bg:#0c0a0a; --panel:#181313; --line:#2c2222;
+    --red:#e5262d; --text:#f4eeee; --muted:#a39898;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+  header{padding:48px 20px 28px;text-align:center;border-bottom:3px solid var(--red)}
+  .brand{font-size:.95rem;font-weight:700;letter-spacing:.35em;color:var(--red)}
+  h1{margin-top:10px;font-size:clamp(2rem,9vw,3.6rem);font-weight:900;line-height:1.05}
+  main{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
+  #status{text-align:center;color:var(--muted);padding:40px 10px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  @media(min-width:700px){.grid{grid-template-columns:repeat(4,1fr);gap:18px}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;text-align:left;color:inherit;font:inherit;padding:0}
+  .card:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+  .poster{aspect-ratio:2/3;width:100%;object-fit:cover;display:block;background:#241b1b}
+  .noposter{aspect-ratio:2/3;display:flex;align-items:center;justify-content:center;background:#241b1b;color:var(--muted);font-size:.85rem;padding:10px;text-align:center}
+  .info{padding:10px 12px 12px}
+  .info b{display:block;font-size:.95rem;line-height:1.25}
+  .meta{margin-top:4px;font-size:.8rem;color:var(--muted)}
+  .price{color:var(--red);font-weight:700}
+  dialog{border:none;border-radius:12px;background:var(--panel);color:var(--text);width:min(92vw,460px);padding:0;margin:auto}
+  dialog::backdrop{background:rgba(0,0,0,.78)}
+  .dposter{width:100%;max-height:48vh;object-fit:cover;display:block}
+  .dbody{padding:18px}
+  .dbody h2{font-size:1.4rem;line-height:1.2}
+  .dbody p{margin-top:12px;line-height:1.55;color:#d8cfcf;white-space:pre-wrap}
+  .actions{display:flex;gap:10px;margin-top:18px}
+  .btn{flex:1;text-align:center;padding:13px;border-radius:8px;font-weight:700;border:1px solid var(--red);background:var(--red);color:#fff;text-decoration:none;font-size:1rem;cursor:pointer;font-family:inherit}
+  .btn.ghost{background:transparent;color:var(--text);border-color:var(--line)}
+  footer{text-align:center;color:var(--muted);font-size:.8rem;padding:24px}
+</style>
 </head>
 <body>
-  <header>
-    <div class="logo">
-      <i class="fas fa-film" style="color:#E50914;"></i>
-      <span>PROSPER</span> <span class="red">MOVIES</span>
-    </div>
-    <div class="nav-links">
-      <!-- HAKUNA ADMIN HAPA — SIRI YAKO -->
-    </div>
-  </header>
+<header>
+  <div class="brand">PROSPER MOVIES</div>
+  <h1>Tazama. Nunua. Furahia.</h1>
+</header>
 
-  <div class="hero">
-    <h1>TAZAMA. NUNUA. <span class="red">FURAHIA.</span></h1>
-    <div class="search-box">
-      <i class="fas fa-search"></i>
-      <input type="text" id="searchInput" placeholder="Tafuta movie au aina (action, drama...)" onkeyup="searchMovie()">
-    </div>
-  </div>
+<main>
+  <div id="status">Inapakia movies...</div>
+  <div class="grid" id="grid"></div>
+</main>
 
-  <div class="container">
-    <div class="movies-grid" id="movieGrid">
-
-      <!-- ONGEZA MOVIE MPYA HAPA -->
-
-      <div class="empty-state" id="emptyState">
-        <i class="fas fa-film"></i>
-        <p>Bado hakuna movie. Nenda Admin uongeze.</p>
-      </div>
-
+<dialog id="dlg">
+  <img class="dposter" id="dPoster" alt="" hidden>
+  <div class="dbody">
+    <h2 id="dTitle"></h2>
+    <div class="meta" id="dMeta"></div>
+    <p id="dDesc"></p>
+    <div class="actions">
+      <a class="btn" id="dWatch" target="_blank" rel="noopener" hidden>Tazama</a>
+      <button class="btn ghost" id="dClose" type="button">Funga</button>
     </div>
   </div>
+</dialog>
 
-  <footer>
-    © 2026 Prosper Movies
-  </footer>
+<footer>&copy; 2026 Prosper Movies</footer>
 
-  <script>
-    function searchMovie() {
-      let input = document.getElementById('searchInput').value.toLowerCase();
-      let cards = document.getElementsByClassName('movie-card');
-      let emptyState = document.getElementById('emptyState');
-      let visibleCount = 0;
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-      for (let i = 0; i < cards.length; i++) {
-        let title = cards[i].getElementsByClassName('movie-title')[0].innerText.toLowerCase();
-        if (title.includes(input)) {
-          cards[i].style.display = "";
-          visibleCount++;
-        } else {
-          cards[i].style.display = "none";
-        }
-      }
+  const firebaseConfig = {
+    apiKey: "AIzaSyAMt3bDm-DtkwAHizrs6f2EB8rsXAu9FKs",
+    authDomain: "prosper-movie-36bfb.firebaseapp.com",
+    projectId: "prosper-movie-36bfb",
+    storageBucket: "prosper-movie-36bfb.firebasestorage.app",
+    messagingSenderId: "869131612157",
+    appId: "1:869131612157:web:bc17324ea27647d7b3b394"
+  };
 
-      if (cards.length > 0 && visibleCount === 0) {
-        emptyState.style.display = "block";
-        emptyState.innerHTML = '<i class="fas fa-search"></i><p>Hakuna movie iliyopatikana.</p>';
-      } else if (cards.length === 0) {
-        emptyState.style.display = "block";
-        emptyState.innerHTML = '<i class="fas fa-film"></i><p>Bado hakuna movie. Nenda Admin uongeze.</p>';
-      } else {
-        emptyState.style.display = "none";
-      }
+  const db = getFirestore(initializeApp(firebaseConfig));
+  const grid = document.getElementById("grid");
+  const statusEl = document.getElementById("status");
+  const dlg = document.getElementById("dlg");
+
+  document.getElementById("dClose").onclick = () => dlg.close();
+  dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+
+  function safeUrl(u){
+    try { const x = new URL(u); return (x.protocol === "https:" || x.protocol === "http:") ? x.href : ""; }
+    catch { return ""; }
+  }
+  function metaText(m){
+    const parts = [];
+    if (m.year) parts.push(m.year);
+    if (m.price) parts.push(m.price);
+    return parts.join("  |  ");
+  }
+
+  function openMovie(m){
+    document.getElementById("dTitle").textContent = m.title || "";
+    document.getElementById("dMeta").textContent = metaText(m);
+    document.getElementById("dDesc").textContent = m.description || "";
+    const p = document.getElementById("dPoster");
+    if (m.poster) { p.src = m.poster; p.hidden = false; } else { p.hidden = true; }
+    const w = document.getElementById("dWatch");
+    const link = safeUrl(m.link || "");
+    if (link) { w.href = link; w.hidden = false; } else { w.hidden = true; }
+    dlg.showModal();
+  }
+
+  function card(m){
+    const b = document.createElement("button");
+    b.className = "card";
+    b.type = "button";
+    if (m.poster) {
+      const img = document.createElement("img");
+      img.className = "poster"; img.loading = "lazy"; img.alt = m.title || "";
+      img.src = m.poster;
+      b.appendChild(img);
+    } else {
+      const d = document.createElement("div");
+      d.className = "noposter"; d.textContent = m.title || "";
+      b.appendChild(d);
     }
+    const info = document.createElement("div");
+    info.className = "info";
+    const t = document.createElement("b");
+    t.textContent = m.title || "";
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.textContent = metaText(m);
+    info.append(t, meta);
+    b.appendChild(info);
+    b.onclick = () => openMovie(m);
+    return b;
+  }
 
-    window.onload = function() {
-      let cards = document.getElementsByClassName('movie-card');
-      let emptyState = document.getElementById('emptyState');
-      if (cards.length === 0) {
-        emptyState.style.display = "block";
-      } else {
-        emptyState.style.display = "none";
-      }
+  const q = query(collection(db, "movies"), orderBy("createdAt", "desc"));
+  onSnapshot(q, snap => {
+    grid.replaceChildren();
+    if (snap.empty) {
+      statusEl.textContent = "Bado hakuna movie. Nenda Admin uongeze.";
+      statusEl.hidden = false;
+      return;
     }
-  </script>
+    statusEl.hidden = true;
+    snap.forEach(doc => grid.appendChild(card(doc.data())));
+  }, err => {
+    console.error(err);
+    statusEl.textContent = "Imeshindwa kupakia movies. Angalia mtandao au Firestore rules.";
+    statusEl.hidden = false;
+  });
+</script>
 </body>
 </html>
