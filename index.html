@@ -5,21 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Prosper Movies - Tazama. Nunua. Furahia.</title>
 <style>
-  :root{--bg:#0c0a0a;--panel:#181313;--line:#2c2222;--red:#e5262d;--text:#f4eeee;--muted:#a39898}
+  :root{
+    --bg:#0c0a0a; --panel:#181313; --line:#2c2222;
+    --red:#e5262d; --text:#f4eeee; --muted:#a39898;
+  }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
-  header{padding:34px 16px 16px;text-align:center;border-bottom:3px solid var(--red)}
-  .brand{font-size:.9rem;font-weight:700;letter-spacing:.35em;color:var(--red)}
-  h1{margin-top:8px;font-size:clamp(1.8rem,8vw,3rem);font-weight:900;line-height:1.05}
-  nav{display:flex;justify-content:center;gap:10px;margin-top:18px}
-  nav a{color:var(--text);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:8px 16px;font-size:.92rem}
-  nav a.on{background:var(--red);border-color:var(--red);font-weight:700}
-  .bar{position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 16px;border-bottom:1px solid var(--line)}
-  .bar input{display:block;width:100%;max-width:700px;margin:0 auto;background:#0f0c0c;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:12px;font:inherit;font-size:1rem}
-  .bar input:focus{outline:2px solid var(--red);border-color:transparent}
-  main{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
-  #status{text-align:center;color:var(--muted);padding:36px 10px;line-height:1.6}
-  #status a{color:var(--red);font-weight:700}
+  header{padding:48px 20px 28px;text-align:center;border-bottom:3px solid var(--red)}
+  .brand{font-size:.95rem;font-weight:700;letter-spacing:.35em;color:var(--red)}
+  h1{margin-top:10px;font-size:clamp(2rem,9vw,3.6rem);font-weight:900;line-height:1.05}
+  main{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
+  #status{text-align:center;color:var(--muted);padding:40px 10px}
   .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
   @media(min-width:700px){.grid{grid-template-columns:repeat(4,1fr);gap:18px}}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;text-align:left;color:inherit;font:inherit;padding:0}
@@ -29,46 +25,24 @@
   .info{padding:10px 12px 12px}
   .info b{display:block;font-size:.95rem;line-height:1.25}
   .meta{margin-top:4px;font-size:.8rem;color:var(--muted)}
-  dialog{border:none;border-radius:12px;background:var(--panel);color:var(--text);width:min(94vw,560px);max-height:94vh;padding:0;margin:auto;overflow:auto}
-  dialog::backdrop{background:rgba(0,0,0,.82)}
-  .dtop{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 16px}
-  .dtop h2{font-size:1.25rem;line-height:1.2}
-  .x{flex:none;width:40px;height:40px;border-radius:50%;border:none;background:#0c0a0a;color:#fff;font-size:1.1rem;cursor:pointer}
-  #player{width:100%;aspect-ratio:16/9;background:#000}
-  #player iframe,#player video{width:100%;height:100%;border:0;display:block;background:#000}
-  .dposter{width:100%;max-height:46vh;object-fit:cover;display:block}
-  .dbody{padding:16px}
-  .stats{display:flex;flex-wrap:wrap;gap:8px;align-items:center;color:var(--muted);font-size:.92rem}
-  .rate{background:var(--red);color:#fff;font-weight:700;border-radius:6px;padding:3px 9px}
-  .servers{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
-  .srv{background:#2a2020;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px 14px;font:inherit;font-size:.92rem;cursor:pointer}
-  .srv.on{background:var(--red);border-color:var(--red);font-weight:700}
-  .btn{display:block;width:100%;text-align:center;padding:14px;border-radius:8px;font-weight:700;border:1px solid var(--red);background:var(--red);color:#fff;text-decoration:none;font-size:1.05rem;cursor:pointer;font-family:inherit;margin-top:14px}
-  .btn.ghost{background:transparent;color:var(--text);border-color:var(--line);font-size:.95rem}
-  .note{margin-top:14px;padding:12px;border:1px dashed var(--line);border-radius:8px;color:var(--muted);font-size:.92rem}
-  .dl{margin-top:14px;padding:12px;border:1px solid var(--line);border-radius:8px;font-size:.92rem;color:var(--muted)}
-  .dl b{display:block;color:var(--text);margin-bottom:4px}
-  .dl a{display:inline-block;margin-top:8px;color:#fff;background:#2a2020;border:1px solid var(--line);border-radius:8px;padding:9px 14px;text-decoration:none;font-weight:600}
-  .tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-  .tags span{background:#2a2020;border-radius:6px;padding:5px 10px;font-size:.85rem;color:#e8dede}
-  #dPlot{margin-top:14px;line-height:1.6;color:#d8cfcf;white-space:pre-wrap}
+  .price{color:var(--red);font-weight:700}
+  dialog{border:none;border-radius:12px;background:var(--panel);color:var(--text);width:min(92vw,460px);padding:0;margin:auto}
+  dialog::backdrop{background:rgba(0,0,0,.78)}
+  .dposter{width:100%;max-height:48vh;object-fit:cover;display:block}
+  .dbody{padding:18px}
+  .dbody h2{font-size:1.4rem;line-height:1.2}
+  .dbody p{margin-top:12px;line-height:1.55;color:#d8cfcf;white-space:pre-wrap}
+  .actions{display:flex;gap:10px;margin-top:18px}
+  .btn{flex:1;text-align:center;padding:13px;border-radius:8px;font-weight:700;border:1px solid var(--red);background:var(--red);color:#fff;text-decoration:none;font-size:1rem;cursor:pointer;font-family:inherit}
+  .btn.ghost{background:transparent;color:var(--text);border-color:var(--line)}
   footer{text-align:center;color:var(--muted);font-size:.8rem;padding:24px}
-  [hidden]{display:none!important}
 </style>
 </head>
 <body>
 <header>
   <div class="brand">PROSPER MOVIES</div>
   <h1>Tazama. Nunua. Furahia.</h1>
-  <nav>
-    <a href="index.html" class="on">Movies Zetu</a>
-    <a href="movie.html">Tafuta Movie</a>
-  </nav>
 </header>
-
-<div class="bar">
-  <input id="q" type="search" placeholder="Tafuta kwenye movies zetu..." autocomplete="off">
-</div>
 
 <main>
   <div id="status">Inapakia movies...</div>
@@ -76,21 +50,15 @@
 </main>
 
 <dialog id="dlg">
-  <div class="dtop">
-    <h2 id="dTitle"></h2>
-    <button class="x" id="dClose" type="button" aria-label="Funga">&#10005;</button>
-  </div>
-  <div id="player" hidden></div>
   <img class="dposter" id="dPoster" alt="" hidden>
   <div class="dbody">
-    <div class="stats" id="dStats"></div>
-    <button class="btn" id="playBtn" type="button">&#9654; Play Movie</button>
-    <div class="note" id="noServer" hidden>Movie hii bado haina server ya kuangalia. Tafadhali rudi baadaye.</div>
-    <div class="servers" id="dServers" hidden style="margin-top:14px"></div>
-    <div class="dl" id="dDownload"></div>
-    <div class="tags" id="dTags"></div>
-    <p id="dPlot"></p>
-    <a class="btn ghost" id="dTrailer" target="_blank" rel="noopener">Tazama trailer</a>
+    <h2 id="dTitle"></h2>
+    <div class="meta" id="dMeta"></div>
+    <p id="dDesc"></p>
+    <div class="actions">
+      <a class="btn" id="dWatch" target="_blank" rel="noopener" hidden>Tazama</a>
+      <button class="btn ghost" id="dClose" type="button">Funga</button>
+    </div>
   </div>
 </dialog>
 
@@ -110,147 +78,77 @@
   };
 
   const db = getFirestore(initializeApp(firebaseConfig));
-  const $ = id => document.getElementById(id);
-  const dlg = $("dlg");
-  let all = [], current = null, servers = [];
+  const grid = document.getElementById("grid");
+  const statusEl = document.getElementById("status");
+  const dlg = document.getElementById("dlg");
+
+  document.getElementById("dClose").onclick = () => dlg.close();
+  dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
 
   function safeUrl(u){
-    try { const x = new URL(u); return x.protocol === "https:" ? x.href : ""; }
+    try { const x = new URL(u); return (x.protocol === "https:" || x.protocol === "http:") ? x.href : ""; }
     catch { return ""; }
   }
-  function getServers(m){
-    let arr = Array.isArray(m.servers) ? m.servers.filter(s => s && safeUrl(s.url)) : [];
-    if (!arr.length && m.link && safeUrl(m.link)) arr = [{ name: "Server 1", url: m.link }];
-    return arr;
+  function metaText(m){
+    const parts = [];
+    if (m.year) parts.push(m.year);
+    if (m.price) parts.push(m.price);
+    return parts.join("  |  ");
   }
 
-  /* ---- Player ---- */
-  function buildPlayer(url){
-    let m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/i);
-    if (m) return frame("https://www.youtube-nocookie.com/embed/" + m[1] + "?autoplay=1&rel=0");
-    m = url.match(/vimeo\.com\/(?:video\/)?(\d+)/i);
-    if (m) return frame("https://player.vimeo.com/video/" + m[1] + "?autoplay=1");
-    if (/\.(mp4|webm|ogg|mov)(\?|#|$)/i.test(url)) {
-      const v = document.createElement("video");
-      v.src = url; v.controls = true; v.autoplay = true; v.playsInline = true;
-      return v;
-    }
-    return frame(url);
-  }
-  function frame(src){
-    const f = document.createElement("iframe");
-    f.src = src;
-    f.allow = "autoplay; fullscreen; picture-in-picture; encrypted-media";
-    f.allowFullscreen = true;
-    return f;
-  }
-  function play(i){
-    const s = servers[i];
-    if (!s) return;
-    document.querySelectorAll(".srv").forEach((b, k) => b.classList.toggle("on", k === i));
-    $("player").replaceChildren(buildPlayer(safeUrl(s.url)));
-    $("player").hidden = false;
-    $("dPoster").hidden = true;
-    $("player").scrollIntoView({ block: "nearest" });
-  }
-  function stopPlayer(){
-    $("player").replaceChildren();
-    $("player").hidden = true;
-  }
-
-  /* ---- Maelezo ---- */
   function openMovie(m){
-    current = m;
-    servers = getServers(m);
-    stopPlayer();
-    $("dTitle").textContent = m.title || "";
-    if (m.poster) { $("dPoster").referrerPolicy = "no-referrer"; $("dPoster").src = m.poster; $("dPoster").hidden = false; }
-    else { $("dPoster").hidden = true; }
-
-    const st = $("dStats"); st.replaceChildren();
-    const add = (txt, cls) => { if (!txt) return; const s = document.createElement("span"); s.textContent = txt; if (cls) s.className = cls; st.appendChild(s); };
-    if (m.rating && m.rating !== "N/A") add("\u2605 " + m.rating + "/10", "rate");
-    add(m.year); add(m.runtime && m.runtime !== "N/A" ? m.runtime : ""); add(m.rated && m.rated !== "N/A" ? m.rated : ""); add(m.price);
-
-    $("playBtn").hidden = !servers.length;
-    $("noServer").hidden = !!servers.length;
-    const sv = $("dServers"); sv.replaceChildren(); sv.hidden = true;
-    servers.forEach((s, i) => {
-      const b = document.createElement("button");
-      b.className = "srv"; b.type = "button"; b.textContent = s.name || ("Server " + (i + 1));
-      b.onclick = () => play(i);
-      sv.appendChild(b);
-    });
-
-    const d = $("dDownload"); d.replaceChildren();
-    const b1 = document.createElement("b"); b1.textContent = "Download";
-    d.appendChild(b1);
-    const dl = safeUrl(m.download || "");
-    if (dl) {
-      const a = document.createElement("a"); a.href = dl; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Pakua movie";
-      d.appendChild(a);
-    } else {
-      d.appendChild(document.createTextNode("Hakuna download link kwa movie hii bado."));
-    }
-
-    const tg = $("dTags"); tg.replaceChildren();
-    (m.genre && m.genre !== "N/A" ? m.genre.split(",") : []).forEach(g => { const s = document.createElement("span"); s.textContent = g.trim(); tg.appendChild(s); });
-    $("dPlot").textContent = m.description || "";
-    $("dTrailer").href = "https://www.youtube.com/results?search_query=" + encodeURIComponent((m.title || "") + " " + (m.year || "") + " trailer");
+    document.getElementById("dTitle").textContent = m.title || "";
+    document.getElementById("dMeta").textContent = metaText(m);
+    document.getElementById("dDesc").textContent = m.description || "";
+    const p = document.getElementById("dPoster");
+    if (m.poster) { p.src = m.poster; p.hidden = false; } else { p.hidden = true; }
+    const w = document.getElementById("dWatch");
+    const link = safeUrl(m.link || "");
+    if (link) { w.href = link; w.hidden = false; } else { w.hidden = true; }
     dlg.showModal();
   }
 
-  $("playBtn").onclick = () => { $("dServers").hidden = false; $("playBtn").hidden = true; play(0); };
-  $("dClose").onclick = () => dlg.close();
-  dlg.addEventListener("close", stopPlayer);
-  dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
-
-  /* ---- Orodha ---- */
   function card(m){
     const b = document.createElement("button");
-    b.className = "card"; b.type = "button";
+    b.className = "card";
+    b.type = "button";
     if (m.poster) {
       const img = document.createElement("img");
       img.className = "poster"; img.loading = "lazy"; img.alt = m.title || "";
-      img.referrerPolicy = "no-referrer"; img.src = m.poster;
+      img.src = m.poster;
       b.appendChild(img);
     } else {
-      const d = document.createElement("div"); d.className = "noposter"; d.textContent = m.title || "";
+      const d = document.createElement("div");
+      d.className = "noposter"; d.textContent = m.title || "";
       b.appendChild(d);
     }
-    const info = document.createElement("div"); info.className = "info";
-    const t = document.createElement("b"); t.textContent = m.title || "";
-    const meta = document.createElement("div"); meta.className = "meta";
-    meta.textContent = [m.year, m.price].filter(Boolean).join("  |  ");
-    info.append(t, meta); b.appendChild(info);
+    const info = document.createElement("div");
+    info.className = "info";
+    const t = document.createElement("b");
+    t.textContent = m.title || "";
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.textContent = metaText(m);
+    info.append(t, meta);
+    b.appendChild(info);
     b.onclick = () => openMovie(m);
     return b;
   }
 
-  function render(){
-    const term = $("q").value.trim().toLowerCase();
-    const list = all.filter(m => !term || (m.title || "").toLowerCase().includes(term));
-    $("grid").replaceChildren(...list.map(card));
-    const st = $("status");
-    if (!all.length) {
-      st.innerHTML = 'Bado hakuna movie. Admin aongeze, au <a href="movie.html">tafuta movie hapa</a>.';
-      st.hidden = false;
-    } else if (!list.length) {
-      st.textContent = "Hakuna movie inayolingana na utafutaji wako.";
-      st.hidden = false;
-    } else {
-      st.hidden = true;
+  const q = query(collection(db, "movies"), orderBy("createdAt", "desc"));
+  onSnapshot(q, snap => {
+    grid.replaceChildren();
+    if (snap.empty) {
+      statusEl.textContent = "Bado hakuna movie. Nenda Admin uongeze.";
+      statusEl.hidden = false;
+      return;
     }
-  }
-  $("q").addEventListener("input", render);
-
-  onSnapshot(query(collection(db, "movies"), orderBy("createdAt", "desc")), snap => {
-    all = snap.docs.map(d => d.data());
-    render();
+    statusEl.hidden = true;
+    snap.forEach(doc => grid.appendChild(card(doc.data())));
   }, err => {
     console.error(err);
-    $("status").textContent = "Imeshindwa kupakia movies. Angalia mtandao au Firestore rules.";
-    $("status").hidden = false;
+    statusEl.textContent = "Imeshindwa kupakia movies. Angalia mtandao au Firestore rules.";
+    statusEl.hidden = false;
   });
 </script>
 </body>
