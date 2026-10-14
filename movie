@@ -26,27 +26,37 @@
   #status{text-align:center;color:var(--muted);padding:36px 10px}
   .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
   @media(min-width:700px){.grid{grid-template-columns:repeat(4,1fr);gap:18px}}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;text-align:left;color:inherit;font:inherit;padding:0}
+  .card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;text-align:left;color:inherit;font:inherit;padding:0}
   .card:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+  .badge{position:absolute;top:8px;left:8px;background:var(--red);color:#fff;font-size:.72rem;font-weight:700;border-radius:6px;padding:3px 8px}
   .poster{aspect-ratio:2/3;width:100%;object-fit:cover;display:block;background:#241b1b}
   .noposter{aspect-ratio:2/3;display:flex;align-items:center;justify-content:center;background:#241b1b;color:var(--muted);font-size:.85rem;padding:10px;text-align:center}
   .info{padding:10px 12px 12px}
   .info b{display:block;font-size:.95rem;line-height:1.25}
   .meta{margin-top:4px;font-size:.8rem;color:var(--muted)}
   .more{display:block;margin:26px auto 0;background:transparent;color:var(--text);border:1px solid var(--red);border-radius:8px;padding:12px 26px;font:inherit;font-weight:700;cursor:pointer}
-  dialog{border:none;border-radius:12px;background:var(--panel);color:var(--text);width:min(94vw,520px);max-height:92vh;padding:0;margin:auto;overflow:auto}
-  dialog::backdrop{background:rgba(0,0,0,.8)}
-  .dposter{width:100%;max-height:50vh;object-fit:cover;display:block}
-  .dbody{padding:18px}
-  .dbody h2{font-size:1.45rem;line-height:1.2}
-  .rate{display:inline-block;margin-top:10px;background:var(--red);color:#fff;font-weight:700;border-radius:6px;padding:4px 10px;font-size:.9rem}
-  .tags{margin-top:10px;color:var(--muted);font-size:.9rem}
-  .dbody p{margin-top:12px;line-height:1.55;color:#d8cfcf}
+  dialog{border:none;border-radius:12px;background:var(--panel);color:var(--text);width:min(94vw,560px);max-height:94vh;padding:0;margin:auto;overflow:auto}
+  dialog::backdrop{background:rgba(0,0,0,.82)}
+  .dtop{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 16px}
+  .dtop h2{font-size:1.25rem;line-height:1.2}
+  .x{flex:none;width:40px;height:40px;border-radius:50%;border:none;background:#0c0a0a;color:#fff;font-size:1.1rem;cursor:pointer}
+  #player{width:100%;aspect-ratio:16/9;background:#000}
+  #player iframe,#player video{width:100%;height:100%;border:0;display:block;background:#000}
+  .dposter{width:100%;max-height:46vh;object-fit:cover;display:block}
+  .dbody{padding:16px}
+  .stats{display:flex;flex-wrap:wrap;gap:8px;align-items:center;color:var(--muted);font-size:.92rem}
+  .rate{background:var(--red);color:#fff;font-weight:700;border-radius:6px;padding:3px 9px}
+  .servers{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .srv{background:#2a2020;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px 14px;font:inherit;font-size:.92rem;cursor:pointer}
+  .srv.on{background:var(--red);border-color:var(--red);font-weight:700}
+  .btn{display:block;width:100%;text-align:center;padding:14px;border-radius:8px;font-weight:700;border:1px solid var(--red);background:var(--red);color:#fff;text-decoration:none;font-size:1.05rem;cursor:pointer;font-family:inherit;margin-top:14px}
+  .btn.ghost{background:transparent;color:var(--text);border-color:var(--line);font-size:.95rem}
+  .note{margin-top:14px;padding:12px;border:1px dashed var(--line);border-radius:8px;color:var(--muted);font-size:.92rem;line-height:1.5}
+  .tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .tags span{background:#2a2020;border-radius:6px;padding:5px 10px;font-size:.85rem;color:#e8dede}
+  #dPlot{margin-top:14px;line-height:1.6;color:#d8cfcf}
   dl{margin-top:14px;font-size:.92rem;line-height:1.5}
   dt{color:var(--muted);margin-top:8px;font-size:.82rem}
-  .actions{display:flex;gap:10px;margin-top:18px}
-  .btn{flex:1;text-align:center;padding:13px;border-radius:8px;font-weight:700;border:1px solid var(--red);background:var(--red);color:#fff;text-decoration:none;font-size:1rem;cursor:pointer;font-family:inherit}
-  .btn.ghost{background:transparent;color:var(--text);border-color:var(--line)}
   footer{text-align:center;color:var(--muted);font-size:.8rem;padding:24px}
   [hidden]{display:none!important}
 </style>
@@ -76,50 +86,91 @@
 </main>
 
 <dialog id="dlg">
+  <div class="dtop">
+    <h2 id="dTitle"></h2>
+    <button class="x" id="dClose" type="button" aria-label="Funga">&#10005;</button>
+  </div>
+  <div id="player" hidden></div>
   <img class="dposter" id="dPoster" alt="" hidden>
   <div class="dbody">
-    <h2 id="dTitle"></h2>
-    <span class="rate" id="dRate" hidden></span>
+    <div class="stats" id="dStats"></div>
+    <button class="btn" id="playBtn" type="button" hidden>&#9654; Play Movie</button>
+    <div class="servers" id="dServers" hidden></div>
+    <div class="note" id="noServer" hidden>Movie hii bado haipo kwenye library yetu ya kuangalia. Unaweza kuangalia trailer.</div>
     <div class="tags" id="dTags"></div>
     <p id="dPlot"></p>
     <dl id="dList"></dl>
-    <div class="actions">
-      <a class="btn" id="dTrailer" target="_blank" rel="noopener">Tazama trailer</a>
-      <button class="btn ghost" id="dClose" type="button">Funga</button>
-    </div>
+    <a class="btn ghost" id="dTrailer" target="_blank" rel="noopener">Tazama trailer</a>
   </div>
 </dialog>
 
 <footer>&copy; 2026 Prosper Movies</footer>
 
-<script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAMt3bDm-DtkwAHizrs6f2EB8rsXAu9FKs",
+    authDomain: "prosper-movie-36bfb.firebaseapp.com",
+    projectId: "prosper-movie-36bfb",
+    storageBucket: "prosper-movie-36bfb.firebasestorage.app",
+    messagingSenderId: "869131612157",
+    appId: "1:869131612157:web:bc17324ea27647d7b3b394"
+  };
   const API_KEY = "d0349ee";
   const API = "https://www.omdbapi.com/";
   const CHIPS = ["Action", "Love", "War", "Comedy", "Horror", "Batman", "Avengers", "Fast", "Africa"];
 
+  const db = getFirestore(initializeApp(firebaseConfig));
   const $ = id => document.getElementById(id);
+  const dlg = $("dlg");
   let term = "Action", page = 1, total = 0, shown = 0, busy = false;
+  let library = {};          // imdbID -> movie yetu
+  let servers = [];
 
+  /* ---- Library yetu (Firebase) ---- */
+  function safeUrl(u){
+    try { const x = new URL(u); return x.protocol === "https:" ? x.href : ""; }
+    catch { return ""; }
+  }
+  function getServers(m){
+    if (!m) return [];
+    let arr = Array.isArray(m.servers) ? m.servers.filter(s => s && safeUrl(s.url)) : [];
+    if (!arr.length && m.link && safeUrl(m.link)) arr = [{ name: "Server 1", url: m.link }];
+    return arr;
+  }
+  onSnapshot(collection(db, "movies"), snap => {
+    library = {};
+    snap.forEach(d => { const m = d.data(); if (m.imdbID && getServers(m).length) library[m.imdbID] = m; });
+    document.querySelectorAll(".card[data-id]").forEach(c => {
+      const b = c.querySelector(".badge");
+      if (library[c.dataset.id] && !b) c.insertBefore(Object.assign(document.createElement("span"), { className: "badge", textContent: "Inapatikana" }), c.firstChild);
+      if (!library[c.dataset.id] && b) b.remove();
+    });
+  }, err => console.error(err));
+
+  /* ---- OMDb ---- */
   async function api(params){
-    const url = API + "?apikey=" + API_KEY + "&" + new URLSearchParams(params);
-    const r = await fetch(url);
+    const r = await fetch(API + "?apikey=" + API_KEY + "&" + new URLSearchParams(params));
     return r.json();
   }
-
   function clean(v){ return v && v !== "N/A" ? v : ""; }
 
   function card(m){
     const b = document.createElement("button");
-    b.className = "card"; b.type = "button";
+    b.className = "card"; b.type = "button"; b.dataset.id = m.imdbID;
+    if (library[m.imdbID]) {
+      const bd = document.createElement("span"); bd.className = "badge"; bd.textContent = "Inapatikana";
+      b.appendChild(bd);
+    }
     if (clean(m.Poster)) {
       const img = document.createElement("img");
       img.className = "poster"; img.loading = "lazy"; img.alt = m.Title;
-      img.referrerPolicy = "no-referrer";
-      img.src = m.Poster;
+      img.referrerPolicy = "no-referrer"; img.src = m.Poster;
       b.appendChild(img);
     } else {
-      const d = document.createElement("div");
-      d.className = "noposter"; d.textContent = m.Title;
+      const d = document.createElement("div"); d.className = "noposter"; d.textContent = m.Title;
       b.appendChild(d);
     }
     const info = document.createElement("div"); info.className = "info";
@@ -167,7 +218,6 @@
     document.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.textContent === t));
     load(true);
   }
-
   $("go").onclick = () => search($("q").value);
   $("q").addEventListener("keydown", e => { if (e.key === "Enter") search($("q").value); });
   $("more").onclick = () => { page++; load(false); };
@@ -179,32 +229,90 @@
     $("chips").appendChild(b);
   });
 
-  /* ---- Maelezo ya movie ---- */
-  const dlg = $("dlg");
+  /* ---- Player (video zetu tu) ---- */
+  function frame(src){
+    const f = document.createElement("iframe");
+    f.src = src;
+    f.allow = "autoplay; fullscreen; picture-in-picture; encrypted-media";
+    f.allowFullscreen = true;
+    return f;
+  }
+  function buildPlayer(url){
+    let m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/i);
+    if (m) return frame("https://www.youtube-nocookie.com/embed/" + m[1] + "?autoplay=1&rel=0");
+    m = url.match(/vimeo\.com\/(?:video\/)?(\d+)/i);
+    if (m) return frame("https://player.vimeo.com/video/" + m[1] + "?autoplay=1");
+    if (/\.(mp4|webm|ogg|mov)(\?|#|$)/i.test(url)) {
+      const v = document.createElement("video");
+      v.src = url; v.controls = true; v.autoplay = true; v.playsInline = true;
+      return v;
+    }
+    return frame(url);
+  }
+  function play(i){
+    const s = servers[i];
+    if (!s) return;
+    document.querySelectorAll(".srv").forEach((b, k) => b.classList.toggle("on", k === i));
+    $("player").replaceChildren(buildPlayer(safeUrl(s.url)));
+    $("player").hidden = false;
+    $("dPoster").hidden = true;
+    $("player").scrollIntoView({ block: "nearest" });
+  }
+  function stopPlayer(){
+    $("player").replaceChildren();
+    $("player").hidden = true;
+  }
+
+  /* ---- Maelezo ---- */
   $("dClose").onclick = () => dlg.close();
+  dlg.addEventListener("close", stopPlayer);
   dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+  $("playBtn").onclick = () => { $("dServers").hidden = false; $("playBtn").hidden = true; play(0); };
 
   async function openMovie(id){
+    stopPlayer();
     $("dTitle").textContent = "Inapakia...";
-    $("dPoster").hidden = true; $("dRate").hidden = true;
-    $("dTags").textContent = ""; $("dPlot").textContent = ""; $("dList").replaceChildren();
-    $("dTrailer").hidden = true;
+    $("dPoster").hidden = true; $("dStats").replaceChildren();
+    $("dTags").replaceChildren(); $("dPlot").textContent = ""; $("dList").replaceChildren();
+    $("playBtn").hidden = true; $("dServers").hidden = true; $("dServers").replaceChildren();
+    $("noServer").hidden = true; $("dTrailer").hidden = true;
+    servers = [];
     dlg.showModal();
     try {
       const m = await api({ i: id, plot: "full" });
       if (m.Response !== "True") { $("dTitle").textContent = "Imeshindwa kupakia maelezo."; return; }
       $("dTitle").textContent = m.Title + " (" + m.Year + ")";
       if (clean(m.Poster)) { $("dPoster").referrerPolicy = "no-referrer"; $("dPoster").src = m.Poster; $("dPoster").hidden = false; }
-      if (clean(m.imdbRating)) { $("dRate").textContent = "IMDb " + m.imdbRating + "/10"; $("dRate").hidden = false; }
-      $("dTags").textContent = [clean(m.Rated), clean(m.Runtime), clean(m.Genre)].filter(Boolean).join("  |  ");
+
+      const st = $("dStats");
+      const add = (txt, cls) => { if (!txt) return; const s = document.createElement("span"); s.textContent = txt; if (cls) s.className = cls; st.appendChild(s); };
+      if (clean(m.imdbRating)) add("\u2605 " + m.imdbRating + "/10", "rate");
+      add(clean(m.Runtime)); add(clean(m.Rated));
+
+      (clean(m.Genre) ? m.Genre.split(",") : []).forEach(g => { const s = document.createElement("span"); s.textContent = g.trim(); $("dTags").appendChild(s); });
       $("dPlot").textContent = clean(m.Plot) || "Hakuna maelezo.";
-      [["Muongozaji", m.Director], ["Waigizaji", m.Actors], ["Lugha", m.Language], ["Nchi", m.Country], ["Tuzo", m.Awards]]
-        .forEach(([k, v]) => {
-          if (!clean(v)) return;
-          const dt = document.createElement("dt"); dt.textContent = k;
-          const dd = document.createElement("dd"); dd.textContent = v;
-          $("dList").append(dt, dd);
+      [["Muongozaji", m.Director], ["Waigizaji", m.Actors], ["Lugha", m.Language], ["Nchi", m.Country], ["Tuzo", m.Awards]].forEach(([k, v]) => {
+        if (!clean(v)) return;
+        const dt = document.createElement("dt"); dt.textContent = k;
+        const dd = document.createElement("dd"); dd.textContent = v;
+        $("dList").append(dt, dd);
+      });
+
+      /* Je, movie hii ipo kwenye library yetu? */
+      const mine = library[m.imdbID];
+      servers = getServers(mine);
+      if (servers.length) {
+        $("playBtn").hidden = false;
+        servers.forEach((s, i) => {
+          const b = document.createElement("button");
+          b.className = "srv"; b.type = "button"; b.textContent = s.name || ("Server " + (i + 1));
+          b.onclick = () => play(i);
+          $("dServers").appendChild(b);
         });
+      } else {
+        $("noServer").hidden = false;
+      }
+
       $("dTrailer").href = "https://www.youtube.com/results?search_query=" + encodeURIComponent(m.Title + " " + m.Year + " trailer");
       $("dTrailer").hidden = false;
     } catch (e) {
