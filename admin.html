@@ -1,42 +1,56 @@
 <!DOCTYPE html>
 <html lang="sw">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex">
-<title>Admin - Prosper Movies</title>
-<style>
-  :root{--bg:#0c0a0a;--panel:#181313;--line:#2c2222;--red:#e5262d;--text:#f4eeee;--muted:#a39898;--ok:#3ecf8e}
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:20px 16px 60px}
-  .wrap{max-width:520px;margin:0 auto}
-  h1{font-size:1.5rem;margin-bottom:4px}
-  h2{font-size:1.1rem;margin:28px 0 12px}
-  .sub{color:var(--muted);margin-bottom:20px;font-size:.95rem}
-  .box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
-  label{display:block;font-size:.9rem;margin:14px 0 6px}
-  input,textarea{width:100%;background:#0f0c0c;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:12px;font:inherit;font-size:1rem}
-  input:focus,textarea:focus{outline:2px solid var(--red);border-color:transparent}
-  textarea{min-height:90px;resize:vertical}
-  button{font:inherit;cursor:pointer}
-  .btn{width:100%;margin-top:18px;padding:14px;border-radius:8px;border:none;background:var(--red);color:#fff;font-weight:700;font-size:1rem}
-  .btn:disabled{opacity:.6}
-  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text);margin-top:0;width:auto;padding:8px 14px;font-weight:600}
-  .btn.danger{background:transparent;border:1px solid #5a2a2a;color:#ff8a8a;margin-top:10px}
-  .msg{margin-top:14px;font-size:.95rem;min-height:1.2em}
-  .msg.err{color:#ff6b6b}.msg.ok{color:var(--ok)}
-  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-  .preview{width:110px;margin-top:10px;border-radius:8px;display:block}
-  .row{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
-  .row:last-child{border-bottom:none}
-  .row img,.row .ph{width:44px;height:64px;object-fit:cover;border-radius:6px;background:#241b1b;flex:none}
-  .row .t{flex:1;min-width:0}
-  .row .t b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .row .t span{color:var(--muted);font-size:.85rem}
-  .del{background:transparent;border:1px solid #5a2a2a;color:#ff8a8a;border-radius:8px;padding:8px 12px;font-weight:600}
-  small{color:var(--muted);display:block;margin-top:6px}
-  [hidden]{display:none!important}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090b12">
+  <meta name="robots" content="noindex">
+  <title>Admin - Prosper Movies</title>
+  <style>
+    :root {
+      --bg: #090b12;
+      --panel: #121622;
+      --panel-light: #1b2232;
+      --text: #f5f7fb;
+      --muted: #aab2c5;
+      --accent: #7c5cff;
+      --border: #293044;
+      --red: #e5262d;
+      --ok: #3ecf8e;
+      --danger: #ff6b6b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: Arial, sans-serif; padding: 20px 16px 60px; }
+   .wrap { max-width: 600px; margin: 0 auto; }
+    h1 { font-size: 1.6rem; margin-bottom: 4px; }
+    h2 { font-size: 1.2rem; margin: 32px 0 14px; }
+   .sub { color: var(--muted); margin-bottom: 20px; font-size:.95rem; }
+   .box { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 20px; }
+    label { display: block; font-size:.9rem; margin: 14px 0 6px; color: var(--muted); }
+    input, textarea { width: 100%; background: var(--panel-light); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 12px; font: inherit; font-size: 1rem; }
+    input:focus, textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
+    textarea { min-height: 90px; resize: vertical; }
+    button { font: inherit; cursor: pointer; border: 0; border-radius: 9px; padding: 12px 16px; font-weight: bold; }
+   .btn { width: 100%; margin-top: 18px; background: var(--accent); color: #fff; }
+   .btn:disabled { opacity:.6; cursor: wait; }
+   .btn.ghost { background: transparent; border: 1px solid var(--border); color: var(--text); width: auto; }
+   .btn.danger { background: transparent; border: 1px solid #5a2a2a; color: var(--danger); width: auto; }
+   .msg { margin-top: 14px; font-size:.95rem; min-height: 1.2em; }
+   .msg.err { color: var(--danger); }
+   .msg.ok { color: var(--ok); }
+   .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+   .preview { width: 120px; margin-top: 10px; border-radius: 8px; display: block; }
+   .row { display: flex; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+   .row:last-child { border-bottom: none; }
+   .row img,.row.ph { width: 50px; height: 75px; object-fit: cover; border-radius: 6px; background: var(--panel-light); flex: none; }
+   .row.t { flex: 1; min-width: 0; }
+   .row.t b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+   .row.t span { color: var(--muted); font-size:.85rem; }
+   .del { background: transparent; border: 1px solid #5a2a2a; color: var(--danger); border-radius: 8px; padding: 8px 12px; }
+    small { color: var(--muted); display: block; margin-top: 6px; font-size:.8rem; }
+    [hidden] { display: none!important; }
+   .loader { text-align: center; padding: 20px; color: var(--muted); }
+  </style>
 </head>
 <body>
 <div class="wrap">
@@ -44,11 +58,11 @@
   <!-- LOGIN -->
   <section id="loginView" hidden>
     <h1>Admin - Prosper Movies</h1>
-    <p class="sub">Ingia ili kuongeza movies.</p>
+    <p class="sub">Ingia na account ya msimamizi.</p>
     <div class="box">
-      <label for="email">Email</label>
+      <label for="email">Barua pepe</label>
       <input id="email" type="email" autocomplete="username" inputmode="email">
-      <label for="pass">Password</label>
+      <label for="pass">Nenosiri</label>
       <input id="pass" type="password" autocomplete="current-password">
       <button class="btn" id="loginBtn" type="button">Ingia</button>
       <div class="msg" id="loginMsg"></div>
@@ -59,13 +73,14 @@
   <section id="adminView" hidden>
     <div class="top">
       <div>
-        <h1>Admin - Prosper Movies</h1>
-        <p class="sub">Ongeza movie mpya, itaonekana mara moja kwenye site.</p>
+        <h1>Dashboard ya Msimamizi</h1>
+        <p class="sub">Ongeza, hariri, na futa movies za Prosper Movies.</p>
       </div>
       <button class="btn ghost" id="logoutBtn" type="button">Toka</button>
     </div>
 
     <div class="box">
+      <h2>Ongeza Movie Mpya</h2>
       <label for="title">Jina la movie *</label>
       <input id="title" type="text">
 
@@ -80,29 +95,31 @@
 
       <label for="posterFile">Picha ya movie (poster)</label>
       <input id="posterFile" type="file" accept="image/*">
-      <small>Chagua picha kutoka kwenye simu yako. Inapunguzwa ukubwa kiotomatiki.</small>
+      <small>Picha itapakiwa Cloudinary. Subiri mpaka ionekane hapa chini.</small>
       <img id="preview" class="preview" alt="" hidden>
 
       <label for="link">Link ya kutazama (hiari)</label>
       <input id="link" type="url" inputmode="url" placeholder="https://...">
 
-      <button class="btn" id="saveBtn" type="button">Hifadhi movie</button>
+      <button class="btn" id="saveBtn" type="button">Hifadhi Movie</button>
       <div class="msg" id="saveMsg"></div>
     </div>
 
-    <h2>Intro ya App</h2>
     <div class="box">
+      <h2>Intro ya App</h2>
       <label for="introFile">Video au picha ya intro</label>
       <input id="introFile" type="file" accept="video/*,image/*">
-      <small>Video fupi (sekunde 5-10) ni bora. Inaonekana mwanzoni mwa app.</small>
+      <small>Video fupi sekunde 5-10 ni bora. Inaonekana mwanzoni mwa app.</small>
       <div id="introCur" class="sub" style="margin-top:10px">Inapakia...</div>
-      <button class="btn" id="introSave" type="button">Pakia intro</button>
-      <button class="btn danger" id="introDel" type="button">Futa intro</button>
+      <button class="btn" id="introSave" type="button">Pakia Intro</button>
+      <button class="btn danger" id="introDel" type="button">Futa Intro</button>
       <div class="msg" id="introMsg"></div>
     </div>
 
-    <h2>Movies zilizopo</h2>
-    <div class="box" id="list"><div class="sub">Inapakia...</div></div>
+    <div class="box">
+      <h2>Movies Zilizopo</h2>
+      <div id="list"><div class="loader">Inapakia orodha...</div></div>
+    </div>
   </section>
 </div>
 
@@ -111,15 +128,17 @@
   import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { getFirestore, collection, addDoc, deleteDoc, doc, setDoc, getDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+  // Badilisha hizi na zako kutoka Firebase Console
   const firebaseConfig = {
-    apiKey: "AIzaSyAMt3bDm-DtkwAHizrs6f2EB8rsXAu9FKs",
+    apiKey: "WEKA_FIREBASE_WEB_API_KEY",
     authDomain: "prosper-movie-36bfb.firebaseapp.com",
     projectId: "prosper-movie-36bfb",
-    storageBucket: "prosper-movie-36bfb.firebasestorage.app",
-    messagingSenderId: "869131612157",
-    appId: "1:869131612157:web:bc17324ea27647d7b3b394"
+    storageBucket: "prosper-movie-36bfb.appspot.com",
+    messagingSenderId: "WEKA_MESSAGING_SENDER_ID",
+    appId: "WEKA_FIREBASE_APP_ID"
   };
 
+  // Cloudinary config yako
   const CLOUD = "mdlpnlqf";
   const PRESET = "prosper_intro";
 
@@ -129,10 +148,13 @@
   const $ = id => document.getElementById(id);
   const introRef = doc(db, "settings", "intro");
 
-  let posterData = "";
+  let posterUrl = ""; // Sasa tunahifadhi URL, sio Base64
   let unsub = null;
 
-  function say(el, text, type){ el.textContent = text; el.className = "msg " + (type || ""); }
+  function say(el, text, type) { 
+    el.textContent = text; 
+    el.className = "msg " + (type || ""); 
+  }
 
   /* ---- Login ---- */
   $("loginBtn").onclick = async () => {
@@ -141,37 +163,67 @@
       await signInWithEmailAndPassword(auth, $("email").value.trim(), $("pass").value);
       say($("loginMsg"), "");
     } catch (e) {
-      say($("loginMsg"), "Email au password si sahihi.", "err");
+      say($("loginMsg"), "Barua pepe au nenosiri si sahihi.", "err");
     }
   };
   $("pass").addEventListener("keydown", e => { if (e.key === "Enter") $("loginBtn").click(); });
   $("logoutBtn").onclick = () => signOut(auth);
 
-  onAuthStateChanged(auth, user => {
-    $("loginView").hidden = !!user;
-    $("adminView").hidden = !user;
+  /* ---- UKAGUZI WA ADMIN ---- */
+  onAuthStateChanged(auth, async user => {
     if (unsub) { unsub(); unsub = null; }
-    if (user) { startList(); showIntro(); }
+    
+    if (!user) {
+      $("loginView").hidden = false;
+      $("adminView").hidden = true;
+      return;
+    }
+
+    try {
+      const token = await user.getIdTokenResult(true);
+      if (token.claims.admin!== true) {
+        await signOut(auth);
+        $("loginView").hidden = false;
+        say($("loginMsg"), "Akaunti hii haina ruhusa za msimamizi.", "err");
+        return;
+      }
+      
+      $("loginView").hidden = true;
+      $("adminView").hidden = false;
+      startList();
+      showIntro();
+      
+    } catch (error) {
+      console.error("Admin authorization error:", error);
+      await signOut(auth);
+      $("loginView").hidden = false;
+      say($("loginMsg"), "Imeshindwa kuthibitisha ruhusa za admin.", "err");
+    }
   });
 
-  /* ---- Poster: resize on the phone, keep it small ---- */
+  /* ---- Poster: Pakia Cloudinary ---- */
   $("posterFile").onchange = async e => {
     const f = e.target.files[0];
-    posterData = "";
+    posterUrl = "";
     $("preview").hidden = true;
     if (!f) return;
+    
+    say($("saveMsg"), "Inapakia poster...");
     try {
-      const bmp = await createImageBitmap(f);
-      const w = 400;
-      const h = Math.round(bmp.height * (w / bmp.width));
-      const c = document.createElement("canvas");
-      c.width = w; c.height = h;
-      c.getContext("2d").drawImage(bmp, 0, 0, w, h);
-      posterData = c.toDataURL("image/jpeg", 0.8);
-      $("preview").src = posterData;
+      const fd = new FormData();
+      fd.append("file", f);
+      fd.append("upload_preset", PRESET);
+      const r = await fetch("https://api.cloudinary.com/v1_1/" + CLOUD + "/image/upload", { method: "POST", body: fd });
+      const j = await r.json();
+      if (!j.secure_url) throw new Error((j.error && j.error.message) || "upload failed");
+      
+      posterUrl = j.secure_url;
+      $("preview").src = posterUrl;
       $("preview").hidden = false;
+      say($("saveMsg"), "Poster imepakiwa. Sasa unaweza kuhifadhi movie.", "ok");
     } catch (err) {
-      say($("saveMsg"), "Picha hii haikusomeka. Jaribu nyingine.", "err");
+      console.error(err);
+      say($("saveMsg"), "Imeshindwa kupakia poster: " + err.message, "err");
     }
   };
 
@@ -179,8 +231,10 @@
   $("saveBtn").onclick = async () => {
     const title = $("title").value.trim();
     if (!title) return say($("saveMsg"), "Weka jina la movie.", "err");
+    if (!posterUrl) return say($("saveMsg"), "Chagua na subiri poster ipakiwe kwanza.", "err");
+    
     const link = $("link").value.trim();
-    if (link && !/^https?:\/\//i.test(link)) return say($("saveMsg"), "Link lazima ianze na https://", "err");
+    if (link &&!/^https?:\/\//i.test(link)) return say($("saveMsg"), "Link lazima ianze na https://", "err");
 
     $("saveBtn").disabled = true;
     say($("saveMsg"), "Inahifadhi...");
@@ -190,30 +244,28 @@
         year: $("year").value.trim(),
         price: $("price").value.trim(),
         description: $("desc").value.trim(),
-        poster: posterData,
+        poster: posterUrl, // Sasa ni URL
         link,
         createdAt: serverTimestamp()
       });
-      ["title","year","price","desc","link"].forEach(id => $(id).value = "");
+      ["title", "year", "price", "desc", "link"].forEach(id => $(id).value = "");
       $("posterFile").value = "";
-      posterData = "";
+      posterUrl = "";
       $("preview").hidden = true;
       say($("saveMsg"), "Imehifadhiwa. Movie ipo live sasa.", "ok");
     } catch (e) {
       console.error(e);
-      say($("saveMsg"), "Imeshindwa kuhifadhi. Hakikisha umeingia na email ya admin, na angalia Firestore rules.", "err");
+      say($("saveMsg"), "Imeshindwa kuhifadhi. Hakikisha rules za Firestore ni sahihi.", "err");
     }
     $("saveBtn").disabled = false;
   };
 
   /* ---- Intro (Cloudinary) ---- */
-  async function showIntro(){
+  async function showIntro() {
     try {
       const s = await getDoc(introRef);
-      const d = s.exists() ? s.data() : null;
-      $("introCur").textContent = d && d.url
-        ? "Intro ipo sasa (" + (d.type === "video" ? "video" : "picha") + ")."
-        : "Hakuna intro sasa.";
+      const d = s.exists()? s.data() : null;
+      $("introCur").textContent = d && d.url? "Intro ipo sasa (" + (d.type === "video"? "video" : "picha") + ")." : "Hakuna intro sasa.";
     } catch (e) {
       $("introCur").textContent = "Imeshindwa kusoma intro.";
     }
@@ -233,7 +285,7 @@
       if (!j.secure_url) throw new Error((j.error && j.error.message) || "upload failed");
       await setDoc(introRef, {
         url: j.secure_url,
-        type: j.resource_type === "video" ? "video" : "image",
+        type: j.resource_type === "video"? "video" : "image",
         updatedAt: serverTimestamp()
       });
       $("introFile").value = "";
@@ -258,7 +310,7 @@
   };
 
   /* ---- List + delete ---- */
-  function startList(){
+  function startList() {
     const q = query(collection(db, "movies"), orderBy("createdAt", "desc"));
     unsub = onSnapshot(q, snap => {
       const box = $("list");
@@ -284,7 +336,7 @@
         t.className = "t";
         const b = document.createElement("b"); b.textContent = m.title || "";
         const sp = document.createElement("span");
-        sp.textContent = [m.year, m.price].filter(Boolean).join("  |  ");
+        sp.textContent = [m.year, m.price].filter(Boolean).join(" | ");
         t.append(b, sp);
         const del = document.createElement("button");
         del.className = "del"; del.type = "button"; del.textContent = "Futa";
