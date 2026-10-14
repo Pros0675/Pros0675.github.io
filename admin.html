@@ -21,31 +21,19 @@
   button{font:inherit;cursor:pointer}
   .btn{width:100%;margin-top:18px;padding:14px;border-radius:8px;border:none;background:var(--red);color:#fff;font-weight:700;font-size:1rem}
   .btn:disabled{opacity:.6}
-  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text);margin-top:10px;font-weight:600}
-  .btn.small{width:auto;margin:0;padding:8px 14px;font-weight:600}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text);margin-top:0;width:auto;padding:8px 14px;font-weight:600}
   .msg{margin-top:14px;font-size:.95rem;min-height:1.2em}
   .msg.err{color:#ff6b6b}.msg.ok{color:var(--ok)}
   .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
   .preview{width:110px;margin-top:10px;border-radius:8px;display:block}
-  .sec{margin:22px 0 4px;padding-top:16px;border-top:1px solid var(--line);font-weight:700;color:var(--red);font-size:.9rem;letter-spacing:.05em}
-  .omrow{display:flex;gap:8px}
-  .omrow input{flex:1;min-width:0}
-  .omrow button{flex:none;background:var(--red);color:#fff;border:none;border-radius:8px;padding:0 16px;font-weight:700}
-  .pick{display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:#0f0c0c;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:8px;margin-top:8px}
-  .pick img,.pick .ph{width:34px;height:50px;object-fit:cover;border-radius:4px;background:#241b1b;flex:none}
-  .pick span{font-size:.92rem}
-  .pick small{display:block;color:var(--muted)}
   .row{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
   .row:last-child{border-bottom:none}
   .row img,.row .ph{width:44px;height:64px;object-fit:cover;border-radius:6px;background:#241b1b;flex:none}
   .row .t{flex:1;min-width:0}
   .row .t b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .row .t span{color:var(--muted);font-size:.85rem}
-  .acts{display:flex;flex-direction:column;gap:6px}
-  .edit{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:7px 12px;font-weight:600}
-  .del{background:transparent;border:1px solid #5a2a2a;color:#ff8a8a;border-radius:8px;padding:7px 12px;font-weight:600}
-  small.h{color:var(--muted);display:block;margin-top:6px}
-  .banner{background:#2a1a1a;border:1px solid var(--red);border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:.92rem}
+  .del{background:transparent;border:1px solid #5a2a2a;color:#ff8a8a;border-radius:8px;padding:8px 12px;font-weight:600}
+  small{color:var(--muted);display:block;margin-top:6px}
   [hidden]{display:none!important}
 </style>
 </head>
@@ -71,22 +59,12 @@
     <div class="top">
       <div>
         <h1>Admin - Prosper Movies</h1>
-        <p class="sub">Movie ukihifadhi inaonekana mara moja kwenye site.</p>
+        <p class="sub">Ongeza movie mpya, itaonekana mara moja kwenye site.</p>
       </div>
-      <button class="btn small ghost" id="logoutBtn" type="button" style="margin-top:0">Toka</button>
+      <button class="btn ghost" id="logoutBtn" type="button">Toka</button>
     </div>
 
     <div class="box">
-      <div class="banner" id="editBanner" hidden>Unahariri movie. Bonyeza "Hifadhi mabadiliko" ukimaliza.</div>
-
-      <label for="omQ">Tafuta kwenye OMDb (inajaza fomu yenyewe)</label>
-      <div class="omrow">
-        <input id="omQ" type="search" placeholder="Mfano: Inception">
-        <button id="omBtn" type="button">Tafuta</button>
-      </div>
-      <div id="omRes"></div>
-
-      <div class="sec">MAELEZO YA MOVIE</div>
       <label for="title">Jina la movie *</label>
       <input id="title" type="text">
 
@@ -101,19 +79,13 @@
 
       <label for="posterFile">Picha ya movie (poster)</label>
       <input id="posterFile" type="file" accept="image/*">
-      <small class="h">Inajazwa na OMDb, au chagua picha kutoka kwenye simu yako.</small>
+      <small>Chagua picha kutoka kwenye simu yako. Inapunguzwa ukubwa kiotomatiki.</small>
       <img id="preview" class="preview" alt="" hidden>
 
-      <div class="sec">SERVERS ZA KUANGALIA</div>
-      <small class="h" style="margin-top:0">Weka links za video ulizo na haki nazo (.mp4, YouTube, Vimeo au embed). Lazima zianze na https://</small>
-      <div id="servers"></div>
-
-      <div class="sec">DOWNLOAD</div>
-      <label for="download">Link ya download (hiari)</label>
-      <input id="download" type="url" inputmode="url" placeholder="https://...">
+      <label for="link">Link ya kutazama (hiari)</label>
+      <input id="link" type="url" inputmode="url" placeholder="https://...">
 
       <button class="btn" id="saveBtn" type="button">Hifadhi movie</button>
-      <button class="btn ghost" id="cancelBtn" type="button" hidden>Ghairi kuhariri</button>
       <div class="msg" id="saveMsg"></div>
     </div>
 
@@ -125,7 +97,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, deleteDoc, doc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAMt3bDm-DtkwAHizrs6f2EB8rsXAu9FKs",
@@ -135,28 +107,16 @@
     messagingSenderId: "869131612157",
     appId: "1:869131612157:web:bc17324ea27647d7b3b394"
   };
-  const OMDB_KEY = "d0349ee";
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
   const $ = id => document.getElementById(id);
-  const N = 5;
 
-  let posterData = "", extra = {}, editId = null, unsub = null, cache = {};
+  let posterData = "";
+  let unsub = null;
 
   function say(el, text, type){ el.textContent = text; el.className = "msg " + (type || ""); }
-  function clean(v){ return v && v !== "N/A" ? v : ""; }
-
-  /* ---- Server inputs ---- */
-  for (let i = 1; i <= N; i++) {
-    const l = document.createElement("label");
-    l.htmlFor = "srv" + i;
-    l.textContent = "Server " + i + (i === 1 ? " (kuu)" : " (hiari)");
-    const inp = document.createElement("input");
-    inp.type = "url"; inp.id = "srv" + i; inp.inputMode = "url"; inp.placeholder = "https://...";
-    $("servers").append(l, inp);
-  }
 
   /* ---- Login ---- */
   $("loginBtn").onclick = async () => {
@@ -178,131 +138,51 @@
     if (user) startList();
   });
 
-  /* ---- Preview ---- */
-  function showPreview(){
-    if (posterData) { $("preview").referrerPolicy = "no-referrer"; $("preview").src = posterData; $("preview").hidden = false; }
-    else { $("preview").hidden = true; }
-  }
-
-  /* ---- Poster kutoka simu ---- */
+  /* ---- Poster: resize on the phone, keep it small ---- */
   $("posterFile").onchange = async e => {
     const f = e.target.files[0];
+    posterData = "";
+    $("preview").hidden = true;
     if (!f) return;
     try {
       const bmp = await createImageBitmap(f);
-      const w = 400, h = Math.round(bmp.height * (w / bmp.width));
+      const w = 400;
+      const h = Math.round(bmp.height * (w / bmp.width));
       const c = document.createElement("canvas");
       c.width = w; c.height = h;
       c.getContext("2d").drawImage(bmp, 0, 0, w, h);
       posterData = c.toDataURL("image/jpeg", 0.8);
-      showPreview();
+      $("preview").src = posterData;
+      $("preview").hidden = false;
     } catch (err) {
       say($("saveMsg"), "Picha hii haikusomeka. Jaribu nyingine.", "err");
     }
   };
 
-  /* ---- OMDb ---- */
-  async function omdb(params){
-    const r = await fetch("https://www.omdbapi.com/?apikey=" + OMDB_KEY + "&" + new URLSearchParams(params));
-    return r.json();
-  }
-  $("omBtn").onclick = async () => {
-    const t = $("omQ").value.trim();
-    if (!t) return;
-    const box = $("omRes");
-    box.textContent = "Inatafuta...";
-    try {
-      const d = await omdb({ s: t });
-      box.replaceChildren();
-      if (d.Response !== "True") { box.textContent = "Hakuna iliyopatikana."; return; }
-      d.Search.slice(0, 6).forEach(m => {
-        const b = document.createElement("button");
-        b.type = "button"; b.className = "pick";
-        if (clean(m.Poster)) { const im = document.createElement("img"); im.referrerPolicy = "no-referrer"; im.src = m.Poster; im.alt = ""; b.appendChild(im); }
-        else { const ph = document.createElement("div"); ph.className = "ph"; b.appendChild(ph); }
-        const s = document.createElement("span");
-        s.textContent = m.Title;
-        const sm = document.createElement("small"); sm.textContent = m.Year + " | " + m.Type;
-        s.appendChild(sm); b.appendChild(s);
-        b.onclick = () => importMovie(m.imdbID);
-        box.appendChild(b);
-      });
-    } catch (e) { box.textContent = "Imeshindwa kuunganisha."; }
-  };
-  $("omQ").addEventListener("keydown", e => { if (e.key === "Enter") $("omBtn").click(); });
-
-  async function importMovie(id){
-    $("omRes").textContent = "Inapakia maelezo...";
-    try {
-      const m = await omdb({ i: id, plot: "full" });
-      if (m.Response !== "True") { $("omRes").textContent = "Imeshindwa."; return; }
-      $("title").value = m.Title || "";
-      $("year").value = clean(m.Year);
-      $("desc").value = clean(m.Plot);
-      posterData = clean(m.Poster);
-      extra = { imdbID: m.imdbID || "", rating: clean(m.imdbRating), genre: clean(m.Genre), runtime: clean(m.Runtime), rated: clean(m.Rated) };
-      $("posterFile").value = "";
-      showPreview();
-      $("omRes").replaceChildren();
-      say($("saveMsg"), "Imejazwa kutoka OMDb. Sasa weka server na bei, kisha uhifadhi.", "ok");
-    } catch (e) { $("omRes").textContent = "Imeshindwa kuunganisha."; }
-  }
-
-  /* ---- Futa fomu ---- */
-  function resetForm(){
-    ["title","year","price","desc","download","omQ"].forEach(id => $(id).value = "");
-    for (let i = 1; i <= N; i++) $("srv" + i).value = "";
-    $("posterFile").value = "";
-    $("omRes").replaceChildren();
-    posterData = ""; extra = {}; editId = null;
-    showPreview();
-    $("editBanner").hidden = true;
-    $("cancelBtn").hidden = true;
-    $("saveBtn").textContent = "Hifadhi movie";
-  }
-  $("cancelBtn").onclick = () => { resetForm(); say($("saveMsg"), ""); };
-
-  /* ---- Hifadhi ---- */
+  /* ---- Save ---- */
   $("saveBtn").onclick = async () => {
     const title = $("title").value.trim();
     if (!title) return say($("saveMsg"), "Weka jina la movie.", "err");
-
-    const servers = [];
-    for (let i = 1; i <= N; i++) {
-      const u = $("srv" + i).value.trim();
-      if (!u) continue;
-      if (!/^https:\/\//i.test(u)) return say($("saveMsg"), "Server " + i + ": link lazima ianze na https://", "err");
-      servers.push({ name: "Server " + (servers.length + 1), url: u });
-    }
-    const download = $("download").value.trim();
-    if (download && !/^https:\/\//i.test(download)) return say($("saveMsg"), "Link ya download lazima ianze na https://", "err");
-
-    const payload = {
-      title,
-      year: $("year").value.trim(),
-      price: $("price").value.trim(),
-      description: $("desc").value.trim(),
-      poster: posterData,
-      servers,
-      download,
-      imdbID: extra.imdbID || "",
-      rating: extra.rating || "",
-      genre: extra.genre || "",
-      runtime: extra.runtime || "",
-      rated: extra.rated || ""
-    };
+    const link = $("link").value.trim();
+    if (link && !/^https?:\/\//i.test(link)) return say($("saveMsg"), "Link lazima ianze na https://", "err");
 
     $("saveBtn").disabled = true;
     say($("saveMsg"), "Inahifadhi...");
     try {
-      if (editId) {
-        await updateDoc(doc(db, "movies", editId), payload);
-        say($("saveMsg"), "Mabadiliko yamehifadhiwa.", "ok");
-      } else {
-        await addDoc(collection(db, "movies"), { ...payload, createdAt: serverTimestamp() });
-        say($("saveMsg"), "Imehifadhiwa. Movie ipo live sasa.", "ok");
-      }
-      resetForm();
+      await addDoc(collection(db, "movies"), {
+        title,
+        year: $("year").value.trim(),
+        price: $("price").value.trim(),
+        description: $("desc").value.trim(),
+        poster: posterData,
+        link,
+        createdAt: serverTimestamp()
+      });
+      ["title","year","price","desc","link"].forEach(id => $(id).value = "");
+      $("posterFile").value = "";
+      posterData = "";
+      $("preview").hidden = true;
+      say($("saveMsg"), "Imehifadhiwa. Movie ipo live sasa.", "ok");
     } catch (e) {
       console.error(e);
       say($("saveMsg"), "Imeshindwa kuhifadhi. Angalia Firestore rules na mtandao.", "err");
@@ -310,36 +190,12 @@
     $("saveBtn").disabled = false;
   };
 
-  /* ---- Hariri ---- */
-  function startEdit(id){
-    const m = cache[id];
-    if (!m) return;
-    resetForm();
-    editId = id;
-    $("title").value = m.title || "";
-    $("year").value = m.year || "";
-    $("price").value = m.price || "";
-    $("desc").value = m.description || "";
-    $("download").value = m.download || "";
-    let sv = Array.isArray(m.servers) ? m.servers : [];
-    if (!sv.length && m.link) sv = [{ url: m.link }];
-    sv.slice(0, N).forEach((s, i) => $("srv" + (i + 1)).value = s.url || "");
-    posterData = m.poster || "";
-    extra = { imdbID: m.imdbID || "", rating: m.rating || "", genre: m.genre || "", runtime: m.runtime || "", rated: m.rated || "" };
-    showPreview();
-    $("editBanner").hidden = false;
-    $("cancelBtn").hidden = false;
-    $("saveBtn").textContent = "Hifadhi mabadiliko";
-    say($("saveMsg"), "");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  /* ---- Orodha ---- */
+  /* ---- List + delete ---- */
   function startList(){
-    unsub = onSnapshot(query(collection(db, "movies"), orderBy("createdAt", "desc")), snap => {
+    const q = query(collection(db, "movies"), orderBy("createdAt", "desc"));
+    unsub = onSnapshot(q, snap => {
       const box = $("list");
       box.replaceChildren();
-      cache = {};
       if (snap.empty) {
         const d = document.createElement("div");
         d.className = "sub"; d.textContent = "Bado hakuna movie.";
@@ -348,21 +204,21 @@
       }
       snap.forEach(s => {
         const m = s.data();
-        cache[s.id] = m;
         const row = document.createElement("div");
         row.className = "row";
-        if (m.poster) { const im = document.createElement("img"); im.referrerPolicy = "no-referrer"; im.src = m.poster; im.alt = ""; row.appendChild(im); }
-        else { const ph = document.createElement("div"); ph.className = "ph"; row.appendChild(ph); }
-        const t = document.createElement("div"); t.className = "t";
+        if (m.poster) {
+          const im = document.createElement("img"); im.src = m.poster; im.alt = "";
+          row.appendChild(im);
+        } else {
+          const ph = document.createElement("div"); ph.className = "ph";
+          row.appendChild(ph);
+        }
+        const t = document.createElement("div");
+        t.className = "t";
         const b = document.createElement("b"); b.textContent = m.title || "";
         const sp = document.createElement("span");
-        const n = Array.isArray(m.servers) ? m.servers.length : (m.link ? 1 : 0);
-        sp.textContent = [m.year, n + " server"].filter(Boolean).join("  |  ");
+        sp.textContent = [m.year, m.price].filter(Boolean).join("  |  ");
         t.append(b, sp);
-        const acts = document.createElement("div"); acts.className = "acts";
-        const ed = document.createElement("button");
-        ed.className = "edit"; ed.type = "button"; ed.textContent = "Hariri";
-        ed.onclick = () => startEdit(s.id);
         const del = document.createElement("button");
         del.className = "del"; del.type = "button"; del.textContent = "Futa";
         del.onclick = async () => {
@@ -370,8 +226,7 @@
           try { await deleteDoc(doc(db, "movies", s.id)); }
           catch (e) { alert("Imeshindwa kufuta."); }
         };
-        acts.append(ed, del);
-        row.append(t, acts);
+        row.append(t, del);
         box.appendChild(row);
       });
     }, err => {
