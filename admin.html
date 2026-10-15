@@ -528,8 +528,13 @@ auth.onAuthStateChanged(async user => {
 
   try {
     const token = await user.getIdTokenResult(true);
+    const adminEmails = [
+      "prospermgimba9@gmail.com",
+      "erickturwa0@gmail.com"
+    ];
 
-    if (token.claims.admin !== true) {
+    if (!adminEmails.includes((user.email || "").toLowerCase())) {
+   
       showMessage(
         "Akaunti hii haina ruhusa za admin. Utaondolewa kwenye dashboard.",
         true
