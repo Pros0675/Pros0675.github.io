@@ -148,9 +148,9 @@ auth.onAuthStateChanged(async user => {
   $("app").classList.add("hidden");
   if (!user) return;
   try {
-    const t = await user.getIdTokenResult(true);
-    if (t.claims.admin !== true) {
-      msg("Akaunti hii si admin.", true);
+    const admins = ["prospermgimba9@gmail.com", "erickturwa0@gmail.com"];
+    if (!admins.includes((user.email || "").toLowerCase())) {
+      msg("Umeingia kama " + (user.email || "?") + ", ambayo si admin. Bonyeza Toka, kisha ingia kwa barua pepe ya admin.", true);
       return;
     }
     $("msg").className = "msg hidden";
