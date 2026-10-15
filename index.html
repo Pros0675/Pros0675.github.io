@@ -110,6 +110,19 @@ h2{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01
 .toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translateX(-50%);z-index:50;width:min(460px,calc(100% - 28px));
   background:#1d3a35;color:#b9ffee;padding:12px 16px;border-radius:14px;overflow-wrap:anywhere;box-shadow:0 8px 30px #0008}
 .toast.err{background:#47202e;color:#ffd0da}
+body.locked .wrap,body.locked .nav{display:none}
+.gate{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 24px;gap:14px}
+.gate h1{font-family:var(--display);font-weight:800;font-size:clamp(30px,8vw,46px);line-height:1.05;letter-spacing:-.03em;margin:0;max-width:14ch;text-wrap:balance}
+.gate p{margin:0;color:var(--muted);max-width:34ch}
+.gate .actions-row{justify-content:center}
+body:not(.locked) .gate{display:none}
+.gate-form{display:grid;gap:10px;width:min(340px,100%);margin-top:6px}
+.avatar{width:64px;height:64px;border-radius:50%;background:var(--accent);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:28px;margin-bottom:12px}
+.role{display:inline-block;padding:4px 12px;border-radius:99px;font-size:12.5px;font-weight:700;background:var(--panel2);margin-top:6px}
+.role.admin{background:var(--gold);color:#241a00}
+.admin-card{margin:14px 18px 0;background:var(--panel);border:1px solid var(--gold);border-radius:20px;padding:20px}
+.admin-card h3{font-family:var(--display);margin:0 0 4px;font-size:19px;display:flex;align-items:center;gap:8px}
+.admin-card svg{width:20px;height:20px;color:var(--gold)}
 footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
 
 @media(max-width:560px){
@@ -120,9 +133,21 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style>
 </head>
-<body>
+<body class="locked">
 
 <div id="toast" class="toast hidden" role="status"></div>
+
+<section id="gate" class="gate">
+  <h1>Ingia ili kuendelea</h1>
+  <p id="gateText">Inapakia...</p>
+  <form id="gateForm" class="gate-form hidden">
+    <input id="gEmail" type="email" placeholder="Barua pepe" autocomplete="email" required>
+    <input id="gPassword" type="password" placeholder="Nenosiri" minlength="6" autocomplete="current-password" required>
+    <button id="gSubmit" type="submit">Ingia</button>
+    <button id="gToggle" type="button" class="ghost">Tengeneza akaunti</button>
+    <button id="gReset" type="button" class="ghost sm">Nimesahau nenosiri</button>
+  </form>
+</section>
 
 <div class="topbar">
   <div class="logo">
@@ -405,35 +430,99 @@ $("resetPassword").addEventListener("click", async () => {
 
 function renderAccount() {
   const box = $("accountBox");
+  const old = document.getElementById("adminCard");
+  if (old) old.remove();
   box.replaceChildren();
-  if (!currentUser) {
-    box.append(el("h3", "", "Hujaingia"), el("p", "muted", "Ingia ili kuhifadhi filamu unazopenda na kuzipata kwenye kifaa chochote."));
-    const stack = el("div", "stack");
-    const b1 = el("button", "", "Ingia"); b1.addEventListener("click", () => openAuth("login"));
-    const b2 = el("button", "ghost", "Tengeneza akaunti"); b2.addEventListener("click", () => openAuth("signup"));
-    stack.append(b1, b2);
-    box.append(stack);
-    return;
-  }
-  box.append(el("h3", "", "Umeingia"), el("p", "muted", currentUser.email || ""));
+  if (!currentUser) return;
+
+  const admin = isAdminUser(currentUser);
+  const email = currentUser.email || "";
+
+  box.append(el("div", "avatar", (email[0] || "?").toUpperCase()));
+  box.append(el("h3", "", email));
+  box.append(el("span", "role" + (admin ? " admin" : ""), admin ? "Admin" : "Mtumiaji"));
   const stack = el("div", "stack");
-  if (isAdminUser(currentUser)) {
-    [["./admin.html", "Admin: Filamu"], ["./series-admin.html", "Admin: Series"]].forEach(([href, label]) => {
-      const a = el("a", "linkbtn", label); a.href = href; stack.append(a);
-    });
-  }
   const out = el("button", "ghost", "Toka");
   out.addEventListener("click", async () => {
-    try { await auth.signOut(); showMessage("Umetoka kwenye akaunti."); } catch (err) { showMessage(friendlyError(err), true); }
+    try { await auth.signOut(); } catch (err) { showMessage(friendlyError(err), true); }
   });
   stack.append(out);
   box.append(stack);
+
+  /* Sehemu ya admin inaonekana kwa admin tu */
+  if (admin) {
+    const card = el("div", "admin-card");
+    card.id = "adminCard";
+    const h = el("h3");
+    h.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>';
+    h.append(document.createTextNode("Zana za Admin"));
+    card.append(h, el("p", "muted", "Zinaonekana kwa akaunti za admin tu."));
+    const st = el("div", "stack");
+    [["./admin.html", "Simamia Filamu"], ["./series-admin.html", "Simamia Series"]].forEach(([href, label]) => {
+      const a = el("a", "linkbtn", label); a.href = href; st.append(a);
+    });
+    card.append(st);
+    box.after(card);
+  }
 }
+
+let contentLoaded = false;
+
+function loadContent() {
+  if (contentLoaded) return;
+  contentLoaded = true;
+  loadIntro();
+  loadOwnMovies();
+  loadSeries();
+}
+
+let gateMode = "login";
+function updateGate() {
+  $("gSubmit").textContent = gateMode === "login" ? "Ingia" : "Jisajili";
+  $("gToggle").textContent = gateMode === "login" ? "Tengeneza akaunti" : "Nina akaunti tayari";
+  $("gPassword").autocomplete = gateMode === "login" ? "current-password" : "new-password";
+}
+$("gToggle").addEventListener("click", () => { gateMode = gateMode === "login" ? "signup" : "login"; updateGate(); });
+
+$("gateForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const email = $("gEmail").value.trim(), password = $("gPassword").value;
+  $("gSubmit").disabled = true;
+  try {
+    if (gateMode === "signup") {
+      const c = await auth.createUserWithEmailAndPassword(email, password);
+      c.user.sendEmailVerification().catch(() => {});
+      showMessage("Akaunti imetengenezwa!");
+    } else {
+      await auth.signInWithEmailAndPassword(email, password);
+    }
+  } catch (err) { showMessage(friendlyError(err), true); }
+  finally { $("gSubmit").disabled = false; }
+});
+
+$("gReset").addEventListener("click", async () => {
+  const email = $("gEmail").value.trim();
+  if (!email) return showMessage("Andika barua pepe yako kwanza.", true);
+  try { await auth.sendPasswordResetEmail(email); showMessage("Kiungo cha kubadilisha nenosiri kimetumwa kwenye barua pepe yako."); }
+  catch (err) { showMessage(friendlyError(err), true); }
+});
 
 auth.onAuthStateChanged(user => {
   currentUser = user;
   renderAccount();
-  if ($("viewSaved").classList.contains("active")) loadSaved();
+
+  if (user) {
+    document.body.classList.remove("locked");
+    loadContent();
+    if ($("viewSaved").classList.contains("active")) loadSaved();
+  } else {
+    document.body.classList.add("locked");
+    contentLoaded = false;
+    heroSet = false;
+    closePlayer();
+    $("gateText").textContent = "Ingia kwenye akaunti yako ili kutazama filamu na series.";
+    $("gateForm").classList.remove("hidden");
+  }
 });
 renderAccount();
 
@@ -774,9 +863,6 @@ async function loadIntro() {
   } catch (error) { console.info("Intro haijapakiwa.", error); }
 }
 
-loadIntro();
-loadOwnMovies();
-loadSeries();
 </script>
 </body>
 </html>
