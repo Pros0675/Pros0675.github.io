@@ -397,7 +397,7 @@
 <div id="playerModal" class="modal hidden">
   <div class="modal-box" style="width:min(950px,100%)">
 
-    <div style="display:flex;justify-content:space-between;gap:10px">
+    <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
       <h2 id="playerTitle">Kicheza Video</h2>
 
       <button
@@ -409,16 +409,26 @@
       </button>
     </div>
 
-    <p class="muted">
-      Tumia viungo vya video ambavyo una ruhusa ya kutazama.
+    <p class="muted" style="margin:8px 0 12px">
+      Filamu inachezwa. Matangazo yamepunguzwa kwa kutumia embed safi.
     </p>
+
+    <!-- Server sources -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <button type="button" class="secondary" id="src1" style="padding:8px 12px;font-size:13px">Server 1</button>
+      <button type="button" class="secondary" id="src2" style="padding:8px 12px;font-size:13px">Server 2</button>
+      <button type="button" class="secondary" id="src3" style="padding:8px 12px;font-size:13px">Server 3</button>
+      <button type="button" class="secondary" id="customUrlBtn" style="padding:8px 12px;font-size:13px">URL yangu</button>
+    </div>
 
     <iframe
       id="playerFrame"
       class="player"
       title="Kicheza video"
       allowfullscreen
+      allow="autoplay; fullscreen; picture-in-picture"
       referrerpolicy="no-referrer"
+      sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
     ></iframe>
   </div>
 </div>
@@ -457,6 +467,7 @@ const $ = id => document.getElementById(id);
 let currentUser = null;
 let authMode = "login";
 let searchToken = 0;
+let currentImdbID = null;
 
 $("yearNow").textContent = new Date().getFullYear();
 
@@ -878,14 +889,13 @@ async function showMovieDetails(imdbID) {
       saveMovie(movie);
     });
 
+    // PLAY BUTTON - sasa inacheza moja kwa moja
     const playButton = document.createElement("button");
-
-    playButton.className = "secondary";
     playButton.style.marginTop = "10px";
-    playButton.textContent = "Fungua kiungo cha video";
+    playButton.textContent = "▶ Cheza Filamu";
 
     playButton.addEventListener("click", () => {
-      openVideo(movie.Title);
+      openVideo(movie.Title, movie.imdbID);
     });
 
     info.append(
@@ -908,42 +918,65 @@ async function showMovieDetails(imdbID) {
 }
 
 /* =========================================
-   VIDEO PLAYER
+   VIDEO PLAYER - SERVER + MATANGAZO YAMEPUNGUZWA
 ========================================= */
 
-function openVideo(title) {
-  const input = prompt(
-    "Bandika HTTPS URL ya video ambayo una ruhusa ya kuitumia:"
-  );
+function openVideo(title, imdbID) {
+  currentImdbID = imdbID;
+
+  $("playerTitle").textContent = title;
+
+  // Anza na Server 1 (safi zaidi)
+  loadServer(1);
+
+  closeModal("detailModal");
+  openModal("playerModal");
+}
+
+function loadServer(num) {
+  if (!currentImdbID) return;
+
+  let embedUrl = "";
+
+  // Servers zenye matangazo machache
+  if (num === 1) {
+    embedUrl = "https://vidsrc.to/embed/movie/" + currentImdbID;
+  } else if (num === 2) {
+    embedUrl = "https://www.2embed.cc/embed/" + currentImdbID;
+  } else if (num === 3) {
+    embedUrl = "https://multiembed.mov/?video_id=" + currentImdbID + "&tmdb=0";
+  }
+
+  $("playerFrame").src = embedUrl;
+}
+
+// Buttons za server
+$("src1").addEventListener("click", () => loadServer(1));
+$("src2").addEventListener("click", () => loadServer(2));
+$("src3").addEventListener("click", () => loadServer(3));
+
+// Button ya kuweka URL yako mwenyewe
+$("customUrlBtn").addEventListener("click", () => {
+  const input = prompt("Bandika HTTPS URL yako ya video:");
 
   if (!input) return;
 
   try {
     const url = new URL(input);
-
     if (url.protocol !== "https:") {
-      throw new Error("URL lazima itumie HTTPS.");
+      throw new Error("Lazima iwe HTTPS");
     }
-
-    $("playerTitle").textContent = title;
-
     $("playerFrame").src = url.href;
-
-    closeModal("detailModal");
-    openModal("playerModal");
-
-  } catch (error) {
-    showMessage(
-      "Kiungo si sahihi. Tumia URL ya HTTPS.",
-      true
-    );
+  } catch (e) {
+    showMessage("Kiungo si sahihi. Tumia URL ya HTTPS.", true);
   }
-}
+});
 
 /* Ondoa video iframe wakati player inafungwa */
 document.querySelectorAll('[data-close="playerModal"]').forEach(button => {
   button.addEventListener("click", () => {
     $("playerFrame").src = "about:blank";
+    currentImdbID = null;
   });
 });
 
