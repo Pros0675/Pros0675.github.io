@@ -7,9 +7,6 @@
   <meta name="description" content="Prosper Movies — tafuta filamu na hifadhi unazopenda.">
   <title>Prosper Movies</title>
 
-  <!-- LETA MAKTABA YA KISASA YA KUSOMA VIDEO KUBWA (VIDEO.JS CSS) -->
-  <link href="https://zencdn.net" rel="stylesheet" />
-
   <style>
     :root {
       --bg: #090b12;
@@ -71,21 +68,7 @@
     .modal-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 15px; }
     .detail-layout { display: grid; grid-template-columns: 145px 1fr; gap: 16px; }
     .detail-layout img { width: 100%; border-radius: 9px; }
-    
-    /* MPANGILIO WA KICHEZA VIDEO (SAFI KABISA BILA MAKOSA) */
-    .player-container {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      border-radius: 9px;
-      overflow: hidden;
-      background: black;
-      margin-bottom: 15px;
-    }
-    .video-js {
-      width: 100% !important;
-      height: 100% !important;
-    }
-
+    .player { width: 100%; aspect-ratio: 16 / 9; border: 0; background: black; border-radius: 9px; }
     footer { text-align: center; color: var(--muted); font-size: 13px; margin: 35px 0 15px; }
 
     @media (max-width: 550px) {
@@ -130,16 +113,845 @@
   </form>
 
   <h2 id="sectionTitle">🎬 Tafuta Filamu</h2>
+
   <p id="sectionDescription" class="muted">Andika jina la filamu ili kuona matokeo.</p>
 
   <div id="movieGrid" class="movie-grid">
     <div class="empty">Karibu Prosper Movies! Tafuta filamu unayoipenda.</div>
   </div>
 
-  <!-- SCRIPT KUTOKA VIDEO.JS INAYOLAZIMISHA PICHA IONEKANE -->
-  <script src="https://zencdn.net"></script>
+  <footer>© <span id="yearNow"></span> Prosper Movies</footer>
 
-  <footer>© 2026 Prosper Movies. Haki zote zimehifadhiwa.</footer>
 </div>
+
+<!-- LOGIN / SIGNUP -->
+<div id="authModal" class="modal hidden">
+  <div class="modal-box">
+    <h2 id="authTitle">Ingia kwenye akaunti</h2>
+
+    <form id="authForm">
+      <label for="email">Barua pepe</label>
+      <input id="email" type="email" autocomplete="email" required>
+
+      <label for="password">Nenosiri</label>
+      <input id="password" type="password" minlength="6" autocomplete="current-password" required>
+
+      <div class="modal-actions">
+        <button id="authSubmit" type="submit">Ingia</button>
+        <button id="toggleAuth" type="button" class="secondary">Tengeneza akaunti</button>
+        <button type="button" class="secondary" data-close="authModal">Funga</button>
+      </div>
+    </form>
+
+    <button id="resetPassword" class="secondary" style="margin-top:12px">Nimesahau nenosiri</button>
+  </div>
+</div>
+
+<!-- MOVIE DETAILS -->
+<div id="detailModal" class="modal hidden">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;gap:10px">
+      <h2>Maelezo ya Filamu</h2>
+      <button type="button" class="secondary" data-close="detailModal">✕</button>
+    </div>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<!-- VIDEO PLAYER -->
+<div id="playerModal" class="modal hidden">
+  <div class="modal-box" style="width:min(950px,100%)">
+
+    <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+      <h2 id="playerTitle">Kicheza Video</h2>
+      <button type="button" class="secondary" data-close="playerModal">Funga</button>
+    </div>
+
+    <p class="muted" style="margin:8px 0 12px">
+      Filamu inachezwa. Matangazo yamepunguzwa kwa kutumia embed safi.
+    </p>
+
+    <!-- Server sources -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <button type="button" class="secondary" id="src1" style="padding:8px 12px;font-size:13px">Server 1</button>
+      <button type="button" class="secondary" id="src2" style="padding:8px 12px;font-size:13px">Server 2</button>
+      <button type="button" class="secondary" id="src3" style="padding:8px 12px;font-size:13px">Server 3</button>
+      <button type="button" class="secondary" id="customUrlBtn" style="padding:8px 12px;font-size:13px">URL yangu</button>
+    </div>
+
+    <!-- YouTube na embed nyingine -->
+    <iframe
+      id="playerFrame"
+      class="player"
+      title="Kicheza video"
+      frameborder="0"
+      allowfullscreen
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerpolicy="strict-origin-when-cross-origin"
+    ></iframe>
+
+    <!-- Dropbox na .mp4 -->
+    <video id="playerVideo" class="player" controls playsinline style="display:none"></video>
+  </div>
+</div>
+
+<!-- FIREBASE LIBRARIES -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+/* =========================================
+   FIREBASE CONFIGURATION
+========================================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyAMt3bDm-DtkwAHizrs6f2EB8rsXAu9FKs",
+  authDomain: "prosper-movie-36bfb.firebaseapp.com",
+  projectId: "prosper-movie-36bfb",
+  storageBucket: "prosper-movie-36bfb.firebasestorage.app",
+  messagingSenderId: "869131612157",
+  appId: "1:869131612157:web:145fdd0bf412d623b3b394",
+  measurementId: "G-SD5Q1203YP"
+};
+
+/* OMDb API key */
+const OMDB_API_KEY = "d0349ee";
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const $ = id => document.getElementById(id);
+
+let currentUser = null;
+let authMode = "login";
+let searchToken = 0;
+let currentImdbID = null;
+
+$("yearNow").textContent = new Date().getFullYear();
+
+const placeholderPoster =
+  "data:image/svg+xml;charset=UTF-8," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="450">' +
+    '<rect width="100%" height="100%" fill="#1b2232"/>' +
+    '<text x="50%" y="50%" fill="#ffffff" font-size="22" text-anchor="middle">Prosper Movies</text>' +
+    '</svg>'
+  );
+
+/* =========================================
+   UJUMBE
+========================================= */
+
+function showMessage(text, error = false) {
+  const el = $("message");
+  el.textContent = text;
+  el.classList.remove("hidden");
+  el.style.background = error ? "#3a1c28" : "#172b2a";
+  el.style.color = error ? "#ffc0ce" : "#a8ffeb";
+}
+
+function hideMessage() {
+  $("message").classList.add("hidden");
+}
+
+function openModal(id) {
+  $(id).classList.remove("hidden");
+}
+
+function closeModal(id) {
+  $(id).classList.add("hidden");
+}
+
+document.querySelectorAll("[data-close]").forEach(button => {
+  button.addEventListener("click", () => {
+    closeModal(button.dataset.close);
+  });
+});
+
+document.querySelectorAll(".modal").forEach(modal => {
+  modal.addEventListener("click", event => {
+    if (event.target === modal) {
+      closeModal(modal.id);
+      if (modal.id === "playerModal") {
+        stopPlayer();
+        currentImdbID = null;
+      }
+    }
+  });
+});
+
+/* =========================================
+   FIREBASE CONFIGURATION CHECK
+========================================= */
+
+const configMissing =
+  firebaseConfig.apiKey.startsWith("WEKA_") ||
+  firebaseConfig.messagingSenderId.startsWith("WEKA_") ||
+  firebaseConfig.appId.startsWith("WEKA_");
+
+if (configMissing) {
+  showMessage("Kwanza jaza Firebase configuration yako kwenye index.html.", true);
+}
+
+/* =========================================
+   AUTHENTICATION
+========================================= */
+
+$("loginBtn").addEventListener("click", () => {
+  authMode = "login";
+  updateAuthMode();
+  openModal("authModal");
+});
+
+$("toggleAuth").addEventListener("click", () => {
+  authMode = authMode === "login" ? "signup" : "login";
+  updateAuthMode();
+});
+
+function updateAuthMode() {
+  $("authTitle").textContent =
+    authMode === "login" ? "Ingia kwenye akaunti" : "Tengeneza akaunti";
+
+  $("authSubmit").textContent =
+    authMode === "login" ? "Ingia" : "Jisajili";
+
+  $("toggleAuth").textContent =
+    authMode === "login" ? "Tengeneza akaunti" : "Nina akaunti tayari";
+}
+
+function friendlyError(error) {
+  const messages = {
+    "auth/email-already-in-use": "Barua pepe hii tayari imesajiliwa.",
+    "auth/invalid-email": "Barua pepe si sahihi.",
+    "auth/weak-password": "Nenosiri liwe na angalau herufi 6.",
+    "auth/user-not-found": "Akaunti haijapatikana.",
+    "auth/wrong-password": "Barua pepe au nenosiri si sahihi.",
+    "auth/invalid-credential": "Barua pepe au nenosiri si sahihi.",
+    "auth/too-many-requests": "Majaribio yamezidi. Jaribu tena baadaye.",
+    "permission-denied": "Huna ruhusa ya kufanya kitendo hiki."
+  };
+
+  return messages[error.code] || error.message || "Hitilafu imetokea.";
+}
+
+$("authForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const email = $("email").value.trim();
+  const password = $("password").value;
+
+  $("authSubmit").disabled = true;
+  hideMessage();
+
+  try {
+    if (authMode === "signup") {
+      const credential = await auth.createUserWithEmailAndPassword(email, password);
+      await credential.user.sendEmailVerification();
+      closeModal("authModal");
+      showMessage("Akaunti imetengenezwa! Angalia barua pepe yako kuthibitisha akaunti.");
+    } else {
+      await auth.signInWithEmailAndPassword(email, password);
+      closeModal("authModal");
+      showMessage("Umeingia kwenye akaunti yako.");
+    }
+  } catch (error) {
+    showMessage(friendlyError(error), true);
+  } finally {
+    $("authSubmit").disabled = false;
+  }
+});
+
+$("resetPassword").addEventListener("click", async () => {
+  const email = $("email").value.trim();
+
+  if (!email) {
+    showMessage("Andika barua pepe yako kwanza.", true);
+    return;
+  }
+
+  try {
+    await auth.sendPasswordResetEmail(email);
+    closeModal("authModal");
+    showMessage("Kiungo cha kubadilisha nenosiri kimetumwa kwenye barua pepe yako.");
+  } catch (error) {
+    showMessage(friendlyError(error), true);
+  }
+});
+
+$("logoutBtn").addEventListener("click", async () => {
+  try {
+    await auth.signOut();
+    showMessage("Umetoka kwenye akaunti.");
+  } catch (error) {
+    showMessage(friendlyError(error), true);
+  }
+});
+
+auth.onAuthStateChanged(async user => {
+  currentUser = user;
+
+  $("loginBtn").classList.toggle("hidden", !!user);
+  $("logoutBtn").classList.toggle("hidden", !user);
+  $("adminLink").classList.add("hidden");
+
+  if (user) {
+    try {
+      const token = await user.getIdTokenResult(true);
+      if (token.claims.admin === true) {
+        $("adminLink").classList.remove("hidden");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+});
+
+/* =========================================
+   SEARCH MOVIES
+========================================= */
+
+$("searchForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const query = $("searchInput").value.trim();
+
+  if (!query) {
+    showMessage("Andika jina la filamu kwanza.", true);
+    return;
+  }
+
+  searchMovies(query);
+});
+
+async function searchMovies(query) {
+  const token = ++searchToken;
+
+  hideMessage();
+
+  $("sectionTitle").textContent = "Matokeo ya Utafutaji";
+  $("sectionDescription").textContent = "Matokeo ya: " + query;
+  $("movieGrid").innerHTML = '<div class="empty">Inatafuta filamu...</div>';
+
+  try {
+    const url =
+      "https://www.omdbapi.com/?" +
+      "apikey=" + encodeURIComponent(OMDB_API_KEY) +
+      "&s=" + encodeURIComponent(query) +
+      "&type=movie";
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error("Huduma ya utafutaji haipatikani.");
+    }
+
+    const data = await response.json();
+
+    if (token !== searchToken) return;
+
+    if (data.Response !== "True") {
+      $("movieGrid").innerHTML =
+        '<div class="empty">Hakuna filamu iliyopatikana. Jaribu jina jingine.</div>';
+      return;
+    }
+
+    renderMovies(data.Search || []);
+
+  } catch (error) {
+    if (token !== searchToken) return;
+
+    $("movieGrid").innerHTML =
+      '<div class="empty">Imeshindikana kutafuta filamu. Kagua intaneti na API key.</div>';
+
+    showMessage(error.message, true);
+  }
+}
+
+/* =========================================
+   RENDER MOVIES
+========================================= */
+
+function renderMovies(movies) {
+  const grid = $("movieGrid");
+
+  grid.replaceChildren();
+
+  if (!movies.length) {
+    grid.innerHTML = '<div class="empty">Hakuna filamu za kuonyesha.</div>';
+    return;
+  }
+
+  movies.forEach(movie => {
+    const card = document.createElement("article");
+    card.className = "movie-card";
+
+    const poster = document.createElement("img");
+    poster.loading = "lazy";
+    poster.alt = "Poster ya " + movie.Title;
+    poster.src =
+      movie.Poster && movie.Poster !== "N/A" ? movie.Poster : placeholderPoster;
+    poster.onerror = () => { poster.src = placeholderPoster; };
+
+    const info = document.createElement("div");
+    info.className = "movie-info";
+
+    const title = document.createElement("div");
+    title.className = "movie-title";
+    title.textContent = movie.Title;
+
+    const year = document.createElement("div");
+    year.className = "movie-year";
+    year.textContent = movie.Year || "Mwaka haujulikani";
+
+    const button = document.createElement("button");
+    button.textContent = "Maelezo";
+    button.addEventListener("click", () => {
+      showMovieDetails(movie.imdbID);
+    });
+
+    info.append(title, year, button);
+    card.append(poster, info);
+    grid.append(card);
+  });
+}
+
+/* =========================================
+   MOVIE DETAILS
+========================================= */
+
+async function showMovieDetails(imdbID) {
+  openModal("detailModal");
+
+  $("detailContent").textContent = "Inapakia maelezo ya filamu...";
+
+  try {
+    const url =
+      "https://www.omdbapi.com/?" +
+      "apikey=" + encodeURIComponent(OMDB_API_KEY) +
+      "&i=" + encodeURIComponent(imdbID) +
+      "&plot=full";
+
+    const response = await fetch(url);
+    const movie = await response.json();
+
+    if (movie.Response !== "True") {
+      throw new Error("Maelezo ya filamu hayapatikani.");
+    }
+
+    const layout = document.createElement("div");
+    layout.className = "detail-layout";
+
+    const poster = document.createElement("img");
+    poster.src =
+      movie.Poster && movie.Poster !== "N/A" ? movie.Poster : placeholderPoster;
+    poster.alt = "Poster ya " + movie.Title;
+    poster.onerror = () => { poster.src = placeholderPoster; };
+
+    const info = document.createElement("div");
+
+    const title = document.createElement("h3");
+    title.textContent = movie.Title;
+
+    const metadata = document.createElement("p");
+    metadata.className = "muted";
+    metadata.textContent = [
+      movie.Year,
+      movie.Runtime,
+      movie.Genre,
+      movie.imdbRating && movie.imdbRating !== "N/A"
+        ? "IMDb " + movie.imdbRating
+        : ""
+    ].filter(Boolean).join(" · ");
+
+    const plot = document.createElement("p");
+    plot.textContent =
+      movie.Plot && movie.Plot !== "N/A" ? movie.Plot : "Maelezo hayapo.";
+
+    const saveButton = document.createElement("button");
+    saveButton.textContent = "❤️ Hifadhi";
+    saveButton.addEventListener("click", () => {
+      saveMovie(movie);
+    });
+
+    const playButton = document.createElement("button");
+    playButton.style.marginTop = "10px";
+    playButton.textContent = "▶ Cheza Filamu";
+    playButton.addEventListener("click", () => {
+      openVideo(movie.Title, movie.imdbID);
+    });
+
+    info.append(
+      title,
+      metadata,
+      plot,
+      saveButton,
+      document.createElement("br"),
+      playButton
+    );
+
+    layout.append(poster, info);
+
+    $("detailContent").replaceChildren(layout);
+
+  } catch (error) {
+    $("detailContent").textContent = friendlyError(error);
+  }
+}
+
+/* =========================================
+   VIDEO PLAYER (YouTube / Dropbox / mp4 / embed)
+========================================= */
+
+function toEmbedUrl(url) {
+  url = (url || "").trim();
+
+  const m = url.match(/youtube\.com\/embed\/([\w-]{11})/) ||
+            url.match(/youtube\.com\/watch\?v=([\w-]{11})/) ||
+            url.match(/youtu\.be\/([\w-]{11})/);
+
+  if (m) {
+    return { type: "frame", src: "https://www.youtube.com/embed/" + m[1] };
+  }
+
+  if (url.includes("dropbox.com")) {
+    return {
+      type: "video",
+      src: url
+        .replace("www.dropbox.com", "dl.dropboxusercontent.com")
+        .replace("?dl=0", "")
+        .replace("&dl=0", "")
+    };
+  }
+
+  if (/\.(mp4|webm|m4v)(\?|$)/i.test(url)) {
+    return { type: "video", src: url };
+  }
+
+  return { type: "frame", src: url };
+}
+
+function loadInPlayer(url) {
+  const frame = $("playerFrame");
+  const video = $("playerVideo");
+  const r = toEmbedUrl(url);
+
+  if (r.type === "video") {
+    frame.src = "about:blank";
+    frame.style.display = "none";
+    video.style.display = "block";
+    video.src = r.src;
+    video.play().catch(() => {});
+  } else {
+    video.pause();
+    video.removeAttribute("src");
+    video.style.display = "none";
+    frame.style.display = "block";
+    frame.src = r.src;
+  }
+}
+
+function stopPlayer() {
+  const video = $("playerVideo");
+  video.pause();
+  video.removeAttribute("src");
+  $("playerFrame").src = "about:blank";
+}
+
+function openVideo(title, imdbID) {
+  currentImdbID = imdbID;
+
+  $("playerTitle").textContent = title;
+
+  loadServer(1);
+
+  closeModal("detailModal");
+  openModal("playerModal");
+}
+
+function loadServer(num) {
+  if (!currentImdbID) return;
+
+  let embedUrl = "";
+
+  if (num === 1) {
+    embedUrl = "https://vidsrc.to/embed/movie/" + currentImdbID;
+  } else if (num === 2) {
+    embedUrl = "https://www.2embed.cc/embed/" + currentImdbID;
+  } else if (num === 3) {
+    embedUrl = "https://multiembed.mov/?video_id=" + currentImdbID + "&tmdb=0";
+  }
+
+  loadInPlayer(embedUrl);
+}
+
+$("src1").addEventListener("click", () => loadServer(1));
+$("src2").addEventListener("click", () => loadServer(2));
+$("src3").addEventListener("click", () => loadServer(3));
+
+$("customUrlBtn").addEventListener("click", () => {
+  const input = prompt("Bandika HTTPS URL yako ya video (YouTube, Dropbox au .mp4):");
+
+  if (!input) return;
+
+  try {
+    const url = new URL(input);
+    if (url.protocol !== "https:") {
+      throw new Error("Lazima iwe HTTPS");
+    }
+    loadInPlayer(url.href);
+  } catch (e) {
+    showMessage("Kiungo si sahihi. Tumia URL ya HTTPS.", true);
+  }
+});
+
+/* Simamisha video wakati player inafungwa */
+document.querySelectorAll('[data-close="playerModal"]').forEach(button => {
+  button.addEventListener("click", () => {
+    stopPlayer();
+    currentImdbID = null;
+  });
+});
+
+/* =========================================
+   FILAMU ZETU (kutoka Firestore "movies")
+========================================= */
+
+async function loadOwnMovies() {
+  if (configMissing) return;
+
+  const grid = $("ownGrid");
+
+  try {
+    const snap = await db.collection("movies").get();
+
+    const list = snap.docs
+      .map(d => d.data())
+      .sort((a, b) =>
+        (b.createdAt ? b.createdAt.seconds : 0) -
+        (a.createdAt ? a.createdAt.seconds : 0)
+      );
+
+    grid.replaceChildren();
+
+    if (!list.length) {
+      grid.innerHTML = '<div class="empty">Bado hakuna filamu zetu.</div>';
+      return;
+    }
+
+    list.forEach(m => {
+      const card = document.createElement("article");
+      card.className = "movie-card";
+
+      const img = document.createElement("img");
+      img.alt = "Poster ya " + (m.title || "");
+      img.src = m.poster || placeholderPoster;
+      img.onerror = () => { img.src = placeholderPoster; };
+
+      const info = document.createElement("div");
+      info.className = "movie-info";
+
+      const t = document.createElement("div");
+      t.className = "movie-title";
+      t.textContent = m.title || "Filamu";
+
+      const y = document.createElement("div");
+      y.className = "movie-year";
+      y.textContent = m.year || "";
+
+      const b = document.createElement("button");
+      b.textContent = "▶ Cheza";
+      b.addEventListener("click", () => {
+        if (!m.videoUrl) {
+          showMessage("Filamu hii haina link ya video.", true);
+          return;
+        }
+        currentImdbID = null;
+        $("playerTitle").textContent = m.title || "Filamu";
+        loadInPlayer(m.videoUrl);
+        openModal("playerModal");
+      });
+
+      info.append(t, y, b);
+      card.append(img, info);
+      grid.append(card);
+    });
+
+  } catch (error) {
+    grid.innerHTML = '<div class="empty">Imeshindikana kupakia filamu zetu.</div>';
+    showMessage(friendlyError(error), true);
+  }
+}
+
+/* =========================================
+   SAVE MOVIES
+========================================= */
+
+async function saveMovie(movie) {
+  if (!currentUser) {
+    showMessage("Ingia kwenye akaunti kwanza ili kuhifadhi filamu.", true);
+    return;
+  }
+
+  try {
+    await db
+      .collection("users")
+      .doc(currentUser.uid)
+      .collection("savedMovies")
+      .doc(movie.imdbID)
+      .set({
+        imdbID: movie.imdbID,
+        title: movie.Title,
+        year: movie.Year || "",
+        poster: movie.Poster && movie.Poster !== "N/A" ? movie.Poster : "",
+        savedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+    showMessage("Filamu imehifadhiwa.");
+
+  } catch (error) {
+    showMessage(friendlyError(error), true);
+  }
+}
+
+/* =========================================
+   SHOW SAVED MOVIES
+========================================= */
+
+$("savedBtn").addEventListener("click", async () => {
+  if (!currentUser) {
+    authMode = "login";
+    updateAuthMode();
+    openModal("authModal");
+    showMessage("Ingia kwanza ili kuona filamu ulizohifadhi.");
+    return;
+  }
+
+  $("sectionTitle").textContent = "❤️ Filamu Zilizohifadhiwa";
+  $("sectionDescription").textContent = "Hii ni orodha yako binafsi.";
+  $("movieGrid").innerHTML = '<div class="empty">Inapakia...</div>';
+
+  try {
+    const snapshot = await db
+      .collection("users")
+      .doc(currentUser.uid)
+      .collection("savedMovies")
+      .orderBy("savedAt", "desc")
+      .get();
+
+    const movies = snapshot.docs.map(doc => doc.data());
+
+    $("movieGrid").replaceChildren();
+
+    if (!movies.length) {
+      $("movieGrid").innerHTML =
+        '<div class="empty">Bado hujahifadhi filamu yoyote.</div>';
+      return;
+    }
+
+    movies.forEach(movie => {
+      const card = document.createElement("article");
+      card.className = "movie-card";
+
+      const poster = document.createElement("img");
+      poster.src = movie.poster || placeholderPoster;
+      poster.alt = "Poster ya " + movie.title;
+      poster.onerror = () => { poster.src = placeholderPoster; };
+
+      const info = document.createElement("div");
+      info.className = "movie-info";
+
+      const title = document.createElement("div");
+      title.className = "movie-title";
+      title.textContent = movie.title || "Filamu";
+
+      const year = document.createElement("div");
+      year.className = "movie-year";
+      year.textContent = movie.year || "";
+
+      const removeButton = document.createElement("button");
+      removeButton.className = "secondary";
+      removeButton.textContent = "Ondoa";
+
+      removeButton.addEventListener("click", async () => {
+        try {
+          await db
+            .collection("users")
+            .doc(currentUser.uid)
+            .collection("savedMovies")
+            .doc(movie.imdbID)
+            .delete();
+
+          card.remove();
+          showMessage("Filamu imeondolewa.");
+
+        } catch (error) {
+          showMessage(friendlyError(error), true);
+        }
+      });
+
+      info.append(title, year, removeButton);
+      card.append(poster, info);
+
+      $("movieGrid").append(card);
+    });
+
+  } catch (error) {
+    $("movieGrid").innerHTML =
+      '<div class="empty">Imeshindikana kupakia filamu ulizohifadhi.</div>';
+
+    showMessage(friendlyError(error), true);
+  }
+});
+
+/* =========================================
+   INTRO / ANNOUNCEMENT
+========================================= */
+
+async function loadIntro() {
+  if (configMissing) return;
+
+  try {
+    const snapshot = await db.collection("settings").doc("intro").get();
+
+    if (!snapshot.exists) return;
+
+    const data = snapshot.data();
+
+    if (!data || !data.url) return;
+
+    const section = $("intro");
+
+    section.replaceChildren();
+
+    if (data.type === "video") {
+      const video = document.createElement("video");
+      video.controls = true;
+      video.preload = "metadata";
+      video.style.width = "100%";
+      video.style.maxHeight = "320px";
+      video.src = data.url;
+      section.append(video);
+
+    } else {
+      const image = document.createElement("img");
+      image.src = data.url;
+      image.alt = "Tangazo la Prosper Movies";
+      image.style.maxWidth = "100%";
+      image.style.maxHeight = "320px";
+      image.style.borderRadius = "12px";
+      section.append(image);
+    }
+
+  } catch (error) {
+    console.info("Intro haijapakiwa.", error);
+  }
+}
+
+loadIntro();
+loadOwnMovies();
+</script>
+
 </body>
 </html>
