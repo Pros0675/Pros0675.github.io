@@ -1,239 +1,832 @@
 <!DOCTYPE html>
 <html lang="sw">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex">
-<title>Admin - Prosper Movies</title>
-<style>
-  :root{--bg:#0c0a0a;--panel:#181313;--line:#2c2222;--red:#e5262d;--text:#f4eeee;--muted:#a39898;--ok:#3ecf8e}
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:20px 16px 60px}
-  .wrap{max-width:520px;margin:0 auto}
-  h1{font-size:1.5rem;margin-bottom:4px}
-  h2{font-size:1.1rem;margin:28px 0 12px}
-  .sub{color:var(--muted);margin-bottom:20px;font-size:.95rem}
-  .box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
-  label{display:block;font-size:.9rem;margin:14px 0 6px}
-  input,textarea{width:100%;background:#0f0c0c;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:12px;font:inherit;font-size:1rem}
-  input:focus,textarea:focus{outline:2px solid var(--red);border-color:transparent}
-  textarea{min-height:90px;resize:vertical}
-  button{font:inherit;cursor:pointer}
-  .btn{width:100%;margin-top:18px;padding:14px;border-radius:8px;border:none;background:var(--red);color:#fff;font-weight:700;font-size:1rem}
-  .btn:disabled{opacity:.6}
-  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text);margin-top:0;width:auto;padding:8px 14px;font-weight:600}
-  .msg{margin-top:14px;font-size:.95rem;min-height:1.2em}
-  .msg.err{color:#ff6b6b}.msg.ok{color:var(--ok)}
-  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-  .preview{width:110px;margin-top:10px;border-radius:8px;display:block}
-  .row{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
-  .row:last-child{border-bottom:none}
-  .row img,.row .ph{width:44px;height:64px;object-fit:cover;border-radius:6px;background:#241b1b;flex:none}
-  .row .t{flex:1;min-width:0}
-  .row .t b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .row .t span{color:var(--muted);font-size:.85rem}
-  .del{background:transparent;border:1px solid #5a2a2a;color:#ff8a8a;border-radius:8px;padding:8px 12px;font-weight:600}
-  small{color:var(--muted);display:block;margin-top:6px}
-  [hidden]{display:none!important}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090b12">
+
+  <title>Prosper Movies | Admin Dashboard</title>
+
+  <style>
+    :root {
+      --bg: #090b12;
+      --panel: #121622;
+      --panel-light: #1b2232;
+      --text: #f5f7fb;
+      --muted: #aab2c5;
+      --accent: #7c5cff;
+      --border: #293044;
+      --danger: #e5484d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, sans-serif;
+    }
+
+    button, input, textarea, select {
+      font: inherit;
+    }
+
+    button {
+      padding: 11px 15px;
+      border: 0;
+      border-radius: 9px;
+      background: var(--accent);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: .6;
+      cursor: wait;
+    }
+
+    button.secondary {
+      background: var(--panel-light);
+    }
+
+    button.danger {
+      background: var(--danger);
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    a {
+      color: #b7aaff;
+    }
+
+    .container {
+      max-width: 1050px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .logo span {
+      color: var(--accent);
+    }
+
+    .panel {
+      padding: 20px;
+      margin: 18px 0;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+    }
+
+    .panel h2 {
+      margin-top: 0;
+    }
+
+    .field {
+      margin: 14px 0;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 15px;
+    }
+
+    .muted {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .message {
+      padding: 13px;
+      margin: 14px 0;
+      border-radius: 9px;
+      background: #172b2a;
+      color: #a8ffeb;
+      overflow-wrap: anywhere;
+    }
+
+    .message.error {
+      background: #3a1c28;
+      color: #ffc0ce;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .movie-item {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 13px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .movie-item img {
+      width: 58px;
+      height: 83px;
+      object-fit: cover;
+      border-radius: 7px;
+      background: var(--panel-light);
+    }
+
+    .movie-info {
+      flex: 1;
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .movie-info strong {
+      display: block;
+    }
+
+    .movie-info small {
+      color: var(--muted);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 12px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        padding: 15px;
+      }
+
+      .logo {
+        font-size: 20px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-<div class="wrap">
+
+<div class="container">
+
+  <header>
+    <div class="logo">🛠️ <span>Prosper</span> Admin</div>
+
+    <div class="actions">
+      <a href="./index.html">← Rudi kwenye tovuti</a>
+
+      <button id="logoutBtn" class="secondary hidden">
+        Toka
+      </button>
+    </div>
+  </header>
+
+  <div id="message" class="message">
+    Inakagua mfumo...
+  </div>
 
   <!-- LOGIN -->
-  <section id="loginView" hidden>
-    <h1>Admin - Prosper Movies</h1>
-    <p class="sub">Ingia ili kuongeza movies.</p>
-    <div class="box">
-      <label for="email">Email</label>
-      <input id="email" type="email" autocomplete="username" inputmode="email">
-      <label for="pass">Password</label>
-      <input id="pass" type="password" autocomplete="current-password">
-      <button class="btn" id="loginBtn" type="button">Ingia</button>
-      <div class="msg" id="loginMsg"></div>
-    </div>
-  </section>
+  <section id="loginPanel" class="panel hidden">
+    <h2>Ingia kama Admin</h2>
 
-  <!-- ADMIN -->
-  <section id="adminView" hidden>
-    <div class="top">
-      <div>
-        <h1>Admin - Prosper Movies</h1>
-        <p class="sub">Ongeza movie mpya, itaonekana mara moja kwenye site.</p>
+    <p class="muted">
+      Akaunti lazima iwe imeidhinishwa na mwenye mfumo.
+      Kuwa na akaunti ya kawaida hakukupi ruhusa za admin.
+    </p>
+
+    <form id="loginForm">
+
+      <div class="field">
+        <label for="email">Barua pepe</label>
+
+        <input
+          id="email"
+          type="email"
+          autocomplete="username"
+          required
+        >
       </div>
-      <button class="btn ghost" id="logoutBtn" type="button">Toka</button>
-    </div>
 
-    <div class="box">
-      <label for="title">Jina la movie *</label>
-      <input id="title" type="text">
+      <div class="field">
+        <label for="password">Nenosiri</label>
 
-      <label for="year">Mwaka</label>
-      <input id="year" type="text" inputmode="numeric" placeholder="2026">
+        <input
+          id="password"
+          type="password"
+          autocomplete="current-password"
+          required
+        >
+      </div>
 
-      <label for="price">Bei</label>
-      <input id="price" type="text" placeholder="Mfano: TSh 2,000 au Bure">
+      <button type="submit" id="loginSubmit">
+        Ingia
+      </button>
 
-      <label for="desc">Maelezo</label>
-      <textarea id="desc"></textarea>
-
-      <label for="posterFile">Picha ya movie (poster)</label>
-      <input id="posterFile" type="file" accept="image/*">
-      <small>Chagua picha kutoka kwenye simu yako. Inapunguzwa ukubwa kiotomatiki.</small>
-      <img id="preview" class="preview" alt="" hidden>
-
-      <label for="link">Link ya kutazama (hiari)</label>
-      <input id="link" type="url" inputmode="url" placeholder="https://...">
-
-      <button class="btn" id="saveBtn" type="button">Hifadhi movie</button>
-      <div class="msg" id="saveMsg"></div>
-    </div>
-
-    <h2>Movies zilizopo</h2>
-    <div class="box" id="list"><div class="sub">Inapakia...</div></div>
+    </form>
   </section>
+
+  <!-- ADMIN DASHBOARD -->
+  <main id="dashboard" class="hidden">
+
+    <section class="panel">
+      <h2>🎬 Ongeza Filamu</h2>
+
+      <p class="muted">
+        Weka maelezo ya filamu. Poster iwe URL halali ya HTTPS.
+        Usihifadhi picha kubwa za Base64 ndani ya Firestore.
+      </p>
+
+      <form id="movieForm">
+
+        <div class="grid">
+
+          <div class="field">
+            <label for="movieTitle">Jina la filamu *</label>
+
+            <input
+              id="movieTitle"
+              maxlength="180"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="movieYear">Mwaka</label>
+
+            <input
+              id="movieYear"
+              maxlength="20"
+              placeholder="2026"
+            >
+          </div>
+
+          <div class="field">
+            <label for="imdbID">IMDb ID</label>
+
+            <input
+              id="imdbID"
+              maxlength="30"
+              placeholder="tt1234567"
+            >
+          </div>
+
+          <div class="field">
+            <label for="poster">Poster URL</label>
+
+            <input
+              id="poster"
+              type="url"
+              maxlength="1500"
+              placeholder="https://example.com/poster.jpg"
+            >
+          </div>
+
+        </div>
+
+        <div class="field">
+          <label for="description">Maelezo ya filamu</label>
+
+          <textarea
+            id="description"
+            maxlength="3000"
+          ></textarea>
+        </div>
+
+        <div class="field">
+          <label for="videoUrl">
+            URL ya video unayoruhusiwa kusambaza
+          </label>
+
+          <input
+            id="videoUrl"
+            type="url"
+            maxlength="2000"
+            placeholder="https://example.com/video"
+          >
+        </div>
+
+        <button type="submit" id="saveMovieBtn">
+          Hifadhi Filamu
+        </button>
+
+      </form>
+    </section>
+
+    <!-- INTRO -->
+    <section class="panel">
+      <h2>🖼️ Intro / Tangazo</h2>
+
+      <p class="muted">
+        Weka URL ya picha au video kutoka huduma ya kuhifadhi
+        maudhui unayoidhibiti, kama Cloudinary au Firebase Storage.
+      </p>
+
+      <form id="introForm">
+
+        <div class="field">
+          <label for="introUrl">URL ya picha au video</label>
+
+          <input
+            id="introUrl"
+            type="url"
+            maxlength="2000"
+            placeholder="https://example.com/intro.jpg"
+            required
+          >
+        </div>
+
+        <div class="field">
+          <label for="introType">Aina ya maudhui</label>
+
+          <select id="introType">
+            <option value="image">Picha</option>
+            <option value="video">Video</option>
+          </select>
+        </div>
+
+        <div class="actions">
+          <button type="submit">
+            Hifadhi Intro
+          </button>
+
+          <button
+            type="button"
+            id="removeIntroBtn"
+            class="danger"
+          >
+            Ondoa Intro
+          </button>
+        </div>
+
+      </form>
+    </section>
+
+    <!-- MOVIE LIST -->
+    <section class="panel">
+      <h2>📚 Filamu Zilizopo</h2>
+
+      <p class="muted">
+        Orodha ya filamu zilizohifadhiwa kwenye Firestore.
+      </p>
+
+      <div id="movieList">
+        Inapakia filamu...
+      </div>
+    </section>
+
+  </main>
+
 </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore, collection, addDoc, deleteDoc, doc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAMt3bDm-DtkwAHizrs6f2EB8rsXAu9FKs",
-    authDomain: "prosper-movie-36bfb.firebaseapp.com",
-    projectId: "prosper-movie-36bfb",
-    storageBucket: "prosper-movie-36bfb.firebasestorage.app",
-    messagingSenderId: "869131612157",
-    appId: "1:869131612157:web:bc17324ea27647d7b3b394"
-  };
+<script>
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-  const $ = id => document.getElementById(id);
+/* =========================================
+   FIREBASE CONFIGURATION
+   Tumia configuration kutoka Firebase Console.
+========================================= */
 
-  let posterData = "";
-  let unsub = null;
+const firebaseConfig = {
+  apiKey: "WEKA_FIREBASE_WEB_API_KEY",
+  authDomain: "prosper-movie-36bfb.firebaseapp.com",
+  projectId: "prosper-movie-36bfb",
+  storageBucket: "prosper-movie-36bfb.appspot.com",
+  messagingSenderId: "WEKA_MESSAGING_SENDER_ID",
+  appId: "WEKA_FIREBASE_APP_ID"
+};
 
-  function say(el, text, type){ el.textContent = text; el.className = "msg " + (type || ""); }
+firebase.initializeApp(firebaseConfig);
 
-  /* ---- Login ---- */
-  $("loginBtn").onclick = async () => {
-    say($("loginMsg"), "Inaingia...");
-    try {
-      await signInWithEmailAndPassword(auth, $("email").value.trim(), $("pass").value);
-      say($("loginMsg"), "");
-    } catch (e) {
-      say($("loginMsg"), "Email au password si sahihi.", "err");
-    }
-  };
-  $("pass").addEventListener("keydown", e => { if (e.key === "Enter") $("loginBtn").click(); });
-  $("logoutBtn").onclick = () => signOut(auth);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-  onAuthStateChanged(auth, user => {
-    $("loginView").hidden = !!user;
-    $("adminView").hidden = !user;
-    if (unsub) { unsub(); unsub = null; }
-    if (user) startList();
-  });
+const $ = id => document.getElementById(id);
 
-  /* ---- Poster: resize on the phone, keep it small ---- */
-  $("posterFile").onchange = async e => {
-    const f = e.target.files[0];
-    posterData = "";
-    $("preview").hidden = true;
-    if (!f) return;
-    try {
-      const bmp = await createImageBitmap(f);
-      const w = 400;
-      const h = Math.round(bmp.height * (w / bmp.width));
-      const c = document.createElement("canvas");
-      c.width = w; c.height = h;
-      c.getContext("2d").drawImage(bmp, 0, 0, w, h);
-      posterData = c.toDataURL("image/jpeg", 0.8);
-      $("preview").src = posterData;
-      $("preview").hidden = false;
-    } catch (err) {
-      say($("saveMsg"), "Picha hii haikusomeka. Jaribu nyingine.", "err");
-    }
-  };
+let isAdmin = false;
 
-  /* ---- Save ---- */
-  $("saveBtn").onclick = async () => {
-    const title = $("title").value.trim();
-    if (!title) return say($("saveMsg"), "Weka jina la movie.", "err");
-    const link = $("link").value.trim();
-    if (link && !/^https?:\/\//i.test(link)) return say($("saveMsg"), "Link lazima ianze na https://", "err");
+const configMissing =
+  firebaseConfig.apiKey.startsWith("WEKA_") ||
+  firebaseConfig.messagingSenderId.startsWith("WEKA_") ||
+  firebaseConfig.appId.startsWith("WEKA_");
 
-    $("saveBtn").disabled = true;
-    say($("saveMsg"), "Inahifadhi...");
-    try {
-      await addDoc(collection(db, "movies"), {
-        title,
-        year: $("year").value.trim(),
-        price: $("price").value.trim(),
-        description: $("desc").value.trim(),
-        poster: posterData,
-        link,
-        createdAt: serverTimestamp()
-      });
-      ["title","year","price","desc","link"].forEach(id => $(id).value = "");
-      $("posterFile").value = "";
-      posterData = "";
-      $("preview").hidden = true;
-      say($("saveMsg"), "Imehifadhiwa. Movie ipo live sasa.", "ok");
-    } catch (e) {
-      console.error(e);
-      say($("saveMsg"), "Imeshindwa kuhifadhi. Angalia Firestore rules na mtandao.", "err");
-    }
-    $("saveBtn").disabled = false;
-  };
+/* =========================================
+   MESSAGES
+========================================= */
 
-  /* ---- List + delete ---- */
-  function startList(){
-    const q = query(collection(db, "movies"), orderBy("createdAt", "desc"));
-    unsub = onSnapshot(q, snap => {
-      const box = $("list");
-      box.replaceChildren();
-      if (snap.empty) {
-        const d = document.createElement("div");
-        d.className = "sub"; d.textContent = "Bado hakuna movie.";
-        box.appendChild(d);
-        return;
-      }
-      snap.forEach(s => {
-        const m = s.data();
-        const row = document.createElement("div");
-        row.className = "row";
-        if (m.poster) {
-          const im = document.createElement("img"); im.src = m.poster; im.alt = "";
-          row.appendChild(im);
-        } else {
-          const ph = document.createElement("div"); ph.className = "ph";
-          row.appendChild(ph);
-        }
-        const t = document.createElement("div");
-        t.className = "t";
-        const b = document.createElement("b"); b.textContent = m.title || "";
-        const sp = document.createElement("span");
-        sp.textContent = [m.year, m.price].filter(Boolean).join("  |  ");
-        t.append(b, sp);
-        const del = document.createElement("button");
-        del.className = "del"; del.type = "button"; del.textContent = "Futa";
-        del.onclick = async () => {
-          if (!confirm('Futa "' + (m.title || "movie hii") + '"?')) return;
-          try { await deleteDoc(doc(db, "movies", s.id)); }
-          catch (e) { alert("Imeshindwa kufuta."); }
-        };
-        row.append(t, del);
-        box.appendChild(row);
-      });
-    }, err => {
-      console.error(err);
-      $("list").textContent = "Imeshindwa kupakia orodha.";
-    });
+function showMessage(text, error = false) {
+  const el = $("message");
+
+  el.textContent = text;
+
+  el.classList.toggle("error", error);
+  el.classList.remove("hidden");
+}
+
+function getErrorMessage(error) {
+  if (error.code === "permission-denied") {
+    return "Ruhusa imekataliwa. Hakikisha Firestore Rules na admin claim vimesanidiwa.";
   }
+
+  if (error.code === "auth/invalid-credential") {
+    return "Barua pepe au nenosiri si sahihi.";
+  }
+
+  return error.message || "Hitilafu imetokea.";
+}
+
+function validHttps(value, optional = false) {
+  if (!value && optional) return true;
+
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+/* =========================================
+   AUTHENTICATION AND ADMIN AUTHORIZATION
+========================================= */
+
+auth.onAuthStateChanged(async user => {
+  isAdmin = false;
+
+  $("dashboard").classList.add("hidden");
+  $("loginPanel").classList.add("hidden");
+
+  $("logoutBtn").classList.toggle("hidden", !user);
+
+  if (configMissing) {
+    showMessage(
+      "Jaza Firebase configuration halisi kwanza.",
+      true
+    );
+
+    if (!user) {
+      $("loginPanel").classList.remove("hidden");
+    }
+
+    return;
+  }
+
+  if (!user) {
+    $("loginPanel").classList.remove("hidden");
+
+    showMessage(
+      "Ingia kwa akaunti iliyoidhinishwa kama admin."
+    );
+
+    return;
+  }
+
+  try {
+    const token = await user.getIdTokenResult(true);
+
+    if (token.claims.admin !== true) {
+      showMessage(
+        "Akaunti hii haina ruhusa za admin. Utaondolewa kwenye dashboard.",
+        true
+      );
+
+      await auth.signOut();
+      return;
+    }
+
+    isAdmin = true;
+
+    $("dashboard").classList.remove("hidden");
+
+    showMessage("Umeingia kama admin aliyeidhinishwa.");
+
+    await loadMovies();
+    await loadIntro();
+
+  } catch (error) {
+    showMessage(getErrorMessage(error), true);
+  }
+});
+
+$("loginForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+  $("loginSubmit").disabled = true;
+
+  try {
+    await auth.signInWithEmailAndPassword(
+      $("email").value.trim(),
+      $("password").value
+    );
+
+  } catch (error) {
+    showMessage(getErrorMessage(error), true);
+
+  } finally {
+    $("loginSubmit").disabled = false;
+  }
+});
+
+$("logoutBtn").addEventListener("click", async () => {
+  try {
+    await auth.signOut();
+
+    showMessage("Umetoka kwenye akaunti.");
+
+  } catch (error) {
+    showMessage(getErrorMessage(error), true);
+  }
+});
+
+/* =========================================
+   ADD MOVIE
+========================================= */
+
+$("movieForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+  if (!isAdmin) {
+    showMessage("Huna ruhusa ya admin.", true);
+    return;
+  }
+
+  const title = $("movieTitle").value.trim();
+  const poster = $("poster").value.trim();
+  const videoUrl = $("videoUrl").value.trim();
+
+  if (!title) {
+    showMessage("Jina la filamu linahitajika.", true);
+    return;
+  }
+
+  if (!validHttps(poster, true)) {
+    showMessage("Poster URL lazima iwe HTTPS.", true);
+    return;
+  }
+
+  if (!validHttps(videoUrl, true)) {
+    showMessage("Video URL lazima iwe HTTPS.", true);
+    return;
+  }
+
+  const movie = {
+    title: title,
+    year: $("movieYear").value.trim(),
+    imdbID: $("imdbID").value.trim(),
+    poster: poster,
+    description: $("description").value.trim(),
+    videoUrl: videoUrl,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    createdBy: auth.currentUser.uid
+  };
+
+  $("saveMovieBtn").disabled = true;
+
+  try {
+    await db.collection("movies").add(movie);
+
+    $("movieForm").reset();
+
+    showMessage("Filamu imehifadhiwa kikamilifu.");
+
+    await loadMovies();
+
+  } catch (error) {
+    showMessage(getErrorMessage(error), true);
+
+  } finally {
+    $("saveMovieBtn").disabled = false;
+  }
+});
+
+/* =========================================
+   LOAD MOVIES
+========================================= */
+
+async function loadMovies() {
+  if (!isAdmin) return;
+
+  const list = $("movieList");
+
+  list.textContent = "Inapakia filamu...";
+
+  try {
+    const snapshot = await db
+      .collection("movies")
+      .orderBy("createdAt", "desc")
+      .limit(100)
+      .get();
+
+    list.replaceChildren();
+
+    if (snapshot.empty) {
+      list.textContent = "Bado hakuna filamu zilizoongezwa.";
+      return;
+    }
+
+    snapshot.forEach(documentSnapshot => {
+      const movie = documentSnapshot.data();
+
+      const row = document.createElement("div");
+      row.className = "movie-item";
+
+      const image = document.createElement("img");
+
+      image.alt = "";
+
+      image.src = movie.poster || "";
+
+      image.onerror = () => {
+        image.style.display = "none";
+      };
+
+      const info = document.createElement("div");
+      info.className = "movie-info";
+
+      const title = document.createElement("strong");
+      title.textContent = movie.title || "Filamu";
+
+      const year = document.createElement("small");
+      year.textContent = movie.year || "Mwaka haujawekwa";
+
+      info.append(title, year);
+
+      const deleteButton = document.createElement("button");
+      deleteButton.className = "danger";
+      deleteButton.textContent = "Futa";
+
+      deleteButton.addEventListener("click", async () => {
+        if (!isAdmin) return;
+
+        const confirmed = confirm(
+          "Una uhakika unataka kufuta filamu hii?"
+        );
+
+        if (!confirmed) return;
+
+        try {
+          await db
+            .collection("movies")
+            .doc(documentSnapshot.id)
+            .delete();
+
+          showMessage("Filamu imefutwa.");
+
+          await loadMovies();
+
+        } catch (error) {
+          showMessage(getErrorMessage(error), true);
+        }
+      });
+
+      row.append(image, info, deleteButton);
+
+      list.append(row);
+    });
+
+  } catch (error) {
+    list.textContent = "Imeshindikana kupakia filamu.";
+
+    showMessage(getErrorMessage(error), true);
+  }
+}
+
+/* =========================================
+   SAVE INTRO
+========================================= */
+
+$("introForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+  if (!isAdmin) {
+    showMessage("Huna ruhusa ya admin.", true);
+    return;
+  }
+
+  const url = $("introUrl").value.trim();
+  const type = $("introType").value;
+
+  if (!validHttps(url)) {
+    showMessage("Tumia URL halali ya HTTPS.", true);
+    return;
+  }
+
+  try {
+    await db.collection("settings").doc("intro").set({
+      url: url,
+      type: type,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedBy: auth.currentUser.uid
+    });
+
+    showMessage("Intro imehifadhiwa.");
+
+  } catch (error) {
+    showMessage(getErrorMessage(error), true);
+  }
+});
+
+/* =========================================
+   LOAD INTRO
+========================================= */
+
+async function loadIntro() {
+  if (!isAdmin) return;
+
+  try {
+    const snapshot = await db
+      .collection("settings")
+      .doc("intro")
+      .get();
+
+    if (!snapshot.exists) {
+      $("introUrl").value = "";
+      return;
+    }
+
+    const data = snapshot.data();
+
+    $("introUrl").value = data.url || "";
+
+    $("introType").value =
+      data.type === "video" ? "video" : "image";
+
+  } catch (error) {
+    showMessage(getErrorMessage(error), true);
+  }
+}
+
+/* =========================================
+   REMOVE INTRO
+========================================= */
+
+$("removeIntroBtn").addEventListener("click", async () => {
+  if (!isAdmin) {
+    showMessage("Huna ruhusa ya admin.", true);
+    return;
+  }
+
+  if (!confirm("Una uhakika unataka kuondoa intro?")) {
+    return;
+  }
+
+  try {
+    await db.collection("settings").doc("intro").delete();
+
+    $("introUrl").value = "";
+
+    showMessage("Intro imeondolewa.");
+
+  } catch (error) {
+    showMessage(getErrorMessage(error), true);
+  }
+});
+
 </script>
+
 </body>
 </html>
