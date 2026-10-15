@@ -381,7 +381,7 @@ async function loadList() {
           $("newBtn").classList.remove("hidden");
           render();
           window.scrollTo({ top: 0, behavior: "smooth" });
-        }),
+       }),
         btn("Futa", "del sm", async () => {
           if (!confirm("Futa series \"" + d.title + "\"?")) return;
           try {
