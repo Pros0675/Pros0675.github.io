@@ -428,7 +428,6 @@
       allowfullscreen
       allow="autoplay; fullscreen; picture-in-picture"
       referrerpolicy="no-referrer"
-      sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
     ></iframe>
   </div>
 </div>
@@ -889,7 +888,7 @@ async function showMovieDetails(imdbID) {
       saveMovie(movie);
     });
 
-    // PLAY BUTTON - sasa inacheza moja kwa moja
+    // PLAY BUTTON
     const playButton = document.createElement("button");
     playButton.style.marginTop = "10px";
     playButton.textContent = "▶ Cheza Filamu";
@@ -918,7 +917,7 @@ async function showMovieDetails(imdbID) {
 }
 
 /* =========================================
-   VIDEO PLAYER - SERVER + MATANGAZO YAMEPUNGUZWA
+   VIDEO PLAYER
 ========================================= */
 
 function openVideo(title, imdbID) {
@@ -926,7 +925,7 @@ function openVideo(title, imdbID) {
 
   $("playerTitle").textContent = title;
 
-  // Anza na Server 1 (safi zaidi)
+  // Anza na Server 1
   loadServer(1);
 
   closeModal("detailModal");
@@ -938,7 +937,6 @@ function loadServer(num) {
 
   let embedUrl = "";
 
-  // Servers zenye matangazo machache
   if (num === 1) {
     embedUrl = "https://vidsrc.to/embed/movie/" + currentImdbID;
   } else if (num === 2) {
