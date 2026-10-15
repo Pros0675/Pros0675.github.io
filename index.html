@@ -1,217 +1,259 @@
 <!DOCTYPE html>
 <html lang="sw">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#090b12">
-  <meta name="description" content="Prosper Movies — tafuta filamu na hifadhi unazopenda.">
-  <title>Prosper Movies</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0c0a14">
+<meta name="description" content="Prosper Movies — tazama filamu na series, hifadhi unazopenda.">
+<title>Prosper Movies</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0c0a14; --panel:#15122a; --panel2:#1e1a38; --text:#f6f3ff; --muted:#a29dbd;
+  --accent:#8b6bff; --gold:#ffc857; --border:#2a2548; --danger:#ff7a93;
+  --display:"Bricolage Grotesque","Trebuchet MS",Arial,sans-serif;
+  --body:"DM Sans",Arial,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);line-height:1.45;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+button,input{font:inherit}
+button{cursor:pointer;border:0;border-radius:12px;padding:11px 16px;background:var(--accent);color:#fff;font-weight:700}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+button:disabled{opacity:.6;cursor:wait}
+button.ghost{background:var(--panel2);color:var(--text)}
+button.sm{padding:8px 12px;font-size:13px;border-radius:10px}
+input{width:100%;padding:13px 14px;background:var(--panel);color:#fff;border:1px solid var(--border);border-radius:12px}
+a{color:inherit}
+.hidden{display:none!important}
+.muted{color:var(--muted)}
 
-  <style>
-    :root {
-      --bg: #090b12;
-      --panel: #121622;
-      --panel-light: #1b2232;
-      --text: #f5f7fb;
-      --muted: #aab2c5;
-      --accent: #7c5cff;
-      --border: #293044;
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; background: var(--bg); color: var(--text); font-family: Arial, sans-serif; }
-    button, input { font: inherit; }
-    button {
-      cursor: pointer; border: 0; border-radius: 9px; padding: 11px 15px;
-      background: var(--accent); color: white; font-weight: bold;
-    }
-    button:disabled { opacity: .6; cursor: wait; }
-    input {
-      width: 100%; padding: 12px; background: var(--panel); color: white;
-      border: 1px solid var(--border); border-radius: 9px;
-    }
-    .container { max-width: 1200px; margin: auto; padding: 18px; }
-    header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .logo { font-size: 25px; font-weight: 900; }
-    .logo span { color: var(--accent); }
-    .header-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
-    .secondary { background: var(--panel-light); }
-    .search-form { display: flex; gap: 9px; margin: 25px 0; }
-    .search-form input { flex: 1; min-width: 0; }
-    h2 { margin-top: 25px; }
-    .muted { color: var(--muted); }
-    .message {
-      background: #172b2a; color: #a8ffeb; padding: 12px; margin: 15px 0;
-      border-radius: 9px; overflow-wrap: anywhere;
-    }
-    .hidden { display: none !important; }
-    .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 16px; margin-top: 20px; }
-    .movie-card { background: var(--panel); border: 1px solid var(--border); border-radius: 13px; overflow: hidden; }
-    .movie-card img { display: block; width: 100%; aspect-ratio: 2 / 3; object-fit: cover; background: var(--panel-light); }
-    .movie-info { padding: 11px; }
-    .movie-title { font-weight: bold; line-height: 1.4; }
-    .movie-year { color: var(--muted); font-size: 13px; margin-top: 6px; }
-    .movie-card button { width: 100%; margin-top: 10px; }
-    .empty {
-      padding: 25px; border: 1px dashed var(--border); border-radius: 12px;
-      color: var(--muted); text-align: center; grid-column: 1 / -1;
-    }
-    .modal {
-      position: fixed; inset: 0; z-index: 20; background: #000c;
-      display: grid; place-items: center; padding: 15px;
-    }
-    .modal-box {
-      width: min(540px, 100%); max-height: 90vh; overflow-y: auto;
-      background: var(--panel); border: 1px solid var(--border);
-      border-radius: 15px; padding: 20px;
-    }
-    .modal-box label { display: block; margin: 14px 0 7px; color: var(--muted); }
-    .modal-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 15px; }
-    .detail-layout { display: grid; grid-template-columns: 145px 1fr; gap: 16px; }
-    .detail-layout img { width: 100%; border-radius: 9px; }
-    .player { width: 100%; aspect-ratio: 16 / 9; border: 0; background: black; border-radius: 9px; }
-    footer { text-align: center; color: var(--muted); font-size: 13px; margin: 35px 0 15px; }
+/* top bar */
+.topbar{position:sticky;top:0;z-index:15;display:flex;align-items:center;justify-content:space-between;
+  padding:calc(12px + env(safe-area-inset-top)) 18px 12px;background:linear-gradient(#0c0a14ee,#0c0a14aa);backdrop-filter:blur(12px)}
+.logo{display:flex;align-items:center;gap:9px;font-family:var(--display);font-weight:800;font-size:23px;letter-spacing:-.02em}
+.logo svg{width:26px;height:26px}
+.logo b{color:var(--accent);font-weight:800}
 
-    @media (max-width: 550px) {
-      .container { padding: 12px; }
-      .logo { font-size: 21px; }
-      .movie-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-      .detail-layout { grid-template-columns: 1fr; }
-      .detail-layout img { max-width: 170px; }
-      .search-form button { padding: 10px; }
-    }
-  </style>
+.wrap{max-width:1100px;margin:auto}
+.view{display:none}
+.view.active{display:block}
+.pad{padding:0 18px}
+h2{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01em;margin:30px 18px 12px}
+.page-title{margin-top:18px}
+
+/* hero */
+.hero{position:relative;margin:0 14px;border-radius:26px;overflow:hidden;min-height:430px;display:flex;align-items:flex-end;background:var(--panel)}
+.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center 18%;background-color:#241d4d}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#0c0a1400 25%,#0c0a14d9 78%,#0c0a14)}
+.hero-body{position:relative;z-index:1;padding:22px;width:100%}
+.hero-tag{display:inline-block;background:#ffffff1f;backdrop-filter:blur(6px);padding:5px 11px;border-radius:99px;font-size:12.5px;font-weight:700;margin-bottom:10px}
+.hero h1{font-family:var(--display);font-weight:800;font-size:clamp(32px,8vw,54px);line-height:1.02;letter-spacing:-.03em;margin:0 0 8px;max-width:14ch;text-wrap:balance}
+.hero p{margin:0 0 16px;color:#d6d1ee;max-width:46ch}
+.hero .actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn-play{background:var(--gold);color:#241a00;display:inline-flex;align-items:center;gap:8px;padding:13px 22px;font-size:16px}
+.btn-play svg{width:18px;height:18px}
+
+/* rows */
+.rail{display:flex;gap:12px;overflow-x:auto;padding:2px 18px 10px;scroll-snap-type:x proximity;scrollbar-width:none}
+.rail::-webkit-scrollbar{display:none}
+.rail .card{flex:0 0 138px;scroll-snap-align:start}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;padding:0 18px}
+.card{background:none;padding:0;text-align:left;color:inherit;border-radius:16px;font-weight:400;display:block;width:100%}
+.card .poster{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:2/3;background:var(--panel2);border:1px solid var(--border)}
+.card img{display:block;width:100%;height:100%;object-fit:cover}
+.card .badge{position:absolute;left:8px;bottom:8px;background:#0c0a14cc;backdrop-filter:blur(6px);padding:3px 9px;border-radius:99px;font-size:12px;font-weight:700}
+.card .t{font-weight:700;margin-top:8px;font-size:14.5px;line-height:1.25}
+.card .s{color:var(--muted);font-size:12.5px;margin-top:2px}
+.card .rm{margin-top:8px;width:100%}
+.empty{padding:26px;border:1px dashed var(--border);border-radius:16px;color:var(--muted);text-align:center;margin:0 18px;grid-column:1/-1}
+.rail .empty{flex:1 0 100%;margin:0}
+#intro{padding:0 18px}
+#intro video,#intro img{width:100%;max-height:300px;border-radius:18px;margin-top:18px;object-fit:cover}
+
+/* search */
+.search{display:flex;gap:9px;padding:0 18px;margin-bottom:6px}
+.search input{flex:1;min-width:0}
+
+/* account */
+.account{margin:0 18px;background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:22px}
+.account h3{font-family:var(--display);margin:0 0 6px;font-size:21px}
+.account .stack{display:grid;gap:10px;margin-top:16px}
+.account a.linkbtn{display:block;text-decoration:none;text-align:center;background:var(--panel2);padding:12px;border-radius:12px;font-weight:700}
+
+/* bottom nav */
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom));z-index:18;
+  width:min(440px,calc(100% - 24px));display:flex;background:#1a1636ee;backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:22px;padding:6px}
+.nav button{flex:1;background:none;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;padding:8px 4px;border-radius:16px}
+.nav button svg{width:22px;height:22px}
+.nav button.on{color:#fff;background:var(--accent)}
+
+/* modals */
+.modal{position:fixed;inset:0;z-index:30;background:#000000d0;display:grid;place-items:center;padding:14px}
+.box{width:min(520px,100%);max-height:92vh;overflow-y:auto;background:var(--panel);border:1px solid var(--border);border-radius:22px;padding:20px}
+.box.wide{width:min(950px,100%)}
+.box label{display:block;margin:14px 0 7px;color:var(--muted)}
+.box h2{margin:0;font-size:21px}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.actions-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.detail{display:grid;grid-template-columns:140px 1fr;gap:16px;margin-top:14px}
+.detail img{width:100%;border-radius:14px}
+.detail h3{font-family:var(--display);font-size:22px;margin:0 0 6px}
+.player{width:100%;aspect-ratio:16/9;border:0;background:#000;border-radius:14px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:8px 13px;font-size:13px;background:var(--panel2);color:var(--text);border-radius:99px}
+.chip.on{background:var(--accent)}
+
+/* toast */
+.toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translateX(-50%);z-index:50;width:min(460px,calc(100% - 28px));
+  background:#1d3a35;color:#b9ffee;padding:12px 16px;border-radius:14px;overflow-wrap:anywhere;box-shadow:0 8px 30px #0008}
+.toast.err{background:#47202e;color:#ffd0da}
+footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
+
+@media(max-width:560px){
+  .hero{min-height:400px;margin:0 10px}
+  .detail{grid-template-columns:1fr}
+  .detail img{max-width:160px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
 </head>
-
 <body>
-<a href="./admin.html" style="position:fixed;bottom:10px;right:10px;font-size:12px;opacity:.6;color:#b7aaff">Admin</a>
 
-<div class="container">
+<div id="toast" class="toast hidden" role="status"></div>
 
-  <header>
-    <div class="logo">🍿 <span>Prosper</span> Movies</div>
-
-    <div class="header-buttons">
-      <button id="savedBtn" class="secondary">❤️ Zilizohifadhiwa</button>
-      <button id="loginBtn">Ingia / Jisajili</button>
-      <button id="logoutBtn" class="secondary hidden">Toka</button>
-      <a id="adminLink" class="hidden" href="./admin.html">Admin</a>
-    </div>
-  </header>
-
-  <div id="message" class="message hidden" role="status"></div>
-
-  <section id="intro"></section>
-
-  <h2>🎞️ Filamu Zetu</h2>
-  <div id="ownGrid" class="movie-grid">
-    <div class="empty">Inapakia...</div>
+<div class="topbar">
+  <div class="logo">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#8b6bff"/><path d="M12 9.5v13l11-6.5z" fill="#ffc857"/></svg>
+    Prosper<b>Movies</b>
   </div>
-
-  <h2>📺 Series</h2>
-  <div id="seriesGrid" class="movie-grid">
-    <div class="empty">Inapakia...</div>
-  </div>
-
-  <form id="searchForm" class="search-form">
-    <input id="searchInput" type="search" placeholder="🔎 Tafuta filamu..." aria-label="Tafuta filamu" required>
-    <button type="submit">Tafuta</button>
-  </form>
-
-  <h2 id="sectionTitle">🎬 Tafuta Filamu</h2>
-
-  <p id="sectionDescription" class="muted">Andika jina la filamu ili kuona matokeo.</p>
-
-  <div id="movieGrid" class="movie-grid">
-    <div class="empty">Karibu Prosper Movies! Tafuta filamu unayoipenda.</div>
-  </div>
-
-  <footer>© <span id="yearNow"></span> Prosper Movies</footer>
-
 </div>
+
+<div class="wrap">
+
+  <!-- ============ MWANZO ============ -->
+  <main id="viewHome" class="view active">
+    <section id="hero" class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-body">
+        <span class="hero-tag" id="heroTag">Karibu</span>
+        <h1 id="heroTitle">Tazama. Hifadhi. Rudia.</h1>
+        <p id="heroText">Filamu na series zako zote mahali pamoja.</p>
+        <div class="actions">
+          <button id="heroPlay" class="btn-play">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>
+            <span id="heroPlayText">Tafuta filamu</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="intro"></section>
+
+    <h2>Filamu Zetu</h2>
+    <div id="ownGrid" class="rail"><div class="empty">Inapakia...</div></div>
+
+    <h2>Series</h2>
+    <div id="seriesGrid" class="rail"><div class="empty">Inapakia...</div></div>
+
+    <footer>© <span id="yearNow"></span> Prosper Movies</footer>
+  </main>
+
+  <!-- ============ TAFUTA ============ -->
+  <main id="viewSearch" class="view">
+    <h2 class="page-title">Tafuta filamu</h2>
+    <form id="searchForm" class="search">
+      <input id="searchInput" type="search" placeholder="Andika jina la filamu" aria-label="Tafuta filamu" required>
+      <button type="submit">Tafuta</button>
+    </form>
+    <h2 id="sectionTitle" style="font-size:17px;margin-top:20px">Matokeo</h2>
+    <div id="movieGrid" class="grid"><div class="empty">Andika jina la filamu ili kuona matokeo.</div></div>
+  </main>
+
+  <!-- ============ ZILIZOHIFADHIWA ============ -->
+  <main id="viewSaved" class="view">
+    <h2 class="page-title">Zilizohifadhiwa</h2>
+    <div id="savedGrid" class="grid"><div class="empty">Inapakia...</div></div>
+  </main>
+
+  <!-- ============ AKAUNTI ============ -->
+  <main id="viewAccount" class="view">
+    <h2 class="page-title">Akaunti</h2>
+    <div id="accountBox" class="account"></div>
+  </main>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="nav" aria-label="Menyu kuu">
+  <button data-view="Home" class="on">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Mwanzo</button>
+  <button data-view="Search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Tafuta</button>
+  <button data-view="Saved">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.600-7 10-7 10z"/></svg>Hifadhi</button>
+  <button data-view="Account">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>Akaunti</button>
+</nav>
 
 <!-- LOGIN / SIGNUP -->
 <div id="authModal" class="modal hidden">
-  <div class="modal-box">
+  <div class="box">
     <h2 id="authTitle">Ingia kwenye akaunti</h2>
-
     <form id="authForm">
       <label for="email">Barua pepe</label>
       <input id="email" type="email" autocomplete="email" required>
-
       <label for="password">Nenosiri</label>
       <input id="password" type="password" minlength="6" autocomplete="current-password" required>
-
-      <div class="modal-actions">
+      <div class="actions-row">
         <button id="authSubmit" type="submit">Ingia</button>
-        <button id="toggleAuth" type="button" class="secondary">Tengeneza akaunti</button>
-        <button type="button" class="secondary" data-close="authModal">Funga</button>
+        <button id="toggleAuth" type="button" class="ghost">Tengeneza akaunti</button>
+        <button type="button" class="ghost" data-close="authModal">Funga</button>
       </div>
     </form>
-
-    <button id="resetPassword" class="secondary" style="margin-top:12px">Nimesahau nenosiri</button>
+    <button id="resetPassword" class="ghost sm" style="margin-top:14px">Nimesahau nenosiri</button>
   </div>
 </div>
 
-<!-- MOVIE DETAILS -->
+<!-- MAELEZO -->
 <div id="detailModal" class="modal hidden">
-  <div class="modal-box">
-    <div style="display:flex;justify-content:space-between;gap:10px">
-      <h2>Maelezo ya Filamu</h2>
-      <button type="button" class="secondary" data-close="detailModal">✕</button>
-    </div>
+  <div class="box">
+    <div class="bar"><h2>Maelezo ya Filamu</h2><button type="button" class="ghost sm" data-close="detailModal">Funga</button></div>
     <div id="detailContent"></div>
   </div>
 </div>
 
-<!-- VIDEO PLAYER -->
+<!-- PLAYER -->
 <div id="playerModal" class="modal hidden">
-  <div class="modal-box" style="width:min(950px,100%)">
-
-    <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+  <div class="box wide">
+    <div class="bar">
       <h2 id="playerTitle">Kicheza Video</h2>
-      <button type="button" class="secondary" data-close="playerModal">Funga</button>
+      <button type="button" class="ghost sm" id="closePlayer">Funga</button>
     </div>
 
-    <p class="muted" style="margin:8px 0 12px">
-      Filamu inachezwa. Matangazo yamepunguzwa kwa kutumia embed safi.
-    </p>
-
-    <!-- Server sources -->
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-      <button type="button" class="secondary" id="src1" style="padding:8px 12px;font-size:13px">Server 1</button>
-      <button type="button" class="secondary" id="src2" style="padding:8px 12px;font-size:13px">Server 2</button>
-      <button type="button" class="secondary" id="src3" style="padding:8px 12px;font-size:13px">Server 3</button>
-      <button type="button" class="secondary" id="customUrlBtn" style="padding:8px 12px;font-size:13px">URL yangu</button>
+    <div id="serverRow" class="chips" style="margin:14px 0 12px">
+      <button type="button" class="chip" id="src1">Server 1</button>
+      <button type="button" class="chip" id="src2">Server 2</button>
+      <button type="button" class="chip" id="src3">Server 3</button>
+      <button type="button" class="chip" id="customUrlBtn">URL yangu</button>
     </div>
 
-    <!-- YouTube na embed nyingine -->
-    <iframe
-      id="playerFrame"
-      class="player"
-      title="Kicheza video"
-      frameborder="0"
-      allowfullscreen
+    <iframe id="playerFrame" class="player" title="Kicheza video" frameborder="0" allowfullscreen
+      style="margin-top:12px"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      referrerpolicy="strict-origin-when-cross-origin"
-    ></iframe>
+      referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    <video id="playerVideo" class="player" controls playsinline style="display:none;margin-top:12px"></video>
 
-    <!-- Dropbox na .mp4 -->
-    <video id="playerVideo" class="player" controls playsinline style="display:none"></video>
-
-    <!-- Seasons na Episodes -->
     <div id="episodePanel" class="hidden" style="margin-top:14px"></div>
   </div>
 </div>
 
-<!-- FIREBASE LIBRARIES -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <script>
-/* =========================================
-   FIREBASE CONFIGURATION
-========================================= */
 const firebaseConfig = {
   apiKey: "AIzaSyAMt3bDm-DtkwAHizrs6f2EB8rsXAu9FKs",
   authDomain: "prosper-movie-36bfb.firebaseapp.com",
@@ -221,113 +263,51 @@ const firebaseConfig = {
   appId: "1:869131612157:web:145fdd0bf412d623b3b394",
   measurementId: "G-SD5Q1203YP"
 };
-
-/* OMDb API key */
 const OMDB_API_KEY = "d0349ee";
+const ADMINS = ["prospermgimba9@gmail.com", "erickturwa0@gmail.com"];
 
 firebase.initializeApp(firebaseConfig);
-
 const auth = firebase.auth();
 const db = firebase.firestore();
-
 const $ = id => document.getElementById(id);
 
-let currentUser = null;
-let authMode = "login";
-let searchToken = 0;
-let currentImdbID = null;
+let currentUser = null, authMode = "login", searchToken = 0, currentImdbID = null, heroSet = false;
 
 $("yearNow").textContent = new Date().getFullYear();
 
-const placeholderPoster =
-  "data:image/svg+xml;charset=UTF-8," +
-  encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="450">' +
-    '<rect width="100%" height="100%" fill="#1b2232"/>' +
-    '<text x="50%" y="50%" fill="#ffffff" font-size="22" text-anchor="middle">Prosper Movies</text>' +
-    '</svg>'
-  );
+const placeholderPoster = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="450"><rect width="100%" height="100%" fill="#1e1a38"/>' +
+  '<text x="50%" y="50%" fill="#a29dbd" font-size="20" text-anchor="middle">Prosper Movies</text></svg>');
 
-/* =========================================
-   UJUMBE
-========================================= */
+/* ---------- helpers ---------- */
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+function isAdminUser(u) { return !!u && ADMINS.includes((u.email || "").toLowerCase()); }
 
+let toastTimer;
 function showMessage(text, error = false) {
-  const el = $("message");
-  el.textContent = text;
-  el.classList.remove("hidden");
-  el.style.background = error ? "#3a1c28" : "#172b2a";
-  el.style.color = error ? "#ffc0ce" : "#a8ffeb";
+  const t = $("toast");
+  t.textContent = text;
+  t.className = "toast" + (error ? " err" : "");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.add("hidden"), 4500);
 }
+function openModal(id) { $(id).classList.remove("hidden"); }
+function closeModal(id) { $(id).classList.add("hidden"); }
 
-function hideMessage() {
-  $("message").classList.add("hidden");
-}
+document.querySelectorAll("[data-close]").forEach(b =>
+  b.addEventListener("click", () => closeModal(b.dataset.close)));
 
-function openModal(id) {
-  $(id).classList.remove("hidden");
-}
-
-function closeModal(id) {
-  $(id).classList.add("hidden");
-}
-
-document.querySelectorAll("[data-close]").forEach(button => {
-  button.addEventListener("click", () => {
-    closeModal(button.dataset.close);
-  });
-});
-
-document.querySelectorAll(".modal").forEach(modal => {
-  modal.addEventListener("click", event => {
-    if (event.target === modal) {
-      closeModal(modal.id);
-      if (modal.id === "playerModal") {
-        stopPlayer();
-        currentImdbID = null;
-      }
+document.querySelectorAll(".modal").forEach(m =>
+  m.addEventListener("click", e => {
+    if (e.target === m) {
+      if (m.id === "playerModal") closePlayer(); else closeModal(m.id);
     }
-  });
-});
-
-/* =========================================
-   FIREBASE CONFIGURATION CHECK
-========================================= */
-
-const configMissing =
-  firebaseConfig.apiKey.startsWith("WEKA_") ||
-  firebaseConfig.messagingSenderId.startsWith("WEKA_") ||
-  firebaseConfig.appId.startsWith("WEKA_");
-
-if (configMissing) {
-  showMessage("Kwanza jaza Firebase configuration yako kwenye index.html.", true);
-}
-
-/* =========================================
-   AUTHENTICATION
-========================================= */
-
-$("loginBtn").addEventListener("click", () => {
-  authMode = "login";
-  updateAuthMode();
-  openModal("authModal");
-});
-
-$("toggleAuth").addEventListener("click", () => {
-  authMode = authMode === "login" ? "signup" : "login";
-  updateAuthMode();
-});
-
-function updateAuthMode() {
-  $("authTitle").textContent =
-    authMode === "login" ? "Ingia kwenye akaunti" : "Tengeneza akaunti";
-
-  $("authSubmit").textContent =
-    authMode === "login" ? "Ingia" : "Jisajili";
-
-  $("toggleAuth").textContent =
-    authMode === "login" ? "Tengeneza akaunti" : "Nina akaunti tayari";
-}
+  }));
 
 function friendlyError(error) {
   const messages = {
@@ -340,314 +320,214 @@ function friendlyError(error) {
     "auth/too-many-requests": "Majaribio yamezidi. Jaribu tena baadaye.",
     "permission-denied": "Huna ruhusa ya kufanya kitendo hiki."
   };
-
   return messages[error.code] || error.message || "Hitilafu imetokea.";
 }
 
-$("authForm").addEventListener("submit", async event => {
-  event.preventDefault();
+/* ---------- navigation ---------- */
+function showView(name) {
+  document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === "view" + name));
+  document.querySelectorAll(".nav button").forEach(b => b.classList.toggle("on", b.dataset.view === name));
+  window.scrollTo({ top: 0 });
+  if (name === "Saved") loadSaved();
+  if (name === "Search") $("searchInput").focus();
+}
+document.querySelectorAll(".nav button").forEach(b =>
+  b.addEventListener("click", () => showView(b.dataset.view)));
 
-  const email = $("email").value.trim();
-  const password = $("password").value;
+/* ---------- cards ---------- */
+function makeCard({ title, sub, poster, badge, onClick }) {
+  const card = el("button", "card");
+  card.type = "button";
+  const p = el("div", "poster");
+  const img = document.createElement("img");
+  img.loading = "lazy";
+  img.alt = "Poster ya " + title;
+  img.src = poster || placeholderPoster;
+  img.onerror = () => { img.src = placeholderPoster; };
+  p.append(img);
+  if (badge) p.append(el("span", "badge", badge));
+  card.append(p, el("div", "t", title), el("div", "s", sub || ""));
+  card.addEventListener("click", onClick);
+  return card;
+}
 
+/* ---------- hero ---------- */
+function setHero({ tag, title, text, poster, playText, onPlay }) {
+  if (heroSet) return;
+  heroSet = true;
+  $("heroTag").textContent = tag;
+  $("heroTitle").textContent = title;
+  $("heroText").textContent = text || "";
+  $("heroPlayText").textContent = playText;
+  if (poster) $("hero").querySelector(".hero-bg").style.backgroundImage = "url('" + poster.replace(/'/g, "%27") + "')";
+  $("heroPlay").onclick = onPlay;
+}
+$("heroPlay").onclick = () => showView("Search");
+
+/* ---------- AUTH ---------- */
+function updateAuthMode() {
+  $("authTitle").textContent = authMode === "login" ? "Ingia kwenye akaunti" : "Tengeneza akaunti";
+  $("authSubmit").textContent = authMode === "login" ? "Ingia" : "Jisajili";
+  $("toggleAuth").textContent = authMode === "login" ? "Tengeneza akaunti" : "Nina akaunti tayari";
+}
+function openAuth(mode) { authMode = mode || "login"; updateAuthMode(); openModal("authModal"); }
+
+$("toggleAuth").addEventListener("click", () => { authMode = authMode === "login" ? "signup" : "login"; updateAuthMode(); });
+
+$("authForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const email = $("email").value.trim(), password = $("password").value;
   $("authSubmit").disabled = true;
-  hideMessage();
-
   try {
     if (authMode === "signup") {
-      const credential = await auth.createUserWithEmailAndPassword(email, password);
-      await credential.user.sendEmailVerification();
+      const c = await auth.createUserWithEmailAndPassword(email, password);
+      await c.user.sendEmailVerification();
       closeModal("authModal");
-      showMessage("Akaunti imetengenezwa! Angalia barua pepe yako kuthibitisha akaunti.");
+      showMessage("Akaunti imetengenezwa! Angalia barua pepe yako kuthibitisha.");
     } else {
       await auth.signInWithEmailAndPassword(email, password);
       closeModal("authModal");
       showMessage("Umeingia kwenye akaunti yako.");
     }
-  } catch (error) {
-    showMessage(friendlyError(error), true);
-  } finally {
-    $("authSubmit").disabled = false;
-  }
+  } catch (err) { showMessage(friendlyError(err), true); }
+  finally { $("authSubmit").disabled = false; }
 });
 
 $("resetPassword").addEventListener("click", async () => {
   const email = $("email").value.trim();
-
-  if (!email) {
-    showMessage("Andika barua pepe yako kwanza.", true);
-    return;
-  }
-
+  if (!email) return showMessage("Andika barua pepe yako kwanza.", true);
   try {
     await auth.sendPasswordResetEmail(email);
     closeModal("authModal");
     showMessage("Kiungo cha kubadilisha nenosiri kimetumwa kwenye barua pepe yako.");
-  } catch (error) {
-    showMessage(friendlyError(error), true);
-  }
+  } catch (err) { showMessage(friendlyError(err), true); }
 });
 
-$("logoutBtn").addEventListener("click", async () => {
-  try {
-    await auth.signOut();
-    showMessage("Umetoka kwenye akaunti.");
-  } catch (error) {
-    showMessage(friendlyError(error), true);
-  }
-});
-
-auth.onAuthStateChanged(async user => {
-  currentUser = user;
-
-  $("loginBtn").classList.toggle("hidden", !!user);
-  $("logoutBtn").classList.toggle("hidden", !user);
-  $("adminLink").classList.add("hidden");
-
-  if (user) {
-    try {
-      const token = await user.getIdTokenResult(true);
-      if (token.claims.admin === true) {
-        $("adminLink").classList.remove("hidden");
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }
-});
-
-/* =========================================
-   SEARCH MOVIES
-========================================= */
-
-$("searchForm").addEventListener("submit", event => {
-  event.preventDefault();
-
-  const query = $("searchInput").value.trim();
-
-  if (!query) {
-    showMessage("Andika jina la filamu kwanza.", true);
+function renderAccount() {
+  const box = $("accountBox");
+  box.replaceChildren();
+  if (!currentUser) {
+    box.append(el("h3", "", "Hujaingia"), el("p", "muted", "Ingia ili kuhifadhi filamu unazopenda na kuzipata kwenye kifaa chochote."));
+    const stack = el("div", "stack");
+    const b1 = el("button", "", "Ingia"); b1.addEventListener("click", () => openAuth("login"));
+    const b2 = el("button", "ghost", "Tengeneza akaunti"); b2.addEventListener("click", () => openAuth("signup"));
+    stack.append(b1, b2);
+    box.append(stack);
     return;
   }
+  box.append(el("h3", "", "Umeingia"), el("p", "muted", currentUser.email || ""));
+  const stack = el("div", "stack");
+  if (isAdminUser(currentUser)) {
+    [["./admin.html", "Admin: Filamu"], ["./series-admin.html", "Admin: Series"]].forEach(([href, label]) => {
+      const a = el("a", "linkbtn", label); a.href = href; stack.append(a);
+    });
+  }
+  const out = el("button", "ghost", "Toka");
+  out.addEventListener("click", async () => {
+    try { await auth.signOut(); showMessage("Umetoka kwenye akaunti."); } catch (err) { showMessage(friendlyError(err), true); }
+  });
+  stack.append(out);
+  box.append(stack);
+}
 
-  searchMovies(query);
+auth.onAuthStateChanged(user => {
+  currentUser = user;
+  renderAccount();
+  if ($("viewSaved").classList.contains("active")) loadSaved();
+});
+renderAccount();
+
+/* ---------- SEARCH (OMDb) ---------- */
+$("searchForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const q = $("searchInput").value.trim();
+  if (!q) return showMessage("Andika jina la filamu kwanza.", true);
+  searchMovies(q);
 });
 
 async function searchMovies(query) {
   const token = ++searchToken;
-
-  hideMessage();
-
-  $("sectionTitle").textContent = "Matokeo ya Utafutaji";
-  $("sectionDescription").textContent = "Matokeo ya: " + query;
+  $("sectionTitle").textContent = "Matokeo ya: " + query;
   $("movieGrid").innerHTML = '<div class="empty">Inatafuta filamu...</div>';
-
   try {
-    const url =
-      "https://www.omdbapi.com/?" +
-      "apikey=" + encodeURIComponent(OMDB_API_KEY) +
-      "&s=" + encodeURIComponent(query) +
-      "&type=movie";
-
+    const url = "https://www.omdbapi.com/?apikey=" + encodeURIComponent(OMDB_API_KEY) +
+      "&s=" + encodeURIComponent(query) + "&type=movie";
     const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error("Huduma ya utafutaji haipatikani.");
-    }
-
+    if (!response.ok) throw new Error("Huduma ya utafutaji haipatikani.");
     const data = await response.json();
-
     if (token !== searchToken) return;
-
     if (data.Response !== "True") {
-      $("movieGrid").innerHTML =
-        '<div class="empty">Hakuna filamu iliyopatikana. Jaribu jina jingine.</div>';
+      $("movieGrid").innerHTML = '<div class="empty">Hakuna filamu iliyopatikana. Jaribu jina jingine.</div>';
       return;
     }
-
-    renderMovies(data.Search || []);
-
+    const grid = $("movieGrid");
+    grid.replaceChildren();
+    (data.Search || []).forEach(m => grid.append(makeCard({
+      title: m.Title, sub: m.Year || "",
+      poster: m.Poster && m.Poster !== "N/A" ? m.Poster : "",
+      onClick: () => showMovieDetails(m.imdbID)
+    })));
   } catch (error) {
     if (token !== searchToken) return;
-
-    $("movieGrid").innerHTML =
-      '<div class="empty">Imeshindikana kutafuta filamu. Kagua intaneti na API key.</div>';
-
+    $("movieGrid").innerHTML = '<div class="empty">Imeshindikana kutafuta filamu. Kagua intaneti na API key.</div>';
     showMessage(error.message, true);
   }
 }
 
-/* =========================================
-   RENDER MOVIES
-========================================= */
-
-function renderMovies(movies) {
-  const grid = $("movieGrid");
-
-  grid.replaceChildren();
-
-  if (!movies.length) {
-    grid.innerHTML = '<div class="empty">Hakuna filamu za kuonyesha.</div>';
-    return;
-  }
-
-  movies.forEach(movie => {
-    const card = document.createElement("article");
-    card.className = "movie-card";
-
-    const poster = document.createElement("img");
-    poster.loading = "lazy";
-    poster.alt = "Poster ya " + movie.Title;
-    poster.src =
-      movie.Poster && movie.Poster !== "N/A" ? movie.Poster : placeholderPoster;
-    poster.onerror = () => { poster.src = placeholderPoster; };
-
-    const info = document.createElement("div");
-    info.className = "movie-info";
-
-    const title = document.createElement("div");
-    title.className = "movie-title";
-    title.textContent = movie.Title;
-
-    const year = document.createElement("div");
-    year.className = "movie-year";
-    year.textContent = movie.Year || "Mwaka haujulikani";
-
-    const button = document.createElement("button");
-    button.textContent = "Maelezo";
-    button.addEventListener("click", () => {
-      showMovieDetails(movie.imdbID);
-    });
-
-    info.append(title, year, button);
-    card.append(poster, info);
-    grid.append(card);
-  });
-}
-
-/* =========================================
-   MOVIE DETAILS
-========================================= */
-
+/* ---------- DETAILS ---------- */
 async function showMovieDetails(imdbID) {
   openModal("detailModal");
-
   $("detailContent").textContent = "Inapakia maelezo ya filamu...";
-
   try {
-    const url =
-      "https://www.omdbapi.com/?" +
-      "apikey=" + encodeURIComponent(OMDB_API_KEY) +
-      "&i=" + encodeURIComponent(imdbID) +
-      "&plot=full";
+    const url = "https://www.omdbapi.com/?apikey=" + encodeURIComponent(OMDB_API_KEY) +
+      "&i=" + encodeURIComponent(imdbID) + "&plot=full";
+    const movie = await (await fetch(url)).json();
+    if (movie.Response !== "True") throw new Error("Maelezo ya filamu hayapatikani.");
 
-    const response = await fetch(url);
-    const movie = await response.json();
-
-    if (movie.Response !== "True") {
-      throw new Error("Maelezo ya filamu hayapatikani.");
-    }
-
-    const layout = document.createElement("div");
-    layout.className = "detail-layout";
-
+    const layout = el("div", "detail");
     const poster = document.createElement("img");
-    poster.src =
-      movie.Poster && movie.Poster !== "N/A" ? movie.Poster : placeholderPoster;
+    poster.src = movie.Poster && movie.Poster !== "N/A" ? movie.Poster : placeholderPoster;
     poster.alt = "Poster ya " + movie.Title;
     poster.onerror = () => { poster.src = placeholderPoster; };
 
-    const info = document.createElement("div");
+    const info = el("div");
+    const meta = el("p", "muted", [movie.Year, movie.Runtime, movie.Genre,
+      movie.imdbRating && movie.imdbRating !== "N/A" ? "IMDb " + movie.imdbRating : ""].filter(Boolean).join(" · "));
+    const plot = el("p", "", movie.Plot && movie.Plot !== "N/A" ? movie.Plot : "Maelezo hayapo.");
 
-    const title = document.createElement("h3");
-    title.textContent = movie.Title;
+    const row = el("div", "actions-row");
+    const play = el("button", "", "▶ Cheza Filamu");
+    play.addEventListener("click", () => openVideo(movie.Title, movie.imdbID));
+    const save = el("button", "ghost", "Hifadhi");
+    save.addEventListener("click", () => saveMovie(movie));
+    row.append(play, save);
 
-    const metadata = document.createElement("p");
-    metadata.className = "muted";
-    metadata.textContent = [
-      movie.Year,
-      movie.Runtime,
-      movie.Genre,
-      movie.imdbRating && movie.imdbRating !== "N/A"
-        ? "IMDb " + movie.imdbRating
-        : ""
-    ].filter(Boolean).join(" · ");
-
-    const plot = document.createElement("p");
-    plot.textContent =
-      movie.Plot && movie.Plot !== "N/A" ? movie.Plot : "Maelezo hayapo.";
-
-    const saveButton = document.createElement("button");
-    saveButton.textContent = "❤️ Hifadhi";
-    saveButton.addEventListener("click", () => {
-      saveMovie(movie);
-    });
-
-    const playButton = document.createElement("button");
-    playButton.style.marginTop = "10px";
-    playButton.textContent = "▶ Cheza Filamu";
-    playButton.addEventListener("click", () => {
-      openVideo(movie.Title, movie.imdbID);
-    });
-
-    info.append(
-      title,
-      metadata,
-      plot,
-      saveButton,
-      document.createElement("br"),
-      playButton
-    );
-
+    info.append(el("h3", "", movie.Title), meta, plot, row);
     layout.append(poster, info);
-
     $("detailContent").replaceChildren(layout);
-
   } catch (error) {
     $("detailContent").textContent = friendlyError(error);
   }
 }
 
-/* =========================================
-   VIDEO PLAYER (YouTube / Dropbox / mp4 / embed)
-========================================= */
-
+/* ---------- PLAYER ---------- */
 function toEmbedUrl(url) {
   url = (url || "").trim();
-
   const m = url.match(/youtube\.com\/embed\/([\w-]{11})/) ||
             url.match(/youtube\.com\/watch\?v=([\w-]{11})/) ||
             url.match(/youtu\.be\/([\w-]{11})/);
-
-  if (m) {
-    return { type: "frame", src: "https://www.youtube.com/embed/" + m[1] };
-  }
-
+  if (m) return { type: "frame", src: "https://www.youtube.com/embed/" + m[1] };
   if (url.includes("dropbox.com")) {
-    return {
-      type: "video",
-      src: url
-        .replace("www.dropbox.com", "dl.dropboxusercontent.com")
-        .replace("?dl=0", "")
-        .replace("&dl=0", "")
-    };
+    return { type: "video", src: url.replace("www.dropbox.com", "dl.dropboxusercontent.com").replace("?dl=0", "").replace("&dl=0", "") };
   }
-
-  if (/\.(mp4|webm|m4v)(\?|$)/i.test(url)) {
-    return { type: "video", src: url };
-  }
-
+  if (/\.(mp4|webm|m4v)(\?|$)/i.test(url)) return { type: "video", src: url };
   return { type: "frame", src: url };
 }
 
 function loadInPlayer(url) {
-  const frame = $("playerFrame");
-  const video = $("playerVideo");
+  const frame = $("playerFrame"), video = $("playerVideo");
   const r = toEmbedUrl(url);
-
-  /* Ficha orodha ya episodes (selectEpisode inaionyesha tena ikihitajika) */
   $("episodePanel").classList.add("hidden");
-
   if (r.type === "video") {
     frame.src = "about:blank";
     frame.style.display = "none";
@@ -663,70 +543,52 @@ function loadInPlayer(url) {
   }
 }
 
-function stopPlayer() {
+function closePlayer() {
   const video = $("playerVideo");
   video.pause();
   video.removeAttribute("src");
   $("playerFrame").src = "about:blank";
   $("episodePanel").classList.add("hidden");
+  closeModal("playerModal");
+  currentImdbID = null;
 }
+$("closePlayer").addEventListener("click", closePlayer);
+
+/* Server 1-3 zinaonekana kwa filamu za OMDb tu */
+function setServers(show) { $("serverRow").classList.toggle("hidden", !show); }
 
 function openVideo(title, imdbID) {
   currentImdbID = imdbID;
-
   $("playerTitle").textContent = title;
-
+  setServers(true);
   loadServer(1);
-
   closeModal("detailModal");
   openModal("playerModal");
 }
 
 function loadServer(num) {
   if (!currentImdbID) return;
-
-  let embedUrl = "";
-
-  if (num === 1) {
-    embedUrl = "https://vidsrc.to/embed/movie/" + currentImdbID;
-  } else if (num === 2) {
-    embedUrl = "https://www.2embed.cc/embed/" + currentImdbID;
-  } else if (num === 3) {
-    embedUrl = "https://multiembed.mov/?video_id=" + currentImdbID + "&tmdb=0";
-  }
-
-  loadInPlayer(embedUrl);
+  const urls = {
+    1: "https://vidsrc.to/embed/movie/" + currentImdbID,
+    2: "https://www.2embed.cc/embed/" + currentImdbID,
+    3: "https://multiembed.mov/?video_id=" + currentImdbID + "&tmdb=0"
+  };
+  loadInPlayer(urls[num]);
 }
-
 $("src1").addEventListener("click", () => loadServer(1));
 $("src2").addEventListener("click", () => loadServer(2));
 $("src3").addEventListener("click", () => loadServer(3));
 
 $("customUrlBtn").addEventListener("click", () => {
   const input = prompt("Bandika HTTPS URL yako ya video (YouTube, Dropbox au .mp4):");
-
   if (!input) return;
-
   try {
     const url = new URL(input);
-    if (url.protocol !== "https:") {
-      throw new Error("Lazima iwe HTTPS");
-    }
+    if (url.protocol !== "https:") throw new Error("Lazima iwe HTTPS");
     loadInPlayer(url.href);
-  } catch (e) {
-    showMessage("Kiungo si sahihi. Tumia URL ya HTTPS.", true);
-  }
+  } catch (e) { showMessage("Kiungo si sahihi. Tumia URL ya HTTPS.", true); }
 });
 
-/* Simamisha video wakati player inafungwa */
-document.querySelectorAll('[data-close="playerModal"]').forEach(button => {
-  button.addEventListener("click", () => {
-    stopPlayer();
-    currentImdbID = null;
-  });
-});
-
-/* Ujumbe kama video ina codec isiyosapotiwa (H.265 n.k.) */
 $("playerVideo").addEventListener("loadedmetadata", () => {
   const v = $("playerVideo");
   if (v.src && v.videoWidth === 0) {
@@ -734,125 +596,64 @@ $("playerVideo").addEventListener("loadedmetadata", () => {
   }
 });
 
-/* =========================================
-   FILAMU ZETU (kutoka Firestore "movies")
-========================================= */
+/* ---------- FILAMU ZETU ---------- */
+function playOwn(m) {
+  if (!m.videoUrl) return showMessage("Filamu hii haina link ya video.", true);
+  currentImdbID = null;
+  $("playerTitle").textContent = m.title || "Filamu";
+  setServers(false);
+  loadInPlayer(m.videoUrl);
+  openModal("playerModal");
+}
 
 async function loadOwnMovies() {
-  if (configMissing) return;
-
   const grid = $("ownGrid");
-
   try {
     const snap = await db.collection("movies").get();
-
-    const list = snap.docs
-      .map(d => d.data())
-      .sort((a, b) =>
-        (b.createdAt ? b.createdAt.seconds : 0) -
-        (a.createdAt ? a.createdAt.seconds : 0)
-      );
-
+    const list = snap.docs.map(d => d.data()).sort((a, b) =>
+      (b.createdAt ? b.createdAt.seconds : 0) - (a.createdAt ? a.createdAt.seconds : 0));
     grid.replaceChildren();
+    if (!list.length) { grid.innerHTML = '<div class="empty">Bado hakuna filamu zetu.</div>'; return; }
 
-    if (!list.length) {
-      grid.innerHTML = '<div class="empty">Bado hakuna filamu zetu.</div>';
-      return;
-    }
+    list.forEach(m => grid.append(makeCard({
+      title: m.title || "Filamu", sub: m.year || "", poster: m.poster, badge: "Filamu",
+      onClick: () => playOwn(m)
+    })));
 
-    list.forEach(m => {
-      const card = document.createElement("article");
-      card.className = "movie-card";
-
-      const img = document.createElement("img");
-      img.alt = "Poster ya " + (m.title || "");
-      img.src = m.poster || placeholderPoster;
-      img.onerror = () => { img.src = placeholderPoster; };
-
-      const info = document.createElement("div");
-      info.className = "movie-info";
-
-      const t = document.createElement("div");
-      t.className = "movie-title";
-      t.textContent = m.title || "Filamu";
-
-      const y = document.createElement("div");
-      y.className = "movie-year";
-      y.textContent = m.year || "";
-
-      const b = document.createElement("button");
-      b.textContent = "▶ Cheza";
-      b.addEventListener("click", () => {
-        if (!m.videoUrl) {
-          showMessage("Filamu hii haina link ya video.", true);
-          return;
-        }
-        currentImdbID = null;
-        $("playerTitle").textContent = m.title || "Filamu";
-        loadInPlayer(m.videoUrl);
-        openModal("playerModal");
-      });
-
-      info.append(t, y, b);
-      card.append(img, info);
-      grid.append(card);
+    const f = list[0];
+    setHero({
+      tag: "Mpya kwenye Prosper", title: f.title || "Filamu",
+      text: f.description || (f.year ? "Mwaka " + f.year : ""),
+      poster: f.poster, playText: "Cheza sasa", onPlay: () => playOwn(f)
     });
-
   } catch (error) {
     grid.innerHTML = '<div class="empty">Imeshindikana kupakia filamu zetu.</div>';
     showMessage(friendlyError(error), true);
   }
 }
 
-/* =========================================
-   SERIES (kutoka Firestore "series")
-========================================= */
-
+/* ---------- SERIES ---------- */
 async function loadSeries() {
-  if (configMissing) return;
-
   const grid = $("seriesGrid");
-
   try {
     const snap = await db.collection("series").get();
     grid.replaceChildren();
-
-    if (snap.empty) {
-      grid.innerHTML = '<div class="empty">Bado hakuna series.</div>';
-      return;
-    }
+    if (snap.empty) { grid.innerHTML = '<div class="empty">Bado hakuna series.</div>'; return; }
 
     snap.docs.forEach(doc => {
       const s = doc.data();
-
-      const card = document.createElement("article");
-      card.className = "movie-card";
-
-      const img = document.createElement("img");
-      img.alt = "Poster ya " + (s.title || "");
-      img.src = s.poster || placeholderPoster;
-      img.onerror = () => { img.src = placeholderPoster; };
-
-      const info = document.createElement("div");
-      info.className = "movie-info";
-
-      const t = document.createElement("div");
-      t.className = "movie-title";
-      t.textContent = s.title || "Series";
-
-      const y = document.createElement("div");
-      y.className = "movie-year";
-      y.textContent = (s.year ? s.year + " · " : "") + (s.seasons || []).length + " Season";
-
-      const b = document.createElement("button");
-      b.textContent = "▶ Tazama";
-      b.addEventListener("click", () => openSeries(s));
-
-      info.append(t, y, b);
-      card.append(img, info);
-      grid.append(card);
+      const n = (s.seasons || []).length;
+      grid.append(makeCard({
+        title: s.title || "Series", sub: (s.year ? s.year + " · " : "") + n + " Season",
+        poster: s.poster, badge: "Series", onClick: () => openSeries(s)
+      }));
     });
 
+    const s0 = snap.docs[0].data();
+    setHero({
+      tag: "Series", title: s0.title || "Series", text: s0.description || "",
+      poster: s0.poster, playText: "Tazama", onPlay: () => openSeries(s0)
+    });
   } catch (error) {
     grid.innerHTML = '<div class="empty">Imeshindikana kupakia series.</div>';
     console.error(error);
@@ -860,241 +661,122 @@ async function loadSeries() {
 }
 
 function openSeries(s) {
-  const seasons = (s.seasons || [])
-    .slice()
-    .sort((a, b) => a.number - b.number);
-
+  const seasons = (s.seasons || []).slice().sort((a, b) => a.number - b.number);
   if (!seasons.length || !seasons[0].episodes || !seasons[0].episodes.length) {
-    showMessage("Series hii bado haina episodes.", true);
-    return;
+    return showMessage("Series hii bado haina episodes.", true);
   }
-
   currentImdbID = null;
-  $("playerTitle").textContent = s.title;
+  setServers(false);
   openModal("playerModal");
   selectEpisode(s, seasons, 0, 0);
 }
 
 function selectEpisode(s, seasons, si, ei) {
   const season = seasons[si];
-  const episodes = (season.episodes || [])
-    .slice()
-    .sort((a, b) => a.number - b.number);
+  const episodes = (season.episodes || []).slice().sort((a, b) => a.number - b.number);
   const ep = episodes[ei];
+  if (!ep) return showMessage("Season hii haina episodes.", true);
 
-  if (!ep) {
-    showMessage("Season hii haina episodes.", true);
-    return;
-  }
-
-  $("playerTitle").textContent =
-    s.title + " · S" + season.number + " E" + ep.number +
-    (ep.title ? " · " + ep.title : "");
-
+  $("playerTitle").textContent = s.title + " · S" + season.number + " E" + ep.number + (ep.title ? " · " + ep.title : "");
   loadInPlayer(ep.videoUrl);
 
   const panel = $("episodePanel");
   panel.replaceChildren();
   panel.classList.remove("hidden");
 
-  const seasonRow = document.createElement("div");
-  seasonRow.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px";
-
+  const sRow = el("div", "chips"); sRow.style.marginBottom = "10px";
   seasons.forEach((se, i) => {
-    const sb = document.createElement("button");
-    sb.type = "button";
-    sb.textContent = "Season " + se.number;
-    sb.style.cssText = "padding:8px 12px;font-size:13px";
-    if (i !== si) sb.className = "secondary";
-    sb.addEventListener("click", () => selectEpisode(s, seasons, i, 0));
-    seasonRow.append(sb);
+    const b = el("button", "chip" + (i === si ? " on" : ""), "Season " + se.number);
+    b.type = "button";
+    b.addEventListener("click", () => selectEpisode(s, seasons, i, 0));
+    sRow.append(b);
   });
 
-  const epRow = document.createElement("div");
-  epRow.style.cssText = "display:flex;gap:8px;flex-wrap:wrap";
-
+  const eRow = el("div", "chips");
   episodes.forEach((e, i) => {
-    const eb = document.createElement("button");
-    eb.type = "button";
-    eb.textContent = "Ep " + e.number;
-    eb.style.cssText = "padding:8px 12px;font-size:13px";
-    if (i !== ei) eb.className = "secondary";
-    eb.addEventListener("click", () => selectEpisode(s, seasons, si, i));
-    epRow.append(eb);
+    const b = el("button", "chip" + (i === ei ? " on" : ""), "Ep " + e.number);
+    b.type = "button";
+    b.addEventListener("click", () => selectEpisode(s, seasons, si, i));
+    eRow.append(b);
   });
-
-  panel.append(seasonRow, epRow);
+  panel.append(sRow, eRow);
 }
 
-/* =========================================
-   SAVE MOVIES
-========================================= */
-
+/* ---------- SAVED ---------- */
 async function saveMovie(movie) {
+  if (!currentUser) { showMessage("Ingia kwenye akaunti kwanza ili kuhifadhi filamu.", true); return openAuth("login"); }
+  try {
+    await db.collection("users").doc(currentUser.uid).collection("savedMovies").doc(movie.imdbID).set({
+      imdbID: movie.imdbID, title: movie.Title, year: movie.Year || "",
+      poster: movie.Poster && movie.Poster !== "N/A" ? movie.Poster : "",
+      savedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showMessage("Filamu imehifadhiwa.");
+  } catch (error) { showMessage(friendlyError(error), true); }
+}
+
+async function loadSaved() {
+  const grid = $("savedGrid");
   if (!currentUser) {
-    showMessage("Ingia kwenye akaunti kwanza ili kuhifadhi filamu.", true);
+    grid.innerHTML = "";
+    const box = el("div", "empty", "Ingia ili kuona filamu ulizohifadhi. ");
+    const b = el("button", "sm", "Ingia"); b.style.marginTop = "12px"; b.addEventListener("click", () => openAuth("login"));
+    box.append(document.createElement("br"), b);
+    grid.append(box);
     return;
   }
-
+  grid.innerHTML = '<div class="empty">Inapakia...</div>';
   try {
-    await db
-      .collection("users")
-      .doc(currentUser.uid)
-      .collection("savedMovies")
-      .doc(movie.imdbID)
-      .set({
-        imdbID: movie.imdbID,
-        title: movie.Title,
-        year: movie.Year || "",
-        poster: movie.Poster && movie.Poster !== "N/A" ? movie.Poster : "",
-        savedAt: firebase.firestore.FieldValue.serverTimestamp()
+    const snap = await db.collection("users").doc(currentUser.uid).collection("savedMovies").orderBy("savedAt", "desc").get();
+    grid.replaceChildren();
+    if (!snap.docs.length) { grid.innerHTML = '<div class="empty">Bado hujahifadhi filamu yoyote.</div>'; return; }
+
+    snap.docs.forEach(d => {
+      const movie = d.data();
+      const wrap = el("div");
+      wrap.append(makeCard({ title: movie.title || "Filamu", sub: movie.year || "", poster: movie.poster,
+        onClick: () => showMovieDetails(movie.imdbID) }));
+      const rm = el("button", "ghost sm rm", "Ondoa");
+      rm.addEventListener("click", async () => {
+        try {
+          await db.collection("users").doc(currentUser.uid).collection("savedMovies").doc(movie.imdbID).delete();
+          wrap.remove();
+          showMessage("Filamu imeondolewa.");
+        } catch (error) { showMessage(friendlyError(error), true); }
       });
-
-    showMessage("Filamu imehifadhiwa.");
-
+      wrap.append(rm);
+      grid.append(wrap);
+    });
   } catch (error) {
+    grid.innerHTML = '<div class="empty">Imeshindikana kupakia filamu ulizohifadhi.</div>';
     showMessage(friendlyError(error), true);
   }
 }
 
-/* =========================================
-   SHOW SAVED MOVIES
-========================================= */
-
-$("savedBtn").addEventListener("click", async () => {
-  if (!currentUser) {
-    authMode = "login";
-    updateAuthMode();
-    openModal("authModal");
-    showMessage("Ingia kwanza ili kuona filamu ulizohifadhi.");
-    return;
-  }
-
-  $("sectionTitle").textContent = "❤️ Filamu Zilizohifadhiwa";
-  $("sectionDescription").textContent = "Hii ni orodha yako binafsi.";
-  $("movieGrid").innerHTML = '<div class="empty">Inapakia...</div>';
-
-  try {
-    const snapshot = await db
-      .collection("users")
-      .doc(currentUser.uid)
-      .collection("savedMovies")
-      .orderBy("savedAt", "desc")
-      .get();
-
-    const movies = snapshot.docs.map(doc => doc.data());
-
-    $("movieGrid").replaceChildren();
-
-    if (!movies.length) {
-      $("movieGrid").innerHTML =
-        '<div class="empty">Bado hujahifadhi filamu yoyote.</div>';
-      return;
-    }
-
-    movies.forEach(movie => {
-      const card = document.createElement("article");
-      card.className = "movie-card";
-
-      const poster = document.createElement("img");
-      poster.src = movie.poster || placeholderPoster;
-      poster.alt = "Poster ya " + movie.title;
-      poster.onerror = () => { poster.src = placeholderPoster; };
-
-      const info = document.createElement("div");
-      info.className = "movie-info";
-
-      const title = document.createElement("div");
-      title.className = "movie-title";
-      title.textContent = movie.title || "Filamu";
-
-      const year = document.createElement("div");
-      year.className = "movie-year";
-      year.textContent = movie.year || "";
-
-      const removeButton = document.createElement("button");
-      removeButton.className = "secondary";
-      removeButton.textContent = "Ondoa";
-
-      removeButton.addEventListener("click", async () => {
-        try {
-          await db
-            .collection("users")
-            .doc(currentUser.uid)
-            .collection("savedMovies")
-            .doc(movie.imdbID)
-            .delete();
-
-          card.remove();
-          showMessage("Filamu imeondolewa.");
-
-        } catch (error) {
-          showMessage(friendlyError(error), true);
-        }
-      });
-
-      info.append(title, year, removeButton);
-      card.append(poster, info);
-
-      $("movieGrid").append(card);
-    });
-
-  } catch (error) {
-    $("movieGrid").innerHTML =
-      '<div class="empty">Imeshindikana kupakia filamu ulizohifadhi.</div>';
-
-    showMessage(friendlyError(error), true);
-  }
-});
-
-/* =========================================
-   INTRO / ANNOUNCEMENT
-========================================= */
-
+/* ---------- INTRO ---------- */
 async function loadIntro() {
-  if (configMissing) return;
-
   try {
-    const snapshot = await db.collection("settings").doc("intro").get();
-
-    if (!snapshot.exists) return;
-
-    const data = snapshot.data();
-
+    const snap = await db.collection("settings").doc("intro").get();
+    if (!snap.exists) return;
+    const data = snap.data();
     if (!data || !data.url) return;
-
     const section = $("intro");
-
     section.replaceChildren();
-
     if (data.type === "video") {
-      const video = document.createElement("video");
-      video.controls = true;
-      video.preload = "metadata";
-      video.style.width = "100%";
-      video.style.maxHeight = "320px";
-      video.src = data.url;
-      section.append(video);
-
+      const v = document.createElement("video");
+      v.controls = true; v.preload = "metadata"; v.playsInline = true; v.src = data.url;
+      section.append(v);
     } else {
-      const image = document.createElement("img");
-      image.src = data.url;
-      image.alt = "Tangazo la Prosper Movies";
-      image.style.maxWidth = "100%";
-      image.style.maxHeight = "320px";
-      image.style.borderRadius = "12px";
-      section.append(image);
+      const img = document.createElement("img");
+      img.src = data.url; img.alt = "Tangazo la Prosper Movies";
+      section.append(img);
     }
-
-  } catch (error) {
-    console.info("Intro haijapakiwa.", error);
-  }
+  } catch (error) { console.info("Intro haijapakiwa.", error); }
 }
 
 loadIntro();
 loadOwnMovies();
 loadSeries();
 </script>
-
 </body>
 </html>
