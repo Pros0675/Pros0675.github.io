@@ -107,6 +107,11 @@
     <div class="empty">Inapakia...</div>
   </div>
 
+  <h2>📺 Series</h2>
+  <div id="seriesGrid" class="movie-grid">
+    <div class="empty">Inapakia...</div>
+  </div>
+
   <form id="searchForm" class="search-form">
     <input id="searchInput" type="search" placeholder="🔎 Tafuta filamu..." aria-label="Tafuta filamu" required>
     <button type="submit">Tafuta</button>
@@ -192,6 +197,9 @@
 
     <!-- Dropbox na .mp4 -->
     <video id="playerVideo" class="player" controls playsinline style="display:none"></video>
+
+    <!-- Seasons na Episodes -->
+    <div id="episodePanel" class="hidden" style="margin-top:14px"></div>
   </div>
 </div>
 
@@ -637,6 +645,9 @@ function loadInPlayer(url) {
   const video = $("playerVideo");
   const r = toEmbedUrl(url);
 
+  /* Ficha orodha ya episodes (selectEpisode inaionyesha tena ikihitajika) */
+  $("episodePanel").classList.add("hidden");
+
   if (r.type === "video") {
     frame.src = "about:blank";
     frame.style.display = "none";
@@ -657,6 +668,7 @@ function stopPlayer() {
   video.pause();
   video.removeAttribute("src");
   $("playerFrame").src = "about:blank";
+  $("episodePanel").classList.add("hidden");
 }
 
 function openVideo(title, imdbID) {
@@ -712,6 +724,14 @@ document.querySelectorAll('[data-close="playerModal"]').forEach(button => {
     stopPlayer();
     currentImdbID = null;
   });
+});
+
+/* Ujumbe kama video ina codec isiyosapotiwa (H.265 n.k.) */
+$("playerVideo").addEventListener("loadedmetadata", () => {
+  const v = $("playerVideo");
+  if (v.src && v.videoWidth === 0) {
+    showMessage("Video hii ina codec ambayo browser haisapoti (H.265?). Ibadilishe kuwa H.264 + AAC.", true);
+  }
 });
 
 /* =========================================
@@ -782,6 +802,128 @@ async function loadOwnMovies() {
     grid.innerHTML = '<div class="empty">Imeshindikana kupakia filamu zetu.</div>';
     showMessage(friendlyError(error), true);
   }
+}
+
+/* =========================================
+   SERIES (kutoka Firestore "series")
+========================================= */
+
+async function loadSeries() {
+  if (configMissing) return;
+
+  const grid = $("seriesGrid");
+
+  try {
+    const snap = await db.collection("series").get();
+    grid.replaceChildren();
+
+    if (snap.empty) {
+      grid.innerHTML = '<div class="empty">Bado hakuna series.</div>';
+      return;
+    }
+
+    snap.docs.forEach(doc => {
+      const s = doc.data();
+
+      const card = document.createElement("article");
+      card.className = "movie-card";
+
+      const img = document.createElement("img");
+      img.alt = "Poster ya " + (s.title || "");
+      img.src = s.poster || placeholderPoster;
+      img.onerror = () => { img.src = placeholderPoster; };
+
+      const info = document.createElement("div");
+      info.className = "movie-info";
+
+      const t = document.createElement("div");
+      t.className = "movie-title";
+      t.textContent = s.title || "Series";
+
+      const y = document.createElement("div");
+      y.className = "movie-year";
+      y.textContent = (s.year ? s.year + " · " : "") + (s.seasons || []).length + " Season";
+
+      const b = document.createElement("button");
+      b.textContent = "▶ Tazama";
+      b.addEventListener("click", () => openSeries(s));
+
+      info.append(t, y, b);
+      card.append(img, info);
+      grid.append(card);
+    });
+
+  } catch (error) {
+    grid.innerHTML = '<div class="empty">Imeshindikana kupakia series.</div>';
+    console.error(error);
+  }
+}
+
+function openSeries(s) {
+  const seasons = (s.seasons || [])
+    .slice()
+    .sort((a, b) => a.number - b.number);
+
+  if (!seasons.length || !seasons[0].episodes || !seasons[0].episodes.length) {
+    showMessage("Series hii bado haina episodes.", true);
+    return;
+  }
+
+  currentImdbID = null;
+  $("playerTitle").textContent = s.title;
+  openModal("playerModal");
+  selectEpisode(s, seasons, 0, 0);
+}
+
+function selectEpisode(s, seasons, si, ei) {
+  const season = seasons[si];
+  const episodes = (season.episodes || [])
+    .slice()
+    .sort((a, b) => a.number - b.number);
+  const ep = episodes[ei];
+
+  if (!ep) {
+    showMessage("Season hii haina episodes.", true);
+    return;
+  }
+
+  $("playerTitle").textContent =
+    s.title + " · S" + season.number + " E" + ep.number +
+    (ep.title ? " · " + ep.title : "");
+
+  loadInPlayer(ep.videoUrl);
+
+  const panel = $("episodePanel");
+  panel.replaceChildren();
+  panel.classList.remove("hidden");
+
+  const seasonRow = document.createElement("div");
+  seasonRow.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px";
+
+  seasons.forEach((se, i) => {
+    const sb = document.createElement("button");
+    sb.type = "button";
+    sb.textContent = "Season " + se.number;
+    sb.style.cssText = "padding:8px 12px;font-size:13px";
+    if (i !== si) sb.className = "secondary";
+    sb.addEventListener("click", () => selectEpisode(s, seasons, i, 0));
+    seasonRow.append(sb);
+  });
+
+  const epRow = document.createElement("div");
+  epRow.style.cssText = "display:flex;gap:8px;flex-wrap:wrap";
+
+  episodes.forEach((e, i) => {
+    const eb = document.createElement("button");
+    eb.type = "button";
+    eb.textContent = "Ep " + e.number;
+    eb.style.cssText = "padding:8px 12px;font-size:13px";
+    if (i !== ei) eb.className = "secondary";
+    eb.addEventListener("click", () => selectEpisode(s, seasons, si, i));
+    epRow.append(eb);
+  });
+
+  panel.append(seasonRow, epRow);
 }
 
 /* =========================================
@@ -951,6 +1093,7 @@ async function loadIntro() {
 
 loadIntro();
 loadOwnMovies();
+loadSeries();
 </script>
 
 </body>
