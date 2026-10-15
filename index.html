@@ -17,246 +17,67 @@
       --accent: #7c5cff;
       --border: #293044;
     }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: Arial, sans-serif;
-    }
-
-    button, input {
-      font: inherit;
-    }
-
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: Arial, sans-serif; }
+    button, input { font: inherit; }
     button {
-      cursor: pointer;
-      border: 0;
-      border-radius: 9px;
-      padding: 11px 15px;
-      background: var(--accent);
-      color: white;
-      font-weight: bold;
+      cursor: pointer; border: 0; border-radius: 9px; padding: 11px 15px;
+      background: var(--accent); color: white; font-weight: bold;
     }
-
-    button:disabled {
-      opacity: .6;
-      cursor: wait;
-    }
-
+    button:disabled { opacity: .6; cursor: wait; }
     input {
-      width: 100%;
-      padding: 12px;
-      background: var(--panel);
-      color: white;
-      border: 1px solid var(--border);
-      border-radius: 9px;
+      width: 100%; padding: 12px; background: var(--panel); color: white;
+      border: 1px solid var(--border); border-radius: 9px;
     }
-
-    .container {
-      max-width: 1200px;
-      margin: auto;
-      padding: 18px;
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .logo {
-      font-size: 25px;
-      font-weight: 900;
-    }
-
-    .logo span {
-      color: var(--accent);
-    }
-
-    .header-buttons {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .secondary {
-      background: var(--panel-light);
-    }
-
-    .search-form {
-      display: flex;
-      gap: 9px;
-      margin: 25px 0;
-    }
-
-    .search-form input {
-      flex: 1;
-      min-width: 0;
-    }
-
-    h2 {
-      margin-top: 25px;
-    }
-
-    .muted {
-      color: var(--muted);
-    }
-
+    .container { max-width: 1200px; margin: auto; padding: 18px; }
+    header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .logo { font-size: 25px; font-weight: 900; }
+    .logo span { color: var(--accent); }
+    .header-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+    .secondary { background: var(--panel-light); }
+    .search-form { display: flex; gap: 9px; margin: 25px 0; }
+    .search-form input { flex: 1; min-width: 0; }
+    h2 { margin-top: 25px; }
+    .muted { color: var(--muted); }
     .message {
-      background: #172b2a;
-      color: #a8ffeb;
-      padding: 12px;
-      margin: 15px 0;
-      border-radius: 9px;
-      overflow-wrap: anywhere;
+      background: #172b2a; color: #a8ffeb; padding: 12px; margin: 15px 0;
+      border-radius: 9px; overflow-wrap: anywhere;
     }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .movie-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
-      gap: 16px;
-      margin-top: 20px;
-    }
-
-    .movie-card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 13px;
-      overflow: hidden;
-    }
-
-    .movie-card img {
-      display: block;
-      width: 100%;
-      aspect-ratio: 2 / 3;
-      object-fit: cover;
-      background: var(--panel-light);
-    }
-
-    .movie-info {
-      padding: 11px;
-    }
-
-    .movie-title {
-      font-weight: bold;
-      line-height: 1.4;
-    }
-
-    .movie-year {
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 6px;
-    }
-
-    .movie-card button {
-      width: 100%;
-      margin-top: 10px;
-    }
-
+    .hidden { display: none !important; }
+    .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 16px; margin-top: 20px; }
+    .movie-card { background: var(--panel); border: 1px solid var(--border); border-radius: 13px; overflow: hidden; }
+    .movie-card img { display: block; width: 100%; aspect-ratio: 2 / 3; object-fit: cover; background: var(--panel-light); }
+    .movie-info { padding: 11px; }
+    .movie-title { font-weight: bold; line-height: 1.4; }
+    .movie-year { color: var(--muted); font-size: 13px; margin-top: 6px; }
+    .movie-card button { width: 100%; margin-top: 10px; }
     .empty {
-      padding: 25px;
-      border: 1px dashed var(--border);
-      border-radius: 12px;
-      color: var(--muted);
-      text-align: center;
-      grid-column: 1 / -1;
+      padding: 25px; border: 1px dashed var(--border); border-radius: 12px;
+      color: var(--muted); text-align: center; grid-column: 1 / -1;
     }
-
     .modal {
-      position: fixed;
-      inset: 0;
-      z-index: 20;
-      background: #000c;
-      display: grid;
-      place-items: center;
-      padding: 15px;
+      position: fixed; inset: 0; z-index: 20; background: #000c;
+      display: grid; place-items: center; padding: 15px;
     }
-
     .modal-box {
-      width: min(540px, 100%);
-      max-height: 90vh;
-      overflow-y: auto;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 15px;
-      padding: 20px;
+      width: min(540px, 100%); max-height: 90vh; overflow-y: auto;
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 15px; padding: 20px;
     }
-
-    .modal-box label {
-      display: block;
-      margin: 14px 0 7px;
-      color: var(--muted);
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 15px;
-    }
-
-    .detail-layout {
-      display: grid;
-      grid-template-columns: 145px 1fr;
-      gap: 16px;
-    }
-
-    .detail-layout img {
-      width: 100%;
-      border-radius: 9px;
-    }
-
-    .player {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      border: 0;
-      background: black;
-      border-radius: 9px;
-    }
-
-    footer {
-      text-align: center;
-      color: var(--muted);
-      font-size: 13px;
-      margin: 35px 0 15px;
-    }
+    .modal-box label { display: block; margin: 14px 0 7px; color: var(--muted); }
+    .modal-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 15px; }
+    .detail-layout { display: grid; grid-template-columns: 145px 1fr; gap: 16px; }
+    .detail-layout img { width: 100%; border-radius: 9px; }
+    .player { width: 100%; aspect-ratio: 16 / 9; border: 0; background: black; border-radius: 9px; }
+    footer { text-align: center; color: var(--muted); font-size: 13px; margin: 35px 0 15px; }
 
     @media (max-width: 550px) {
-      .container {
-        padding: 12px;
-      }
-
-      .logo {
-        font-size: 21px;
-      }
-
-      .movie-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-      }
-
-      .detail-layout {
-        grid-template-columns: 1fr;
-      }
-
-      .detail-layout img {
-        max-width: 170px;
-      }
-
-      .search-form button {
-        padding: 10px;
-      }
+      .container { padding: 12px; }
+      .logo { font-size: 21px; }
+      .movie-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+      .detail-layout { grid-template-columns: 1fr; }
+      .detail-layout img { max-width: 170px; }
+      .search-form button { padding: 10px; }
     }
   </style>
 </head>
@@ -270,21 +91,10 @@
     <div class="logo">🍿 <span>Prosper</span> Movies</div>
 
     <div class="header-buttons">
-      <button id="savedBtn" class="secondary">
-        ❤️ Zilizohifadhiwa
-      </button>
-
-      <button id="loginBtn">
-        Ingia / Jisajili
-      </button>
-
-      <button id="logoutBtn" class="secondary hidden">
-        Toka
-      </button>
-
-      <a id="adminLink" class="hidden" href="./admin.html">
-        Admin
-      </a>
+      <button id="savedBtn" class="secondary">❤️ Zilizohifadhiwa</button>
+      <button id="loginBtn">Ingia / Jisajili</button>
+      <button id="logoutBtn" class="secondary hidden">Toka</button>
+      <a id="adminLink" class="hidden" href="./admin.html">Admin</a>
     </div>
   </header>
 
@@ -292,32 +102,25 @@
 
   <section id="intro"></section>
 
+  <h2>🎞️ Filamu Zetu</h2>
+  <div id="ownGrid" class="movie-grid">
+    <div class="empty">Inapakia...</div>
+  </div>
+
   <form id="searchForm" class="search-form">
-    <input
-      id="searchInput"
-      type="search"
-      placeholder="🔎 Tafuta filamu..."
-      aria-label="Tafuta filamu"
-      required
-    >
+    <input id="searchInput" type="search" placeholder="🔎 Tafuta filamu..." aria-label="Tafuta filamu" required>
     <button type="submit">Tafuta</button>
   </form>
 
   <h2 id="sectionTitle">🎬 Tafuta Filamu</h2>
 
-  <p id="sectionDescription" class="muted">
-    Andika jina la filamu ili kuona matokeo.
-  </p>
+  <p id="sectionDescription" class="muted">Andika jina la filamu ili kuona matokeo.</p>
 
   <div id="movieGrid" class="movie-grid">
-    <div class="empty">
-      Karibu Prosper Movies! Tafuta filamu unayoipenda.
-    </div>
+    <div class="empty">Karibu Prosper Movies! Tafuta filamu unayoipenda.</div>
   </div>
 
-  <footer>
-    © <span id="yearNow"></span> Prosper Movies
-  </footer>
+  <footer>© <span id="yearNow"></span> Prosper Movies</footer>
 
 </div>
 
@@ -328,50 +131,19 @@
 
     <form id="authForm">
       <label for="email">Barua pepe</label>
-      <input
-        id="email"
-        type="email"
-        autocomplete="email"
-        required
-      >
+      <input id="email" type="email" autocomplete="email" required>
 
       <label for="password">Nenosiri</label>
-      <input
-        id="password"
-        type="password"
-        minlength="6"
-        autocomplete="current-password"
-        required
-      >
+      <input id="password" type="password" minlength="6" autocomplete="current-password" required>
 
       <div class="modal-actions">
         <button id="authSubmit" type="submit">Ingia</button>
-
-        <button
-          id="toggleAuth"
-          type="button"
-          class="secondary"
-        >
-          Tengeneza akaunti
-        </button>
-
-        <button
-          type="button"
-          class="secondary"
-          data-close="authModal"
-        >
-          Funga
-        </button>
+        <button id="toggleAuth" type="button" class="secondary">Tengeneza akaunti</button>
+        <button type="button" class="secondary" data-close="authModal">Funga</button>
       </div>
     </form>
 
-    <button
-      id="resetPassword"
-      class="secondary"
-      style="margin-top:12px"
-    >
-      Nimesahau nenosiri
-    </button>
+    <button id="resetPassword" class="secondary" style="margin-top:12px">Nimesahau nenosiri</button>
   </div>
 </div>
 
@@ -380,16 +152,8 @@
   <div class="modal-box">
     <div style="display:flex;justify-content:space-between;gap:10px">
       <h2>Maelezo ya Filamu</h2>
-
-      <button
-        type="button"
-        class="secondary"
-        data-close="detailModal"
-      >
-        ✕
-      </button>
+      <button type="button" class="secondary" data-close="detailModal">✕</button>
     </div>
-
     <div id="detailContent"></div>
   </div>
 </div>
@@ -400,14 +164,7 @@
 
     <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
       <h2 id="playerTitle">Kicheza Video</h2>
-
-      <button
-        type="button"
-        class="secondary"
-        data-close="playerModal"
-      >
-        Funga
-      </button>
+      <button type="button" class="secondary" data-close="playerModal">Funga</button>
     </div>
 
     <p class="muted" style="margin:8px 0 12px">
@@ -422,14 +179,19 @@
       <button type="button" class="secondary" id="customUrlBtn" style="padding:8px 12px;font-size:13px">URL yangu</button>
     </div>
 
+    <!-- YouTube na embed nyingine -->
     <iframe
       id="playerFrame"
       class="player"
       title="Kicheza video"
+      frameborder="0"
       allowfullscreen
-      allow="autoplay; fullscreen; picture-in-picture"
-      referrerpolicy="no-referrer"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerpolicy="strict-origin-when-cross-origin"
     ></iframe>
+
+    <!-- Dropbox na .mp4 -->
+    <video id="playerVideo" class="player" controls playsinline style="display:none"></video>
   </div>
 </div>
 
@@ -441,7 +203,6 @@
 <script>
 /* =========================================
    FIREBASE CONFIGURATION
-   Jaza thamani zako halisi kutoka Firebase.
 ========================================= */
 const firebaseConfig = {
   apiKey: "AIzaSyAMt3bDm-DtkwAHizrs6f2EB8rsXAu9FKs",
@@ -453,10 +214,9 @@ const firebaseConfig = {
   measurementId: "G-SD5Q1203YP"
 };
 
-/* OMDb API key kutoka code yako ya awali */
+/* OMDb API key */
 const OMDB_API_KEY = "d0349ee";
 
-/* Anzisha Firebase */
 firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
@@ -486,10 +246,8 @@ const placeholderPoster =
 
 function showMessage(text, error = false) {
   const el = $("message");
-
   el.textContent = text;
   el.classList.remove("hidden");
-
   el.style.background = error ? "#3a1c28" : "#172b2a";
   el.style.color = error ? "#ffc0ce" : "#a8ffeb";
 }
@@ -516,6 +274,10 @@ document.querySelectorAll(".modal").forEach(modal => {
   modal.addEventListener("click", event => {
     if (event.target === modal) {
       closeModal(modal.id);
+      if (modal.id === "playerModal") {
+        stopPlayer();
+        currentImdbID = null;
+      }
     }
   });
 });
@@ -530,10 +292,7 @@ const configMissing =
   firebaseConfig.appId.startsWith("WEKA_");
 
 if (configMissing) {
-  showMessage(
-    "Kwanza jaza Firebase configuration yako kwenye index.html.",
-    true
-  );
+  showMessage("Kwanza jaza Firebase configuration yako kwenye index.html.", true);
 }
 
 /* =========================================
@@ -553,49 +312,28 @@ $("toggleAuth").addEventListener("click", () => {
 
 function updateAuthMode() {
   $("authTitle").textContent =
-    authMode === "login"
-      ? "Ingia kwenye akaunti"
-      : "Tengeneza akaunti";
+    authMode === "login" ? "Ingia kwenye akaunti" : "Tengeneza akaunti";
 
   $("authSubmit").textContent =
     authMode === "login" ? "Ingia" : "Jisajili";
 
   $("toggleAuth").textContent =
-    authMode === "login"
-      ? "Tengeneza akaunti"
-      : "Nina akaunti tayari";
+    authMode === "login" ? "Tengeneza akaunti" : "Nina akaunti tayari";
 }
 
 function friendlyError(error) {
   const messages = {
-    "auth/email-already-in-use":
-      "Barua pepe hii tayari imesajiliwa.",
-
-    "auth/invalid-email":
-      "Barua pepe si sahihi.",
-
-    "auth/weak-password":
-      "Nenosiri liwe na angalau herufi 6.",
-
-    "auth/user-not-found":
-      "Akaunti haijapatikana.",
-
-    "auth/wrong-password":
-      "Barua pepe au nenosiri si sahihi.",
-
-    "auth/invalid-credential":
-      "Barua pepe au nenosiri si sahihi.",
-
-    "auth/too-many-requests":
-      "Majaribio yamezidi. Jaribu tena baadaye.",
-
-    "permission-denied":
-      "Huna ruhusa ya kufanya kitendo hiki."
+    "auth/email-already-in-use": "Barua pepe hii tayari imesajiliwa.",
+    "auth/invalid-email": "Barua pepe si sahihi.",
+    "auth/weak-password": "Nenosiri liwe na angalau herufi 6.",
+    "auth/user-not-found": "Akaunti haijapatikana.",
+    "auth/wrong-password": "Barua pepe au nenosiri si sahihi.",
+    "auth/invalid-credential": "Barua pepe au nenosiri si sahihi.",
+    "auth/too-many-requests": "Majaribio yamezidi. Jaribu tena baadaye.",
+    "permission-denied": "Huna ruhusa ya kufanya kitendo hiki."
   };
 
-  return messages[error.code] ||
-    error.message ||
-    "Hitilafu imetokea.";
+  return messages[error.code] || error.message || "Hitilafu imetokea.";
 }
 
 $("authForm").addEventListener("submit", async event => {
@@ -609,34 +347,17 @@ $("authForm").addEventListener("submit", async event => {
 
   try {
     if (authMode === "signup") {
-      const credential =
-        await auth.createUserWithEmailAndPassword(
-          email,
-          password
-        );
-
+      const credential = await auth.createUserWithEmailAndPassword(email, password);
       await credential.user.sendEmailVerification();
-
       closeModal("authModal");
-
-      showMessage(
-        "Akaunti imetengenezwa! Angalia barua pepe yako kuthibitisha akaunti."
-      );
-
+      showMessage("Akaunti imetengenezwa! Angalia barua pepe yako kuthibitisha akaunti.");
     } else {
-      await auth.signInWithEmailAndPassword(
-        email,
-        password
-      );
-
+      await auth.signInWithEmailAndPassword(email, password);
       closeModal("authModal");
-
       showMessage("Umeingia kwenye akaunti yako.");
     }
-
   } catch (error) {
     showMessage(friendlyError(error), true);
-
   } finally {
     $("authSubmit").disabled = false;
   }
@@ -646,22 +367,14 @@ $("resetPassword").addEventListener("click", async () => {
   const email = $("email").value.trim();
 
   if (!email) {
-    showMessage(
-      "Andika barua pepe yako kwanza.",
-      true
-    );
+    showMessage("Andika barua pepe yako kwanza.", true);
     return;
   }
 
   try {
     await auth.sendPasswordResetEmail(email);
-
     closeModal("authModal");
-
-    showMessage(
-      "Kiungo cha kubadilisha nenosiri kimetumwa kwenye barua pepe yako."
-    );
-
+    showMessage("Kiungo cha kubadilisha nenosiri kimetumwa kwenye barua pepe yako.");
   } catch (error) {
     showMessage(friendlyError(error), true);
   }
@@ -686,7 +399,6 @@ auth.onAuthStateChanged(async user => {
   if (user) {
     try {
       const token = await user.getIdTokenResult(true);
-
       if (token.claims.admin === true) {
         $("adminLink").classList.remove("hidden");
       }
@@ -719,12 +431,8 @@ async function searchMovies(query) {
   hideMessage();
 
   $("sectionTitle").textContent = "Matokeo ya Utafutaji";
-
-  $("sectionDescription").textContent =
-    "Matokeo ya: " + query;
-
-  $("movieGrid").innerHTML =
-    '<div class="empty">Inatafuta filamu...</div>';
+  $("sectionDescription").textContent = "Matokeo ya: " + query;
+  $("movieGrid").innerHTML = '<div class="empty">Inatafuta filamu...</div>';
 
   try {
     const url =
@@ -771,8 +479,7 @@ function renderMovies(movies) {
   grid.replaceChildren();
 
   if (!movies.length) {
-    grid.innerHTML =
-      '<div class="empty">Hakuna filamu za kuonyesha.</div>';
+    grid.innerHTML = '<div class="empty">Hakuna filamu za kuonyesha.</div>';
     return;
   }
 
@@ -781,18 +488,11 @@ function renderMovies(movies) {
     card.className = "movie-card";
 
     const poster = document.createElement("img");
-
     poster.loading = "lazy";
     poster.alt = "Poster ya " + movie.Title;
-
     poster.src =
-      movie.Poster && movie.Poster !== "N/A"
-        ? movie.Poster
-        : placeholderPoster;
-
-    poster.onerror = () => {
-      poster.src = placeholderPoster;
-    };
+      movie.Poster && movie.Poster !== "N/A" ? movie.Poster : placeholderPoster;
+    poster.onerror = () => { poster.src = placeholderPoster; };
 
     const info = document.createElement("div");
     info.className = "movie-info";
@@ -807,7 +507,6 @@ function renderMovies(movies) {
 
     const button = document.createElement("button");
     button.textContent = "Maelezo";
-
     button.addEventListener("click", () => {
       showMovieDetails(movie.imdbID);
     });
@@ -825,8 +524,7 @@ function renderMovies(movies) {
 async function showMovieDetails(imdbID) {
   openModal("detailModal");
 
-  $("detailContent").textContent =
-    "Inapakia maelezo ya filamu...";
+  $("detailContent").textContent = "Inapakia maelezo ya filamu...";
 
   try {
     const url =
@@ -846,17 +544,10 @@ async function showMovieDetails(imdbID) {
     layout.className = "detail-layout";
 
     const poster = document.createElement("img");
-
     poster.src =
-      movie.Poster && movie.Poster !== "N/A"
-        ? movie.Poster
-        : placeholderPoster;
-
+      movie.Poster && movie.Poster !== "N/A" ? movie.Poster : placeholderPoster;
     poster.alt = "Poster ya " + movie.Title;
-
-    poster.onerror = () => {
-      poster.src = placeholderPoster;
-    };
+    poster.onerror = () => { poster.src = placeholderPoster; };
 
     const info = document.createElement("div");
 
@@ -865,7 +556,6 @@ async function showMovieDetails(imdbID) {
 
     const metadata = document.createElement("p");
     metadata.className = "muted";
-
     metadata.textContent = [
       movie.Year,
       movie.Runtime,
@@ -876,24 +566,18 @@ async function showMovieDetails(imdbID) {
     ].filter(Boolean).join(" · ");
 
     const plot = document.createElement("p");
-
     plot.textContent =
-      movie.Plot && movie.Plot !== "N/A"
-        ? movie.Plot
-        : "Maelezo hayapo.";
+      movie.Plot && movie.Plot !== "N/A" ? movie.Plot : "Maelezo hayapo.";
 
     const saveButton = document.createElement("button");
     saveButton.textContent = "❤️ Hifadhi";
-
     saveButton.addEventListener("click", () => {
       saveMovie(movie);
     });
 
-    // PLAY BUTTON
     const playButton = document.createElement("button");
     playButton.style.marginTop = "10px";
     playButton.textContent = "▶ Cheza Filamu";
-
     playButton.addEventListener("click", () => {
       openVideo(movie.Title, movie.imdbID);
     });
@@ -912,21 +596,74 @@ async function showMovieDetails(imdbID) {
     $("detailContent").replaceChildren(layout);
 
   } catch (error) {
-    $("detailContent").textContent =
-      friendlyError(error);
+    $("detailContent").textContent = friendlyError(error);
   }
 }
 
 /* =========================================
-   VIDEO PLAYER
+   VIDEO PLAYER (YouTube / Dropbox / mp4 / embed)
 ========================================= */
+
+function toEmbedUrl(url) {
+  url = (url || "").trim();
+
+  const m = url.match(/youtube\.com\/embed\/([\w-]{11})/) ||
+            url.match(/youtube\.com\/watch\?v=([\w-]{11})/) ||
+            url.match(/youtu\.be\/([\w-]{11})/);
+
+  if (m) {
+    return { type: "frame", src: "https://www.youtube.com/embed/" + m[1] };
+  }
+
+  if (url.includes("dropbox.com")) {
+    return {
+      type: "video",
+      src: url
+        .replace("www.dropbox.com", "dl.dropboxusercontent.com")
+        .replace("?dl=0", "")
+        .replace("&dl=0", "")
+    };
+  }
+
+  if (/\.(mp4|webm|m4v)(\?|$)/i.test(url)) {
+    return { type: "video", src: url };
+  }
+
+  return { type: "frame", src: url };
+}
+
+function loadInPlayer(url) {
+  const frame = $("playerFrame");
+  const video = $("playerVideo");
+  const r = toEmbedUrl(url);
+
+  if (r.type === "video") {
+    frame.src = "about:blank";
+    frame.style.display = "none";
+    video.style.display = "block";
+    video.src = r.src;
+    video.play().catch(() => {});
+  } else {
+    video.pause();
+    video.removeAttribute("src");
+    video.style.display = "none";
+    frame.style.display = "block";
+    frame.src = r.src;
+  }
+}
+
+function stopPlayer() {
+  const video = $("playerVideo");
+  video.pause();
+  video.removeAttribute("src");
+  $("playerFrame").src = "about:blank";
+}
 
 function openVideo(title, imdbID) {
   currentImdbID = imdbID;
 
   $("playerTitle").textContent = title;
 
-  // Anza na Server 1
   loadServer(1);
 
   closeModal("detailModal");
@@ -946,17 +683,15 @@ function loadServer(num) {
     embedUrl = "https://multiembed.mov/?video_id=" + currentImdbID + "&tmdb=0";
   }
 
-  $("playerFrame").src = embedUrl;
+  loadInPlayer(embedUrl);
 }
 
-// Buttons za server
 $("src1").addEventListener("click", () => loadServer(1));
 $("src2").addEventListener("click", () => loadServer(2));
 $("src3").addEventListener("click", () => loadServer(3));
 
-// Button ya kuweka URL yako mwenyewe
 $("customUrlBtn").addEventListener("click", () => {
-  const input = prompt("Bandika HTTPS URL yako ya video:");
+  const input = prompt("Bandika HTTPS URL yako ya video (YouTube, Dropbox au .mp4):");
 
   if (!input) return;
 
@@ -965,19 +700,89 @@ $("customUrlBtn").addEventListener("click", () => {
     if (url.protocol !== "https:") {
       throw new Error("Lazima iwe HTTPS");
     }
-    $("playerFrame").src = url.href;
+    loadInPlayer(url.href);
   } catch (e) {
     showMessage("Kiungo si sahihi. Tumia URL ya HTTPS.", true);
   }
 });
 
-/* Ondoa video iframe wakati player inafungwa */
+/* Simamisha video wakati player inafungwa */
 document.querySelectorAll('[data-close="playerModal"]').forEach(button => {
   button.addEventListener("click", () => {
-    $("playerFrame").src = "about:blank";
+    stopPlayer();
     currentImdbID = null;
   });
 });
+
+/* =========================================
+   FILAMU ZETU (kutoka Firestore "movies")
+========================================= */
+
+async function loadOwnMovies() {
+  if (configMissing) return;
+
+  const grid = $("ownGrid");
+
+  try {
+    const snap = await db.collection("movies").get();
+
+    const list = snap.docs
+      .map(d => d.data())
+      .sort((a, b) =>
+        (b.createdAt ? b.createdAt.seconds : 0) -
+        (a.createdAt ? a.createdAt.seconds : 0)
+      );
+
+    grid.replaceChildren();
+
+    if (!list.length) {
+      grid.innerHTML = '<div class="empty">Bado hakuna filamu zetu.</div>';
+      return;
+    }
+
+    list.forEach(m => {
+      const card = document.createElement("article");
+      card.className = "movie-card";
+
+      const img = document.createElement("img");
+      img.alt = "Poster ya " + (m.title || "");
+      img.src = m.poster || placeholderPoster;
+      img.onerror = () => { img.src = placeholderPoster; };
+
+      const info = document.createElement("div");
+      info.className = "movie-info";
+
+      const t = document.createElement("div");
+      t.className = "movie-title";
+      t.textContent = m.title || "Filamu";
+
+      const y = document.createElement("div");
+      y.className = "movie-year";
+      y.textContent = m.year || "";
+
+      const b = document.createElement("button");
+      b.textContent = "▶ Cheza";
+      b.addEventListener("click", () => {
+        if (!m.videoUrl) {
+          showMessage("Filamu hii haina link ya video.", true);
+          return;
+        }
+        currentImdbID = null;
+        $("playerTitle").textContent = m.title || "Filamu";
+        loadInPlayer(m.videoUrl);
+        openModal("playerModal");
+      });
+
+      info.append(t, y, b);
+      card.append(img, info);
+      grid.append(card);
+    });
+
+  } catch (error) {
+    grid.innerHTML = '<div class="empty">Imeshindikana kupakia filamu zetu.</div>';
+    showMessage(friendlyError(error), true);
+  }
+}
 
 /* =========================================
    SAVE MOVIES
@@ -985,11 +790,7 @@ document.querySelectorAll('[data-close="playerModal"]').forEach(button => {
 
 async function saveMovie(movie) {
   if (!currentUser) {
-    showMessage(
-      "Ingia kwenye akaunti kwanza ili kuhifadhi filamu.",
-      true
-    );
-
+    showMessage("Ingia kwenye akaunti kwanza ili kuhifadhi filamu.", true);
     return;
   }
 
@@ -1003,10 +804,7 @@ async function saveMovie(movie) {
         imdbID: movie.imdbID,
         title: movie.Title,
         year: movie.Year || "",
-        poster:
-          movie.Poster && movie.Poster !== "N/A"
-            ? movie.Poster
-            : "",
+        poster: movie.Poster && movie.Poster !== "N/A" ? movie.Poster : "",
         savedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
@@ -1026,22 +824,13 @@ $("savedBtn").addEventListener("click", async () => {
     authMode = "login";
     updateAuthMode();
     openModal("authModal");
-
-    showMessage(
-      "Ingia kwanza ili kuona filamu ulizohifadhi."
-    );
-
+    showMessage("Ingia kwanza ili kuona filamu ulizohifadhi.");
     return;
   }
 
-  $("sectionTitle").textContent =
-    "❤️ Filamu Zilizohifadhiwa";
-
-  $("sectionDescription").textContent =
-    "Hii ni orodha yako binafsi.";
-
-  $("movieGrid").innerHTML =
-    '<div class="empty">Inapakia...</div>';
+  $("sectionTitle").textContent = "❤️ Filamu Zilizohifadhiwa";
+  $("sectionDescription").textContent = "Hii ni orodha yako binafsi.";
+  $("movieGrid").innerHTML = '<div class="empty">Inapakia...</div>';
 
   try {
     const snapshot = await db
@@ -1066,13 +855,9 @@ $("savedBtn").addEventListener("click", async () => {
       card.className = "movie-card";
 
       const poster = document.createElement("img");
-
       poster.src = movie.poster || placeholderPoster;
       poster.alt = "Poster ya " + movie.title;
-
-      poster.onerror = () => {
-        poster.src = placeholderPoster;
-      };
+      poster.onerror = () => { poster.src = placeholderPoster; };
 
       const info = document.createElement("div");
       info.className = "movie-info";
@@ -1099,7 +884,6 @@ $("savedBtn").addEventListener("click", async () => {
             .delete();
 
           card.remove();
-
           showMessage("Filamu imeondolewa.");
 
         } catch (error) {
@@ -1129,10 +913,7 @@ async function loadIntro() {
   if (configMissing) return;
 
   try {
-    const snapshot = await db
-      .collection("settings")
-      .doc("intro")
-      .get();
+    const snapshot = await db.collection("settings").doc("intro").get();
 
     if (!snapshot.exists) return;
 
@@ -1146,24 +927,20 @@ async function loadIntro() {
 
     if (data.type === "video") {
       const video = document.createElement("video");
-
       video.controls = true;
       video.preload = "metadata";
       video.style.width = "100%";
       video.style.maxHeight = "320px";
       video.src = data.url;
-
       section.append(video);
 
     } else {
       const image = document.createElement("img");
-
       image.src = data.url;
       image.alt = "Tangazo la Prosper Movies";
       image.style.maxWidth = "100%";
       image.style.maxHeight = "320px";
       image.style.borderRadius = "12px";
-
       section.append(image);
     }
 
@@ -1173,6 +950,7 @@ async function loadIntro() {
 }
 
 loadIntro();
+loadOwnMovies();
 </script>
 
 </body>
