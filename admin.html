@@ -187,6 +187,10 @@
       margin-top: 12px;
     }
 
+    .pay-item {
+      flex-wrap: wrap;
+    }
+
     @media (max-width: 600px) {
       .container {
         padding: 12px;
@@ -347,6 +351,18 @@
           >
         </div>
 
+        <div class="field">
+          <label for="price">Bei (TSh), 0 = bure</label>
+
+          <input
+            id="price"
+            type="number"
+            min="0"
+            step="100"
+            value="0"
+          >
+        </div>
+
         <button type="submit" id="saveMovieBtn">
           Hifadhi Filamu
         </button>
@@ -401,6 +417,23 @@
         </div>
 
       </form>
+    </section>
+
+    <!-- PAYMENTS -->
+    <section class="panel">
+      <h2>💰 Malipo Yanayosubiri</h2>
+
+      <p class="muted">
+        Linganisha code na kiasi kwenye SMS ya Tigo Pesa kabla ya kuidhinisha.
+      </p>
+
+      <button type="button" id="refreshPayBtn" class="secondary">
+        Onyesha upya
+      </button>
+
+      <div id="paymentList" style="margin-top:12px">
+        Inapakia...
+      </div>
     </section>
 
     <!-- MOVIE LIST -->
@@ -471,7 +504,7 @@ function showMessage(text, error = false) {
 
 function getErrorMessage(error) {
   if (error.code === "permission-denied") {
-    return "Ruhusa imekataliwa. Hakikisha Firestore Rules na admin claim vimesanidiwa.";
+    return "Ruhusa imekataliwa. Hakikisha Firestore Rules zimewekwa na barua pepe yako imethibitishwa.";
   }
 
   if (error.code === "auth/invalid-credential") {
@@ -527,14 +560,15 @@ auth.onAuthStateChanged(async user => {
   }
 
   try {
-    const token = await user.getIdTokenResult(true);
+    await user.getIdTokenResult(true);
+
     const adminEmails = [
       "prospermgimba9@gmail.com",
       "erickturwa0@gmail.com"
     ];
 
     if (!adminEmails.includes((user.email || "").toLowerCase())) {
-   
+
       showMessage(
         "Akaunti hii haina ruhusa za admin. Utaondolewa kwenye dashboard.",
         true
@@ -548,10 +582,18 @@ auth.onAuthStateChanged(async user => {
 
     $("dashboard").classList.remove("hidden");
 
-    showMessage("Umeingia kama admin aliyeidhinishwa.");
+    if (user.emailVerified) {
+      showMessage("Umeingia kama admin aliyeidhinishwa.");
+    } else {
+      showMessage(
+        "Umeingia, lakini barua pepe yako haijathibitishwa. Thibitisha kupitia kiungo kilichotumwa na Firebase, vinginevyo kuhifadhi na kuidhinisha malipo kutakataliwa.",
+        true
+      );
+    }
 
     await loadMovies();
     await loadIntro();
+    await loadPayments();
 
   } catch (error) {
     showMessage(getErrorMessage(error), true);
@@ -590,6 +632,8 @@ $("logoutBtn").addEventListener("click", async () => {
 
 /* =========================================
    ADD MOVIE
+   Movie ya malipo: link ya video inakwenda
+   kwenye "movieSecrets", si kwenye "movies".
 ========================================= */
 
 $("movieForm").addEventListener("submit", async event => {
@@ -619,13 +663,24 @@ $("movieForm").addEventListener("submit", async event => {
     return;
   }
 
+  const price = Math.max(0, parseInt($("price").value, 10) || 0);
+  const paid = price > 0;
+
+  if (paid && !videoUrl) {
+    showMessage("Movie ya malipo inahitaji URL ya video.", true);
+    return;
+  }
+
+  const ref = db.collection("movies").doc();
+
   const movie = {
     title: title,
     year: $("movieYear").value.trim(),
     imdbID: $("imdbID").value.trim(),
     poster: poster,
     description: $("description").value.trim(),
-    videoUrl: videoUrl,
+    videoUrl: paid ? "" : videoUrl,
+    price: price,
     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     createdBy: auth.currentUser.uid
   };
@@ -633,9 +688,20 @@ $("movieForm").addEventListener("submit", async event => {
   $("saveMovieBtn").disabled = true;
 
   try {
-    await db.collection("movies").add(movie);
+    const batch = db.batch();
+
+    batch.set(ref, movie);
+
+    if (paid) {
+      batch.set(db.collection("movieSecrets").doc(ref.id), {
+        videoUrl: videoUrl
+      });
+    }
+
+    await batch.commit();
 
     $("movieForm").reset();
+    $("price").value = "0";
 
     showMessage("Filamu imehifadhiwa kikamilifu.");
 
@@ -697,7 +763,9 @@ async function loadMovies() {
       title.textContent = movie.title || "Filamu";
 
       const year = document.createElement("small");
-      year.textContent = movie.year || "Mwaka haujawekwa";
+      year.textContent =
+        (movie.year || "Mwaka haujawekwa") +
+        (movie.price > 0 ? " · TSh " + movie.price : " · Bure");
 
       info.append(title, year);
 
@@ -715,10 +783,12 @@ async function loadMovies() {
         if (!confirmed) return;
 
         try {
-          await db
-            .collection("movies")
-            .doc(documentSnapshot.id)
-            .delete();
+          const b = db.batch();
+
+          b.delete(db.collection("movies").doc(documentSnapshot.id));
+          b.delete(db.collection("movieSecrets").doc(documentSnapshot.id));
+
+          await b.commit();
 
           showMessage("Filamu imefutwa.");
 
@@ -740,6 +810,117 @@ async function loadMovies() {
     showMessage(getErrorMessage(error), true);
   }
 }
+
+/* =========================================
+   PAYMENTS (kuidhinisha au kukataa)
+========================================= */
+
+async function loadPayments() {
+  if (!isAdmin) return;
+
+  const list = $("paymentList");
+
+  list.textContent = "Inapakia...";
+
+  try {
+    const snap = await db
+      .collection("payments")
+      .where("status", "==", "pending")
+      .get();
+
+    list.replaceChildren();
+
+    if (snap.empty) {
+      list.textContent = "Hakuna malipo yanayosubiri.";
+      return;
+    }
+
+    snap.docs
+      .sort((a, b) =>
+        ((a.data().createdAt || {}).seconds || 0) -
+        ((b.data().createdAt || {}).seconds || 0)
+      )
+      .forEach(d => {
+        const p = d.data();
+
+        const row = document.createElement("div");
+        row.className = "movie-item pay-item";
+
+        const info = document.createElement("div");
+        info.className = "movie-info";
+
+        const t = document.createElement("strong");
+        t.textContent =
+          (p.movieTitle || p.movieId) + " · TSh " + (p.amount || 0);
+
+        const s = document.createElement("small");
+        s.textContent = (p.email || p.uid) + " · Code: " + p.txCode;
+
+        info.append(t, s);
+
+        const ok = document.createElement("button");
+        ok.textContent = "Idhinisha";
+        ok.addEventListener("click", () => decidePayment(d.id, p, true));
+
+        const no = document.createElement("button");
+        no.className = "danger";
+        no.textContent = "Kataa";
+        no.addEventListener("click", () => decidePayment(d.id, p, false));
+
+        row.append(info, ok, no);
+
+        list.append(row);
+      });
+
+  } catch (error) {
+    list.textContent = "Imeshindikana kupakia malipo.";
+
+    showMessage(getErrorMessage(error), true);
+  }
+}
+
+async function decidePayment(id, p, approve) {
+  if (!isAdmin) return;
+
+  const ask = approve
+    ? "Umeangalia SMS na kiasi kinalingana?"
+    : "Kataa malipo haya?";
+
+  if (!confirm(ask)) return;
+
+  try {
+    const ts = firebase.firestore.FieldValue.serverTimestamp();
+    const batch = db.batch();
+
+    batch.update(db.collection("payments").doc(id), {
+      status: approve ? "approved" : "rejected",
+      decidedBy: auth.currentUser.uid,
+      decidedAt: ts
+    });
+
+    if (approve) {
+      batch.set(
+        db.collection("users").doc(p.uid).collection("purchases").doc(p.movieId),
+        {
+          txCode: p.txCode,
+          amount: p.amount || 0,
+          approvedAt: ts
+        }
+      );
+    }
+
+    await batch.commit();
+
+    showMessage(approve ? "Malipo yameidhinishwa." : "Malipo yamekataliwa.");
+
+    await loadPayments();
+
+  } catch (error) {
+    showMessage(getErrorMessage(error), true);
+  }
+}
+
+$("refreshPayBtn").addEventListener("click", loadPayments);
 
 /* =========================================
    SAVE INTRO
