@@ -82,6 +82,9 @@
 
       <label for="desc">Maelezo</label>
       <textarea id="desc"></textarea>
+
+      <label for="price">Bei ya series nzima (TSh), 0 = bure</label>
+      <input id="price" type="number" min="0" step="100" value="0">
     </div>
 
     <!-- SEASONS -->
@@ -153,7 +156,11 @@ auth.onAuthStateChanged(async user => {
       msg("Umeingia kama " + (user.email || "?") + ", ambayo si admin. Bonyeza Toka, kisha ingia kwa barua pepe ya admin.", true);
       return;
     }
-    $("msg").className = "msg hidden";
+    if (user.emailVerified) {
+      $("msg").className = "msg hidden";
+    } else {
+      msg("Barua pepe yako haijathibitishwa. Thibitisha kupitia kiungo kilichotumwa na Firebase, vinginevyo kuhifadhi kutakataliwa.", true);
+    }
     $("app").classList.remove("hidden");
     newSeries();
     loadList();
@@ -161,10 +168,6 @@ auth.onAuthStateChanged(async user => {
 });
 
 /* ---------- SEASONS UI ---------- */
-function sortSeasons() {
-  seasons.forEach(s => s.episodes.forEach((ep, i) => { if (!ep.number) ep.number = i + 1; }));
-}
-
 function renumber(season) {
   season.episodes.forEach((ep, i) => ep.number = i + 1);
 }
@@ -280,6 +283,7 @@ function newSeries() {
   editingId = null;
   seasons = [];
   ["title", "year", "imdb", "poster", "desc"].forEach(id => $(id).value = "");
+  $("price").value = "0";
   $("formTitle").textContent = "Series mpya";
   $("newBtn").classList.add("hidden");
   render();
@@ -290,6 +294,11 @@ function isHttps(u) {
   try { return new URL(u).protocol === "https:"; } catch (e) { return false; }
 }
 
+/* Funguo za link za siri: "season_episode", mfano "1_3" */
+function urlKey(season, ep) {
+  return season.number + "_" + ep.number;
+}
+
 $("saveBtn").addEventListener("click", async () => {
   const title = $("title").value.trim();
   if (!title) return msg("Andika jina la series.", true);
@@ -298,44 +307,62 @@ $("saveBtn").addEventListener("click", async () => {
   for (const s of seasons) {
     if (!s.episodes.length) return msg("Season " + s.number + " haina episode.", true);
     for (const ep of s.episodes) {
-      if (!isHttps(ep.videoUrl.trim()))
+      if (!isHttps((ep.videoUrl || "").trim()))
         return msg("Season " + s.number + " Episode " + ep.number + ": URL ya video lazima iwe HTTPS.", true);
     }
   }
 
+  const price = Math.max(0, parseInt($("price").value, 10) || 0);
+  const paid = price > 0;
+
+  /* Series ya malipo: link hazibaki kwenye "series", zinaenda "seriesSecrets" */
+  const secretUrls = {};
   const data = {
     title,
     year: $("year").value.trim(),
     imdbID: $("imdb").value.trim(),
     poster: $("poster").value.trim(),
     description: $("desc").value.trim(),
+    price: price,
     seasons: seasons.map(s => ({
       number: s.number,
-      episodes: s.episodes.map(ep => ({
-        number: ep.number,
-        title: ep.title.trim(),
-        videoUrl: ep.videoUrl.trim()
-      }))
+      episodes: s.episodes.map(ep => {
+        const url = ep.videoUrl.trim();
+        if (paid) secretUrls[urlKey(s, ep)] = url;
+        return {
+          number: ep.number,
+          title: (ep.title || "").trim(),
+          videoUrl: paid ? "" : url
+        };
+      })
     })),
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   };
 
   $("saveBtn").disabled = true;
   try {
-    if (editingId) {
-      await db.collection("series").doc(editingId).set(data, { merge: true });
-    } else {
-      data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-      const ref = await db.collection("series").add(data);
-      editingId = ref.id;
-      $("formTitle").textContent = "Hariri: " + title;
-      $("newBtn").classList.remove("hidden");
-    }
+    const isNew = !editingId;
+    const ref = isNew ? db.collection("series").doc() : db.collection("series").doc(editingId);
+    if (isNew) data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+
+    const batch = db.batch();
+    batch.set(ref, data, { merge: true });
+
+    const secretRef = db.collection("seriesSecrets").doc(ref.id);
+    if (paid) batch.set(secretRef, { urls: secretUrls });
+    else batch.delete(secretRef);
+
+    await batch.commit();
+
+    editingId = ref.id;
+    $("formTitle").textContent = "Hariri: " + title;
+    $("newBtn").classList.remove("hidden");
+
     msg("Series imehifadhiwa.");
     loadList();
   } catch (err) {
     msg(err.code === "permission-denied"
-      ? "Huna ruhusa. Ongeza rule ya collection \"series\" kwenye Firestore."
+      ? "Huna ruhusa. Hakikisha Firestore rules za \"series\" na \"seriesSecrets\" zimewekwa na barua pepe yako imethibitishwa."
       : err.message, true);
   } finally {
     $("saveBtn").disabled = false;
@@ -357,26 +384,42 @@ async function loadList() {
 
       const info = document.createElement("div");
       const eps = (d.seasons || []).reduce((n, s) => n + s.episodes.length, 0);
-      info.innerHTML = "";
       const t = document.createElement("strong");
       t.textContent = d.title;
       const sub = document.createElement("div");
       sub.className = "muted";
       sub.style.fontSize = "13px";
-      sub.textContent = (d.seasons || []).length + " season, " + eps + " episodes";
+      sub.textContent =
+        (d.seasons || []).length + " season, " + eps + " episodes" +
+        (d.price > 0 ? " · TSh " + d.price : " · Bure");
       info.append(t, sub);
 
       const tools = document.createElement("div");
       tools.className = "row";
       tools.append(
-        btn("Hariri", "sec sm", () => {
+        btn("Hariri", "sec sm", async () => {
+          const copy = JSON.parse(JSON.stringify(d.seasons || []));
+
+          if (d.price > 0) {
+            try {
+              const sec = await db.collection("seriesSecrets").doc(doc.id).get();
+              const urls = sec.exists ? (sec.data().urls || {}) : {};
+              copy.forEach(s => s.episodes.forEach(ep => {
+                ep.videoUrl = urls[urlKey(s, ep)] || "";
+              }));
+            } catch (err) {
+              return msg("Imeshindikana kusoma link za siri: " + err.message, true);
+            }
+          }
+
           editingId = doc.id;
           $("title").value = d.title || "";
           $("year").value = d.year || "";
           $("imdb").value = d.imdbID || "";
           $("poster").value = d.poster || "";
           $("desc").value = d.description || "";
-          seasons = JSON.parse(JSON.stringify(d.seasons || []));
+          $("price").value = d.price || 0;
+          seasons = copy;
           $("formTitle").textContent = "Hariri: " + d.title;
           $("newBtn").classList.remove("hidden");
           render();
@@ -385,7 +428,10 @@ async function loadList() {
         btn("Futa", "del sm", async () => {
           if (!confirm("Futa series \"" + d.title + "\"?")) return;
           try {
-            await db.collection("series").doc(doc.id).delete();
+            const b = db.batch();
+            b.delete(db.collection("series").doc(doc.id));
+            b.delete(db.collection("seriesSecrets").doc(doc.id));
+            await b.commit();
             if (editingId === doc.id) newSeries();
             msg("Series imefutwa.");
             loadList();
