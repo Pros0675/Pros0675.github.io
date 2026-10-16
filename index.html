@@ -118,6 +118,7 @@ h2{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01
 .steps{margin:10px 0 0;padding-left:20px;line-height:1.55}
 .steps li{margin:7px 0}
 .note{background:#2b2410;border:1px solid #5b4a14;color:#ffe9a8;border-radius:12px;padding:11px 13px;font-size:13.5px;margin:12px 0}
+.wa{display:block;text-align:center;text-decoration:none;background:#123a2a;color:var(--ok);border:1px solid #1d5a42;border-radius:12px;padding:11px 14px;font-weight:700;font-size:14px;margin:12px 0 0}
 .status{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700}
 .status.pending{background:#3a3010;color:#ffe08a}
 .status.approved{background:#103a2a;color:var(--ok)}
@@ -322,6 +323,10 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
       Lipa kiasi kamili. Namba ya muamala hutumika mara moja tu, kwa hiyo usitumie ya zamani wala ya mtu mwingine.
       Ukikosea namba, wasiliana na admin.
     </div>
+
+    <a class="wa" href="https://wa.me/255675295764?text=Habari%2C%20nahitaji%20msaada%20wa%20malipo%20ya%20Prosper%20Movies." target="_blank" rel="noopener">
+      Una tatizo la malipo? Wasiliana nasi WhatsApp
+    </a>
 
     <form id="payForm">
       <label for="txCode">Namba ya muamala (kutoka SMS)</label>
@@ -544,6 +549,40 @@ $("refreshMine").addEventListener("click", async () => {
   showMessage("Taarifa zimesasishwa.");
 });
 
+/* ---- Usasishaji wa moja kwa moja ---- */
+let unsubPay = null, unsubPur = null;
+
+function stopLive() {
+  if (unsubPay) { unsubPay(); unsubPay = null; }
+  if (unsubPur) { unsubPur(); unsubPur = null; }
+}
+
+function startLive() {
+  stopLive();
+  if (!currentUser) return;
+  let firstPur = true;
+
+  unsubPur = db.collection("users").doc(currentUser.uid).collection("purchases")
+    .onSnapshot(snap => {
+      const before = purchased.size;
+      purchased = new Set(snap.docs.map(d => d.id));
+      renderOwn();
+      renderSeriesList();
+      if (!firstPur && purchased.size > before) {
+        showMessage("Malipo yameidhinishwa! Unaweza kutazama sasa.");
+      }
+      if (payItem && purchased.has(payItem.id)) closeModal("payModal");
+      firstPur = false;
+    }, err => console.error("Purchases live", err));
+
+  unsubPay = db.collection("payments").where("uid", "==", currentUser.uid)
+    .onSnapshot(snap => {
+      myPayments = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => ((b.createdAt || {}).seconds || 0) - ((a.createdAt || {}).seconds || 0));
+      renderMyPayments();
+    }, err => console.error("Payments live", err));
+}
+
 function pendingFor(id) {
   return myPayments.some(p => p.movieId === id && p.status === "pending");
 }
@@ -728,13 +767,11 @@ auth.onAuthStateChanged(async user => {
   if (user) {
     document.body.classList.remove("locked");
     $("payBox").classList.remove("hidden");
-    await Promise.all([loadPurchases(), loadMyPayments()]);
-    renderMyPayments();
+    startLive();
     loadContent();
-    renderOwn();
-    renderSeriesList();
     if ($("viewSaved").classList.contains("active")) loadSaved();
   } else {
+    stopLive();
     document.body.classList.add("locked");
     contentLoaded = false;
     heroSet = false;
