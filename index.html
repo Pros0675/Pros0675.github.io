@@ -12,7 +12,7 @@
 <style>
 :root{
   --bg:#0c0a14; --panel:#15122a; --panel2:#1e1a38; --text:#f6f3ff; --muted:#a29dbd;
-  --accent:#8b6bff; --gold:#ffc857; --border:#2a2548; --danger:#ff7a93;
+  --accent:#8b6bff; --gold:#ffc857; --border:#2a2548; --danger:#ff7a93; --ok:#6be3b4;
   --display:"Bricolage Grotesque","Trebuchet MS",Arial,sans-serif;
   --body:"DM Sans",Arial,sans-serif;
 }
@@ -65,6 +65,8 @@ h2{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01
 .card .poster{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:2/3;background:var(--panel2);border:1px solid var(--border)}
 .card img{display:block;width:100%;height:100%;object-fit:cover}
 .card .badge{position:absolute;left:8px;bottom:8px;background:#0c0a14cc;backdrop-filter:blur(6px);padding:3px 9px;border-radius:99px;font-size:12px;font-weight:700}
+.card .badge.paid{background:var(--gold);color:#241a00}
+.card .badge.open{background:var(--ok);color:#06281c}
 .card .t{font-weight:700;margin-top:8px;font-size:14.5px;line-height:1.25}
 .card .s{color:var(--muted);font-size:12.5px;margin-top:2px}
 .card .rm{margin-top:8px;width:100%}
@@ -106,6 +108,25 @@ h2{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01
 .chip{padding:8px 13px;font-size:13px;background:var(--panel2);color:var(--text);border-radius:99px}
 .chip.on{background:var(--accent)}
 
+/* payment */
+.price-tag{display:inline-block;background:var(--gold);color:#241a00;font-weight:800;padding:6px 14px;border-radius:99px;font-size:18px;margin:10px 0 4px}
+.paybox{background:var(--panel2);border:1px solid var(--border);border-radius:16px;padding:14px;margin:12px 0}
+.paybox .line{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0}
+.paybox .line + .line{border-top:1px solid var(--border)}
+.paybox .k{color:var(--muted);font-size:13px}
+.paybox .v{font-weight:700;text-align:right;overflow-wrap:anywhere}
+.steps{margin:10px 0 0;padding-left:20px;line-height:1.55}
+.steps li{margin:7px 0}
+.note{background:#2b2410;border:1px solid #5b4a14;color:#ffe9a8;border-radius:12px;padding:11px 13px;font-size:13.5px;margin:12px 0}
+.status{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700}
+.status.pending{background:#3a3010;color:#ffe08a}
+.status.approved{background:#103a2a;color:var(--ok)}
+.status.rejected{background:#3f1a26;color:var(--danger)}
+.pay-row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:11px 0;border-top:1px solid var(--border)}
+.pay-row:first-of-type{border-top:0}
+.pay-row .i{min-width:0;overflow-wrap:anywhere}
+.pay-row small{display:block;color:var(--muted)}
+
 /* toast */
 .toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translateX(-50%);z-index:50;width:min(460px,calc(100% - 28px));
   background:#1d3a35;color:#b9ffee;padding:12px 16px;border-radius:14px;overflow-wrap:anywhere;box-shadow:0 8px 30px #0008}
@@ -123,6 +144,8 @@ body:not(.locked) .gate{display:none}
 .admin-card{margin:14px 18px 0;background:var(--panel);border:1px solid var(--gold);border-radius:20px;padding:20px}
 .admin-card h3{font-family:var(--display);margin:0 0 4px;font-size:19px;display:flex;align-items:center;gap:8px}
 .admin-card svg{width:20px;height:20px;color:var(--gold)}
+.pay-card{margin:14px 18px 0;background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:20px}
+.pay-card h3{font-family:var(--display);margin:0 0 4px;font-size:19px}
 footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
 
 @media(max-width:560px){
@@ -207,6 +230,15 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
   <main id="viewAccount" class="view">
     <h2 class="page-title">Akaunti</h2>
     <div id="accountBox" class="account"></div>
+
+    <div id="payBox" class="pay-card hidden">
+      <div class="bar">
+        <h3>Malipo yangu</h3>
+        <button id="refreshMine" type="button" class="ghost sm">Onyesha upya</button>
+      </div>
+      <p class="muted" style="margin:6px 0 10px;font-size:13.5px">Malipo yakiidhinishwa, filamu au series itafunguka yenyewe.</p>
+      <div id="myPayments"><span class="muted">Inapakia...</span></div>
+    </div>
   </main>
 </div>
 
@@ -249,6 +281,60 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
   </div>
 </div>
 
+<!-- MALIPO -->
+<div id="payModal" class="modal hidden">
+  <div class="box">
+    <div class="bar">
+      <h2 id="payTitle">Lipia kutazama</h2>
+      <button type="button" class="ghost sm" data-close="payModal">Funga</button>
+    </div>
+
+    <div class="price-tag" id="payAmount">TSh 0</div>
+    <p class="muted" id="payItemName" style="margin:2px 0 0"></p>
+
+    <div id="payPendingNote" class="note hidden">
+      Una ombi la malipo la hii linalosubiri idhini. Subiri kidogo kisha bonyeza "Onyesha upya" kwenye Akaunti.
+    </div>
+
+    <div class="paybox">
+      <div class="line"><span class="k">Mtandao</span><span class="v">Tigo Pesa (Mixx by Yas)</span></div>
+      <div class="line">
+        <span class="k">Namba ya malipo</span>
+        <span class="v"><span id="payNumber">0675295764</span>
+          <button type="button" class="ghost sm" id="copyNumber" style="margin-left:8px">Nakili</button></span>
+      </div>
+      <div class="line"><span class="k">Jina</span><span class="v">PROSPER LUPUMKO MGIMBA</span></div>
+      <div class="line"><span class="k">Kiasi</span><span class="v" id="payAmount2">TSh 0</span></div>
+    </div>
+
+    <h3 style="font-family:var(--display);margin:18px 0 0;font-size:17px">Jinsi ya kulipa</h3>
+    <ol class="steps">
+      <li>Fungua huduma ya <b>Tigo Pesa / Mixx by Yas</b> kwenye simu yako.</li>
+      <li>Chagua <b>Tuma pesa</b> (au Lipa kwa namba) kisha andika namba <b>0675295764</b>.</li>
+      <li>Hakikisha jina linalotokea ni <b>Prosper Lupumko Mgimba</b>. Likiwa tofauti, acha.</li>
+      <li>Weka <b>kiasi kamili</b> kilichoandikwa juu, kisha thibitisha kwa PIN yako.</li>
+      <li>Utapokea <b>SMS ya uthibitisho</b>. Nakili <b>namba ya muamala</b> (Transaction ID / Reference).</li>
+      <li>Rudi hapa, bandika namba hiyo kwenye kisanduku hapa chini, kisha bonyeza <b>Tuma malipo</b>.</li>
+      <li>Subiri idhini (kwa kawaida dakika chache). Ikikubaliwa, itafunguka kwenye akaunti yako.</li>
+    </ol>
+
+    <div class="note">
+      Lipa kiasi kamili. Namba ya muamala hutumika mara moja tu, kwa hiyo usitumie ya zamani wala ya mtu mwingine.
+      Ukikosea namba, wasiliana na admin.
+    </div>
+
+    <form id="payForm">
+      <label for="txCode">Namba ya muamala (kutoka SMS)</label>
+      <input id="txCode" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false"
+             placeholder="Mfano: MP260101ABC123" maxlength="29" required>
+      <div class="actions-row">
+        <button id="paySubmit" type="submit">Tuma malipo</button>
+        <button type="button" class="ghost" data-close="payModal">Funga</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- PLAYER -->
 <div id="playerModal" class="modal hidden">
   <div class="box wide">
@@ -268,7 +354,7 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
       style="margin-top:12px"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
       referrerpolicy="strict-origin-when-cross-origin"></iframe>
-    <video id="playerVideo" class="player" controls playsinline style="display:none;margin-top:12px"></video>
+    <video id="playerVideo" class="player" controls playsinline controlsList="nodownload noremoteplayback" disablePictureInPicture style="display:none;margin-top:12px"></video>
 
     <div id="episodePanel" class="hidden" style="margin-top:14px"></div>
   </div>
@@ -298,6 +384,13 @@ const $ = id => document.getElementById(id);
 
 let currentUser = null, authMode = "login", searchToken = 0, currentImdbID = null, heroSet = false;
 
+/* ---- malipo ---- */
+let purchased = new Set();      // id za vitu ambavyo mtumiaji amefungua
+let myPayments = [];            // malipo ya mtumiaji
+let ownList = [];               // filamu zetu (zikiwa na id)
+let seriesList = [];            // series (zikiwa na id)
+let payItem = null;             // kitu kinacholipiwa sasa
+
 $("yearNow").textContent = new Date().getFullYear();
 
 const placeholderPoster = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
@@ -312,6 +405,7 @@ function el(tag, cls, text) {
   return e;
 }
 function isAdminUser(u) { return !!u && ADMINS.includes((u.email || "").toLowerCase()); }
+function fmtPrice(n) { return "TSh " + Number(n || 0).toLocaleString("en-US"); }
 
 let toastTimer;
 function showMessage(text, error = false) {
@@ -355,12 +449,13 @@ function showView(name) {
   window.scrollTo({ top: 0 });
   if (name === "Saved") loadSaved();
   if (name === "Search") $("searchInput").focus();
+  if (name === "Account") refreshMine();
 }
 document.querySelectorAll(".nav button").forEach(b =>
   b.addEventListener("click", () => showView(b.dataset.view)));
 
 /* ---------- cards ---------- */
-function makeCard({ title, sub, poster, badge, onClick }) {
+function makeCard({ title, sub, poster, badge, badgeClass, onClick }) {
   const card = el("button", "card");
   card.type = "button";
   const p = el("div", "poster");
@@ -370,7 +465,7 @@ function makeCard({ title, sub, poster, badge, onClick }) {
   img.src = poster || placeholderPoster;
   img.onerror = () => { img.src = placeholderPoster; };
   p.append(img);
-  if (badge) p.append(el("span", "badge", badge));
+  if (badge) p.append(el("span", "badge" + (badgeClass ? " " + badgeClass : ""), badge));
   card.append(p, el("div", "t", title), el("div", "s", sub || ""));
   card.addEventListener("click", onClick);
   return card;
@@ -388,6 +483,125 @@ function setHero({ tag, title, text, poster, playText, onPlay }) {
   $("heroPlay").onclick = onPlay;
 }
 $("heroPlay").onclick = () => showView("Search");
+
+/* =====================================================
+   MALIPO: kufungua, kulipa, na historia
+===================================================== */
+function isUnlocked(item) {
+  if (!(item.price > 0)) return true;
+  if (isAdminUser(currentUser)) return true;
+  return purchased.has(item.id);
+}
+
+async function loadPurchases() {
+  purchased = new Set();
+  if (!currentUser) return;
+  try {
+    const snap = await db.collection("users").doc(currentUser.uid).collection("purchases").get();
+    purchased = new Set(snap.docs.map(d => d.id));
+  } catch (error) { console.error("Purchases", error); }
+}
+
+async function loadMyPayments() {
+  myPayments = [];
+  if (!currentUser) return;
+  try {
+    const snap = await db.collection("payments").where("uid", "==", currentUser.uid).get();
+    myPayments = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => ((b.createdAt || {}).seconds || 0) - ((a.createdAt || {}).seconds || 0));
+  } catch (error) { console.error("Payments", error); }
+}
+
+function renderMyPayments() {
+  const box = $("myPayments");
+  box.replaceChildren();
+  if (!myPayments.length) {
+    box.append(el("span", "muted", "Bado hujafanya malipo yoyote."));
+    return;
+  }
+  const labels = { pending: "Inasubiri", approved: "Imeidhinishwa", rejected: "Imekataliwa" };
+  myPayments.forEach(p => {
+    const row = el("div", "pay-row");
+    const info = el("div", "i");
+    info.append(el("strong", "", p.movieTitle || p.movieId));
+    info.append(el("small", "", fmtPrice(p.amount) + " · " + p.txCode));
+    const st = el("span", "status " + (p.status || "pending"), labels[p.status] || "Inasubiri");
+    row.append(info, st);
+    box.append(row);
+  });
+}
+
+async function refreshMine() {
+  if (!currentUser) return;
+  $("payBox").classList.remove("hidden");
+  await Promise.all([loadPurchases(), loadMyPayments()]);
+  renderMyPayments();
+  renderOwn();
+  renderSeriesList();
+}
+$("refreshMine").addEventListener("click", async () => {
+  await refreshMine();
+  showMessage("Taarifa zimesasishwa.");
+});
+
+function pendingFor(id) {
+  return myPayments.some(p => p.movieId === id && p.status === "pending");
+}
+
+function openPay(item) {
+  payItem = item;
+  $("payTitle").textContent = "Lipia kutazama";
+  $("payItemName").textContent = item.title;
+  $("payAmount").textContent = fmtPrice(item.price);
+  $("payAmount2").textContent = fmtPrice(item.price);
+  $("payPendingNote").classList.toggle("hidden", !pendingFor(item.id));
+  $("txCode").value = "";
+  openModal("payModal");
+}
+
+$("copyNumber").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText("0675295764");
+    showMessage("Namba imenakiliwa.");
+  } catch (e) { showMessage("Nakili kwa mkono: 0675295764", true); }
+});
+
+$("payForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!currentUser) return openAuth("login");
+  if (!payItem) return;
+
+  const code = $("txCode").value.toUpperCase().replace(/\s+/g, "");
+  if (!/^[A-Z0-9._-]{6,29}$/.test(code)) {
+    return showMessage("Namba ya muamala si sahihi. Tumia herufi na namba tu (6 hadi 29).", true);
+  }
+
+  $("paySubmit").disabled = true;
+  try {
+    await db.collection("payments").doc(code).set({
+      uid: currentUser.uid,
+      email: currentUser.email,
+      movieId: payItem.id,
+      movieTitle: payItem.title,
+      amount: payItem.price,
+      txCode: code,
+      status: "pending",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    closeModal("payModal");
+    showMessage("Malipo yametumwa. Subiri idhini ya admin.");
+    await loadMyPayments();
+    renderMyPayments();
+  } catch (error) {
+    if (error.code === "permission-denied") {
+      showMessage("Imekataliwa: namba hii imeshatumika, au kiasi hakilingani na bei. Kagua kisha jaribu tena.", true);
+    } else {
+      showMessage(friendlyError(error), true);
+    }
+  } finally {
+    $("paySubmit").disabled = false;
+  }
+});
 
 /* ---------- AUTH ---------- */
 function updateAuthMode() {
@@ -458,7 +672,7 @@ function renderAccount() {
     h.append(document.createTextNode("Zana za Admin"));
     card.append(h, el("p", "muted", "Zinaonekana kwa akaunti za admin tu."));
     const st = el("div", "stack");
-    [["./admin.html", "Simamia Filamu"], ["./series-admin.html", "Simamia Series"]].forEach(([href, label]) => {
+    [["./admin.html", "Simamia Filamu na Malipo"], ["./series-admin.html", "Simamia Series"]].forEach(([href, label]) => {
       const a = el("a", "linkbtn", label); a.href = href; st.append(a);
     });
     card.append(st);
@@ -507,19 +721,30 @@ $("gReset").addEventListener("click", async () => {
   catch (err) { showMessage(friendlyError(err), true); }
 });
 
-auth.onAuthStateChanged(user => {
+auth.onAuthStateChanged(async user => {
   currentUser = user;
   renderAccount();
 
   if (user) {
     document.body.classList.remove("locked");
+    $("payBox").classList.remove("hidden");
+    await Promise.all([loadPurchases(), loadMyPayments()]);
+    renderMyPayments();
     loadContent();
+    renderOwn();
+    renderSeriesList();
     if ($("viewSaved").classList.contains("active")) loadSaved();
   } else {
     document.body.classList.add("locked");
     contentLoaded = false;
     heroSet = false;
+    purchased = new Set();
+    myPayments = [];
+    ownList = [];
+    seriesList = [];
+    $("payBox").classList.add("hidden");
     closePlayer();
+    closeModal("payModal");
     $("gateText").textContent = "Ingia kwenye akaunti yako ili kutazama filamu na series.";
     $("gateForm").classList.remove("hidden");
   }
@@ -621,6 +846,9 @@ function loadInPlayer(url) {
     frame.src = "about:blank";
     frame.style.display = "none";
     video.style.display = "block";
+    video.setAttribute("controlsList", "nodownload noremoteplayback");
+    video.disablePictureInPicture = true;
+    video.oncontextmenu = ev => ev.preventDefault();
     video.src = r.src;
     video.play().catch(() => {});
   } else {
@@ -686,34 +914,61 @@ $("playerVideo").addEventListener("loadedmetadata", () => {
 });
 
 /* ---------- FILAMU ZETU ---------- */
-function playOwn(m) {
-  if (!m.videoUrl) return showMessage("Filamu hii haina link ya video.", true);
-  currentImdbID = null;
-  $("playerTitle").textContent = m.title || "Filamu";
-  setServers(false);
-  loadInPlayer(m.videoUrl);
-  openModal("playerModal");
+async function getMovieUrl(m) {
+  if (!(m.price > 0)) return m.videoUrl;
+  const snap = await db.collection("movieSecrets").doc(m.id).get();
+  return snap.exists ? (snap.data().videoUrl || "") : "";
+}
+
+async function playOwn(m) {
+  if (!isUnlocked(m)) return openPay(m);
+  try {
+    const url = await getMovieUrl(m);
+    if (!url) return showMessage("Filamu hii haina link ya video.", true);
+    currentImdbID = null;
+    $("playerTitle").textContent = m.title || "Filamu";
+    setServers(false);
+    loadInPlayer(url);
+    openModal("playerModal");
+  } catch (error) {
+    showMessage(error.code === "permission-denied"
+      ? "Bado hujafungua filamu hii. Lipia kwanza, au subiri idhini."
+      : friendlyError(error), true);
+  }
+}
+
+function renderOwn() {
+  const grid = $("ownGrid");
+  if (!ownList.length) return;
+  grid.replaceChildren();
+  ownList.forEach(m => {
+    const paid = m.price > 0;
+    const open = paid && isUnlocked(m);
+    grid.append(makeCard({
+      title: m.title || "Filamu", sub: m.year || "", poster: m.poster,
+      badge: paid ? (open ? "Imefunguliwa" : fmtPrice(m.price)) : "Filamu",
+      badgeClass: paid ? (open ? "open" : "paid") : "",
+      onClick: () => playOwn(m)
+    }));
+  });
 }
 
 async function loadOwnMovies() {
   const grid = $("ownGrid");
   try {
     const snap = await db.collection("movies").get();
-    const list = snap.docs.map(d => d.data()).sort((a, b) =>
+    ownList = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) =>
       (b.createdAt ? b.createdAt.seconds : 0) - (a.createdAt ? a.createdAt.seconds : 0));
-    grid.replaceChildren();
-    if (!list.length) { grid.innerHTML = '<div class="empty">Bado hakuna filamu zetu.</div>'; return; }
+    if (!ownList.length) { grid.innerHTML = '<div class="empty">Bado hakuna filamu zetu.</div>'; return; }
 
-    list.forEach(m => grid.append(makeCard({
-      title: m.title || "Filamu", sub: m.year || "", poster: m.poster, badge: "Filamu",
-      onClick: () => playOwn(m)
-    })));
+    renderOwn();
 
-    const f = list[0];
+    const f = ownList[0];
     setHero({
       tag: "Mpya kwenye Prosper", title: f.title || "Filamu",
       text: f.description || (f.year ? "Mwaka " + f.year : ""),
-      poster: f.poster, playText: "Cheza sasa", onPlay: () => playOwn(f)
+      poster: f.poster, playText: f.price > 0 && !isUnlocked(f) ? "Lipia " + fmtPrice(f.price) : "Cheza sasa",
+      onPlay: () => playOwn(f)
     });
   } catch (error) {
     grid.innerHTML = '<div class="empty">Imeshindikana kupakia filamu zetu.</div>';
@@ -722,26 +977,38 @@ async function loadOwnMovies() {
 }
 
 /* ---------- SERIES ---------- */
+function renderSeriesList() {
+  const grid = $("seriesGrid");
+  if (!seriesList.length) return;
+  grid.replaceChildren();
+  seriesList.forEach(s => {
+    const n = (s.seasons || []).length;
+    const paid = s.price > 0;
+    const open = paid && isUnlocked(s);
+    grid.append(makeCard({
+      title: s.title || "Series", sub: (s.year ? s.year + " · " : "") + n + " Season",
+      poster: s.poster,
+      badge: paid ? (open ? "Imefunguliwa" : fmtPrice(s.price)) : "Series",
+      badgeClass: paid ? (open ? "open" : "paid") : "",
+      onClick: () => openSeries(s)
+    }));
+  });
+}
+
 async function loadSeries() {
   const grid = $("seriesGrid");
   try {
     const snap = await db.collection("series").get();
-    grid.replaceChildren();
-    if (snap.empty) { grid.innerHTML = '<div class="empty">Bado hakuna series.</div>'; return; }
+    seriesList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (!seriesList.length) { grid.innerHTML = '<div class="empty">Bado hakuna series.</div>'; return; }
 
-    snap.docs.forEach(doc => {
-      const s = doc.data();
-      const n = (s.seasons || []).length;
-      grid.append(makeCard({
-        title: s.title || "Series", sub: (s.year ? s.year + " · " : "") + n + " Season",
-        poster: s.poster, badge: "Series", onClick: () => openSeries(s)
-      }));
-    });
+    renderSeriesList();
 
-    const s0 = snap.docs[0].data();
+    const s0 = seriesList[0];
     setHero({
       tag: "Series", title: s0.title || "Series", text: s0.description || "",
-      poster: s0.poster, playText: "Tazama", onPlay: () => openSeries(s0)
+      poster: s0.poster, playText: s0.price > 0 && !isUnlocked(s0) ? "Lipia " + fmtPrice(s0.price) : "Tazama",
+      onPlay: () => openSeries(s0)
     });
   } catch (error) {
     grid.innerHTML = '<div class="empty">Imeshindikana kupakia series.</div>';
@@ -749,11 +1016,30 @@ async function loadSeries() {
   }
 }
 
-function openSeries(s) {
-  const seasons = (s.seasons || []).slice().sort((a, b) => a.number - b.number);
+async function openSeries(s) {
+  if (!isUnlocked(s)) return openPay(s);
+
+  const seasons = JSON.parse(JSON.stringify(s.seasons || []))
+    .sort((a, b) => a.number - b.number);
+
   if (!seasons.length || !seasons[0].episodes || !seasons[0].episodes.length) {
     return showMessage("Series hii bado haina episodes.", true);
   }
+
+  if (s.price > 0) {
+    try {
+      const sec = await db.collection("seriesSecrets").doc(s.id).get();
+      const urls = sec.exists ? (sec.data().urls || {}) : {};
+      seasons.forEach(se => (se.episodes || []).forEach(ep => {
+        ep.videoUrl = urls[se.number + "_" + ep.number] || "";
+      }));
+    } catch (error) {
+      return showMessage(error.code === "permission-denied"
+        ? "Bado hujafungua series hii. Lipia kwanza, au subiri idhini."
+        : friendlyError(error), true);
+    }
+  }
+
   currentImdbID = null;
   setServers(false);
   openModal("playerModal");
@@ -767,7 +1053,8 @@ function selectEpisode(s, seasons, si, ei) {
   if (!ep) return showMessage("Season hii haina episodes.", true);
 
   $("playerTitle").textContent = s.title + " · S" + season.number + " E" + ep.number + (ep.title ? " · " + ep.title : "");
-  loadInPlayer(ep.videoUrl);
+  if (ep.videoUrl) loadInPlayer(ep.videoUrl);
+  else showMessage("Episode hii haina link ya video.", true);
 
   const panel = $("episodePanel");
   panel.replaceChildren();
