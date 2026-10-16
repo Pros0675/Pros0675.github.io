@@ -425,6 +425,7 @@
 
       <p class="muted">
         Linganisha code na kiasi kwenye SMS ya Tigo Pesa kabla ya kuidhinisha.
+        Malipo yaliyokataliwa yanaonekana chini, na unaweza kuyafuta ili mteja ajaribu tena.
       </p>
 
       <button type="button" id="refreshPayBtn" class="secondary">
@@ -825,7 +826,7 @@ async function loadPayments() {
   try {
     const snap = await db
       .collection("payments")
-      .where("status", "==", "pending")
+      .where("status", "in", ["pending", "rejected"])
       .get();
 
     list.replaceChildren();
@@ -836,10 +837,13 @@ async function loadPayments() {
     }
 
     snap.docs
-      .sort((a, b) =>
-        ((a.data().createdAt || {}).seconds || 0) -
-        ((b.data().createdAt || {}).seconds || 0)
-      )
+      .sort((a, b) => {
+        const ra = a.data().status === "rejected" ? 1 : 0;
+        const rb = b.data().status === "rejected" ? 1 : 0;
+        if (ra !== rb) return ra - rb;
+        return ((a.data().createdAt || {}).seconds || 0) -
+               ((b.data().createdAt || {}).seconds || 0);
+      })
       .forEach(d => {
         const p = d.data();
 
@@ -854,20 +858,31 @@ async function loadPayments() {
           (p.movieTitle || p.movieId) + " · TSh " + (p.amount || 0);
 
         const s = document.createElement("small");
-        s.textContent = (p.email || p.uid) + " · Code: " + p.txCode;
+        s.textContent =
+          (p.email || p.uid) + " · Code: " + p.txCode +
+          (p.status === "rejected" ? " · IMEKATALIWA" : "");
 
         info.append(t, s);
 
-        const ok = document.createElement("button");
-        ok.textContent = "Idhinisha";
-        ok.addEventListener("click", () => decidePayment(d.id, p, true));
+        if (p.status === "rejected") {
+          const rm = document.createElement("button");
+          rm.className = "secondary";
+          rm.textContent = "Futa ili ajaribu tena";
+          rm.addEventListener("click", () => removePayment(d.id));
 
-        const no = document.createElement("button");
-        no.className = "danger";
-        no.textContent = "Kataa";
-        no.addEventListener("click", () => decidePayment(d.id, p, false));
+          row.append(info, rm);
+        } else {
+          const ok = document.createElement("button");
+          ok.textContent = "Idhinisha";
+          ok.addEventListener("click", () => decidePayment(d.id, p, true));
 
-        row.append(info, ok, no);
+          const no = document.createElement("button");
+          no.className = "danger";
+          no.textContent = "Kataa";
+          no.addEventListener("click", () => decidePayment(d.id, p, false));
+
+          row.append(info, ok, no);
+        }
 
         list.append(row);
       });
@@ -912,6 +927,23 @@ async function decidePayment(id, p, approve) {
     await batch.commit();
 
     showMessage(approve ? "Malipo yameidhinishwa." : "Malipo yamekataliwa.");
+
+    await loadPayments();
+
+  } catch (error) {
+    showMessage(getErrorMessage(error), true);
+  }
+}
+
+async function removePayment(id) {
+  if (!isAdmin) return;
+
+  if (!confirm("Futa ombi hili ili mteja aweze kutuma upya?")) return;
+
+  try {
+    await db.collection("payments").doc(id).delete();
+
+    showMessage("Ombi limefutwa. Mteja anaweza kujaribu tena.");
 
     await loadPayments();
 
