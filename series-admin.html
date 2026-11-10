@@ -33,6 +33,9 @@
   .ep .fields{display:grid;gap:8px}
   .ep .tools{display:flex;gap:6px;flex-wrap:wrap}
   .saved{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--border)}
+
+  .genre-boxes label{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:var(--light,#1b2232);border-radius:99px;margin:0 6px 8px 0;color:var(--text);cursor:pointer;font-size:14px}
+  .genre-boxes input{width:auto;padding:0;margin:0}
   @media(max-width:550px){.grid2{grid-template-columns:1fr}}
 </style>
 </head>
@@ -86,6 +89,16 @@
 
       <label for="price">Bei ya series nzima (TSh), 0 = bure</label>
       <input id="price" type="number" min="0" step="100" value="0">
+      <div class="grid2">
+        <div><label for="runtime">Muda (mfano 1h 45m)</label><input id="runtime" maxlength="20" placeholder="1h 45m"></div>
+        <div><label for="age">Umri unaofaa</label>
+          <select id="age" style="width:100%;padding:12px;background:#070910;color:#fff;border:1px solid #293044;border-radius:9px">
+            <option value="">Haijawekwa</option><option>G</option><option>7+</option><option>13+</option><option>16+</option><option>18+</option>
+          </select></div>
+      </div>
+      <label>Makundi (chagua moja au zaidi)</label>
+      <div id="genreBoxes" class="genre-boxes"></div>
+
     </div>
 
     <!-- SEASONS -->
@@ -170,6 +183,31 @@ auth.onAuthStateChanged(async user => {
     loadList();
   } catch (err) { msg(err.message, true); }
 });
+
+
+/* ---------- MAKUNDI ---------- */
+const GENRE_LIST = ["Action","Comedy","Drama","Horror","Adventure","Animation","Romance","Sci-Fi","Documentary","Family"];
+
+function buildGenreBoxes() {
+  const box = $("genreBoxes");
+  box.replaceChildren();
+  GENRE_LIST.forEach(g => {
+    const l = document.createElement("label");
+    const c = document.createElement("input");
+    c.type = "checkbox";
+    c.value = g;
+    l.append(c, document.createTextNode(g));
+    box.append(l);
+  });
+}
+function getGenres() {
+  return Array.from(document.querySelectorAll("#genreBoxes input:checked")).map(c => c.value);
+}
+function setGenres(arr) {
+  const set = new Set(arr || []);
+  document.querySelectorAll("#genreBoxes input").forEach(c => c.checked = set.has(c.value));
+}
+buildGenreBoxes();
 
 /* ---------- SEASONS UI ---------- */
 function renumber(season) {
@@ -318,6 +356,9 @@ function newSeries() {
   seasons = [];
   ["title", "year", "imdb", "poster", "desc"].forEach(id => $(id).value = "");
   $("price").value = "0";
+  $("runtime").value = "";
+  $("age").value = "";
+  setGenres([]);
   $("formTitle").textContent = "Series mpya";
   $("newBtn").classList.add("hidden");
   render();
@@ -360,6 +401,9 @@ $("saveBtn").addEventListener("click", async () => {
     poster: $("poster").value.trim(),
     description: $("desc").value.trim(),
     price: price,
+    genres: getGenres(),
+    runtime: $("runtime").value.trim(),
+    age: $("age").value,
     seasons: seasons.map(s => ({
       number: s.number,
       kind: s.kind === "connection" ? "connection" : "season",
@@ -461,6 +505,9 @@ async function loadList() {
           $("poster").value = d.poster || "";
           $("desc").value = d.description || "";
           $("price").value = d.price || 0;
+          $("runtime").value = d.runtime || "";
+          $("age").value = d.age || "";
+          setGenres(d.genres || []);
           seasons = copy;
           relabel();
           $("formTitle").textContent = "Hariri: " + d.title;
