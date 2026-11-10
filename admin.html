@@ -191,6 +191,25 @@
       flex-wrap: wrap;
     }
 
+    .field .genre-boxes label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      background: var(--panel-light);
+      border-radius: 99px;
+      margin: 0 6px 8px 0;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .genre-boxes input {
+      width: auto;
+      padding: 0;
+      margin: 0;
+    }
+
     @media (max-width: 600px) {
       .container {
         padding: 12px;
@@ -364,9 +383,33 @@
           >
         </div>
 
-        <button type="submit" id="saveMovieBtn">
-          Hifadhi Filamu
-        </button>
+
+        <div class="grid">
+          <div class="field">
+            <label for="runtime">Muda (mfano 1h 45m)</label>
+            <input id="runtime" maxlength="20" placeholder="1h 45m">
+          </div>
+          <div class="field">
+            <label for="age">Umri unaofaa</label>
+            <select id="age">
+              <option value="">Haijawekwa</option><option>G</option><option>7+</option><option>13+</option><option>16+</option><option>18+</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Makundi (chagua moja au zaidi)</label>
+          <div id="genreBoxes" class="genre-boxes"></div>
+        </div>
+
+        <div class="actions" style="margin-top:0">
+          <button type="submit" id="saveMovieBtn">
+            Hifadhi Filamu
+          </button>
+          <button type="button" id="cancelEditBtn" class="secondary hidden">
+            Ghairi kuhariri
+          </button>
+        </div>
 
       </form>
     </section>
@@ -485,6 +528,31 @@ const db = firebase.firestore();
 const $ = id => document.getElementById(id);
 
 let isAdmin = false;
+let editingId = null;
+
+/* ---------- MAKUNDI ---------- */
+const GENRE_LIST = ["Action","Comedy","Drama","Horror","Adventure","Animation","Romance","Sci-Fi","Documentary","Family"];
+
+function buildGenreBoxes() {
+  const box = $("genreBoxes");
+  box.replaceChildren();
+  GENRE_LIST.forEach(g => {
+    const l = document.createElement("label");
+    const c = document.createElement("input");
+    c.type = "checkbox";
+    c.value = g;
+    l.append(c, document.createTextNode(g));
+    box.append(l);
+  });
+}
+function getGenres() {
+  return Array.from(document.querySelectorAll("#genreBoxes input:checked")).map(c => c.value);
+}
+function setGenres(arr) {
+  const set = new Set(arr || []);
+  document.querySelectorAll("#genreBoxes input").forEach(c => c.checked = set.has(c.value));
+}
+buildGenreBoxes();
 
 const configMissing =
   firebaseConfig.apiKey.startsWith("WEKA_") ||
@@ -673,7 +741,10 @@ $("movieForm").addEventListener("submit", async event => {
     return;
   }
 
-  const ref = db.collection("movies").doc();
+  const isEdit = !!editingId;
+  const ref = isEdit
+    ? db.collection("movies").doc(editingId)
+    : db.collection("movies").doc();
 
   const movie = {
     title: title,
@@ -683,29 +754,36 @@ $("movieForm").addEventListener("submit", async event => {
     description: $("description").value.trim(),
     videoUrl: paid ? "" : videoUrl,
     price: price,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    createdBy: auth.currentUser.uid
+    genres: getGenres(),
+    runtime: $("runtime").value.trim(),
+    age: $("age").value
   };
+
+  if (!isEdit) {
+    movie.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+    movie.createdBy = auth.currentUser.uid;
+  }
 
   $("saveMovieBtn").disabled = true;
 
   try {
     const batch = db.batch();
 
-    batch.set(ref, movie);
+    batch.set(ref, movie, { merge: true });
 
     if (paid) {
       batch.set(db.collection("movieSecrets").doc(ref.id), {
         videoUrl: videoUrl
       });
+    } else if (isEdit) {
+      batch.delete(db.collection("movieSecrets").doc(ref.id));
     }
 
     await batch.commit();
 
-    $("movieForm").reset();
-    $("price").value = "0";
+    resetMovieForm();
 
-    showMessage("Filamu imehifadhiwa kikamilifu.");
+    showMessage(isEdit ? "Filamu imesasishwa." : "Filamu imehifadhiwa kikamilifu.");
 
     await loadMovies();
 
@@ -716,6 +794,54 @@ $("movieForm").addEventListener("submit", async event => {
     $("saveMovieBtn").disabled = false;
   }
 });
+
+/* =========================================
+   EDIT MOVIE
+========================================= */
+
+function resetMovieForm() {
+  editingId = null;
+  $("movieForm").reset();
+  $("price").value = "0";
+  setGenres([]);
+  $("saveMovieBtn").textContent = "Hifadhi Filamu";
+  $("cancelEditBtn").classList.add("hidden");
+}
+
+$("cancelEditBtn").addEventListener("click", resetMovieForm);
+
+async function startEdit(id, movie) {
+  let url = movie.videoUrl || "";
+
+  if (movie.price > 0) {
+    try {
+      const sec = await db.collection("movieSecrets").doc(id).get();
+      url = sec.exists ? (sec.data().videoUrl || "") : "";
+    } catch (error) {
+      showMessage(getErrorMessage(error), true);
+      return;
+    }
+  }
+
+  editingId = id;
+
+  $("movieTitle").value = movie.title || "";
+  $("movieYear").value = movie.year || "";
+  $("imdbID").value = movie.imdbID || "";
+  $("poster").value = movie.poster || "";
+  $("description").value = movie.description || "";
+  $("videoUrl").value = url;
+  $("price").value = movie.price || 0;
+  $("runtime").value = movie.runtime || "";
+  $("age").value = movie.age || "";
+  setGenres(movie.genres || []);
+
+  $("saveMovieBtn").textContent = "Sasisha Filamu";
+  $("cancelEditBtn").classList.remove("hidden");
+
+  showMessage("Unahariri: " + (movie.title || "Filamu"));
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
 
 /* =========================================
    LOAD MOVIES
@@ -801,7 +927,12 @@ async function loadMovies() {
         }
       });
 
-      row.append(image, info, deleteButton);
+      const editButton = document.createElement("button");
+      editButton.className = "secondary";
+      editButton.textContent = "Hariri";
+      editButton.addEventListener("click", () => startEdit(documentSnapshot.id, movie));
+
+      row.append(image, info, editButton, deleteButton);
 
       list.append(row);
     });
