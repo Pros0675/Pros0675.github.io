@@ -147,6 +147,10 @@ body:not(.locked) .gate{display:none}
 .admin-card svg{width:20px;height:20px;color:var(--gold)}
 .pay-card{margin:14px 18px 0;background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:20px}
 .pay-card h3{font-family:var(--display);margin:0 0 4px;font-size:19px}
+/* player bar */
+.pbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.card .prog{position:absolute;left:0;right:0;bottom:0;height:5px;background:#0009}
+.card .prog i{display:block;height:100%;background:var(--gold)}
 /* makundi */
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;padding:0 18px}
 .tile{height:88px;border-radius:16px;text-align:left;display:flex;flex-direction:column;justify-content:flex-end;padding:12px;color:#fff;font-family:var(--display);font-weight:800;font-size:17px;line-height:1.1;position:relative;overflow:hidden}
@@ -207,6 +211,9 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
     </section>
 
     <section id="intro"></section>
+
+    <h2 id="contH" class="hidden">Endelea kutazama</h2>
+    <div id="contGrid" class="rail hidden"></div>
 
     <h2>Filamu Zetu</h2>
     <div id="ownGrid" class="rail"><div class="empty">Inapakia...</div></div>
@@ -378,6 +385,15 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
       referrerpolicy="strict-origin-when-cross-origin"></iframe>
     <video id="playerVideo" class="player" controls playsinline controlsList="nodownload noremoteplayback" disablePictureInPicture style="display:none;margin-top:12px"></video>
 
+    <div id="playerBar" class="pbar hidden">
+      <button type="button" class="chip" id="pBack">⏪ 10s</button>
+      <button type="button" class="chip" id="pFwd">10s ⏩</button>
+      <button type="button" class="chip" id="pMute">🔊 Sauti</button>
+      <button type="button" class="chip" id="pSpeed">⚡ 1x</button>
+      <button type="button" class="chip" id="pFull">⛶ Skrini nzima</button>
+      <button type="button" class="chip hidden" id="pNext">⏭ Ep inayofuata</button>
+    </div>
+
     <div id="episodePanel" class="hidden" style="margin-top:14px"></div>
   </div>
 </div>
@@ -412,6 +428,12 @@ let myPayments = [];            // malipo ya mtumiaji
 let ownList = [];               // filamu zetu (zikiwa na id)
 let seriesList = [];            // series (zikiwa na id)
 let payItem = null;             // kitu kinacholipiwa sasa
+let progressList = [];          // endelea kutazama
+let playCtx = null;             // kinachochezwa sasa (kwa kuhifadhi progress)
+let seriesCtx = null;           // muktadha wa series (episode inayofuata)
+let pendingSeek = 0;            // sekunde za kuendelea
+let lastSave = 0;
+let speedIdx = 2;               // 1x
 
 $("yearNow").textContent = new Date().getFullYear();
 
@@ -567,11 +589,12 @@ $("refreshMine").addEventListener("click", async () => {
 });
 
 /* ---- Usasishaji wa moja kwa moja ---- */
-let unsubPay = null, unsubPur = null;
+let unsubPay = null, unsubPur = null, unsubProg = null;
 
 function stopLive() {
   if (unsubPay) { unsubPay(); unsubPay = null; }
   if (unsubPur) { unsubPur(); unsubPur = null; }
+  if (unsubProg) { unsubProg(); unsubProg = null; }
 }
 
 function startLive() {
@@ -598,6 +621,14 @@ function startLive() {
         .sort((a, b) => ((b.createdAt || {}).seconds || 0) - ((a.createdAt || {}).seconds || 0));
       renderMyPayments();
     }, err => console.error("Payments live", err));
+
+  unsubProg = db.collection("users").doc(currentUser.uid).collection("progress")
+    .onSnapshot(snap => {
+      progressList = snap.docs.map(d => d.data()).sort((a, b) =>
+        ((b.updatedAt && b.updatedAt.seconds) || Date.now() / 1000) -
+        ((a.updatedAt && a.updatedAt.seconds) || Date.now() / 1000));
+      renderContinue();
+    }, err => console.error("Progress live", err));
 }
 
 function pendingFor(id) {
@@ -785,6 +816,10 @@ auth.onAuthStateChanged(async user => {
     document.body.classList.remove("locked");
     $("payBox").classList.remove("hidden");
     startLive();
+    db.collection("profiles").doc(user.uid).set({
+      uid: user.uid, email: user.email || "",
+      lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true }).catch(() => {});
     loadContent();
     if ($("viewSaved").classList.contains("active")) loadSaved();
   } else {
@@ -796,6 +831,7 @@ auth.onAuthStateChanged(async user => {
     myPayments = [];
     ownList = [];
     seriesList = [];
+    progressList = [];
     $("payBox").classList.add("hidden");
     closePlayer();
     closeModal("payModal");
@@ -904,8 +940,12 @@ function loadInPlayer(url) {
     video.disablePictureInPicture = true;
     video.oncontextmenu = ev => ev.preventDefault();
     video.src = r.src;
+    $("playerBar").classList.remove("hidden");
+    applySpeed();
+    syncMute();
     video.play().catch(() => {});
   } else {
+    $("playerBar").classList.add("hidden");
     video.pause();
     video.removeAttribute("src");
     video.style.display = "none";
@@ -915,6 +955,9 @@ function loadInPlayer(url) {
 }
 
 function closePlayer() {
+  saveProgress(true);
+  playCtx = null; seriesCtx = null; pendingSeek = 0;
+  $("playerBar").classList.add("hidden");
   const video = $("playerVideo");
   video.pause();
   video.removeAttribute("src");
@@ -930,6 +973,8 @@ function setServers(show) { $("serverRow").classList.toggle("hidden", !show); }
 
 function openVideo(title, imdbID) {
   currentImdbID = imdbID;
+  playCtx = null; seriesCtx = null; pendingSeek = 0;
+  $("pNext").classList.add("hidden");
   $("playerTitle").textContent = title;
   setServers(true);
   loadServer(1);
@@ -967,6 +1012,161 @@ $("playerVideo").addEventListener("loadedmetadata", () => {
   }
 });
 
+/* =====================================================
+   KICHEZA: sauti, kasi, skrini nzima, kuruka, episode inayofuata
+===================================================== */
+const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
+
+function applySpeed() {
+  $("playerVideo").playbackRate = SPEEDS[speedIdx];
+  $("pSpeed").textContent = "⚡ " + SPEEDS[speedIdx] + "x";
+}
+function syncMute() {
+  $("pMute").textContent = $("playerVideo").muted ? "🔇 Imenyamazishwa" : "🔊 Sauti";
+}
+
+$("pBack").addEventListener("click", () => {
+  const v = $("playerVideo");
+  v.currentTime = Math.max(0, v.currentTime - 10);
+});
+$("pFwd").addEventListener("click", () => {
+  const v = $("playerVideo");
+  v.currentTime = Math.min(v.duration || 1e9, v.currentTime + 10);
+});
+$("pMute").addEventListener("click", () => {
+  const v = $("playerVideo");
+  v.muted = !v.muted;
+  syncMute();
+});
+$("pSpeed").addEventListener("click", () => {
+  speedIdx = (speedIdx + 1) % SPEEDS.length;
+  applySpeed();
+});
+$("pFull").addEventListener("click", () => {
+  const v = $("playerVideo");
+  const fn = v.requestFullscreen || v.webkitRequestFullscreen || v.webkitEnterFullscreen || v.msRequestFullscreen;
+  if (!fn) return showMessage("Skrini nzima haisapotiwi kwenye kifaa hiki.", true);
+  try {
+    const r = fn.call(v);
+    if (r && r.catch) r.catch(() => showMessage("Imeshindikana kufungua skrini nzima.", true));
+  } catch (e) { showMessage("Imeshindikana kufungua skrini nzima.", true); }
+});
+$("pNext").addEventListener("click", () => { nextEpisode(); });
+$("playerVideo").addEventListener("volumechange", syncMute);
+
+function nextEpisode() {
+  if (!seriesCtx) return false;
+  const { s, seasons, si, ei } = seriesCtx;
+  const eps = (seasons[si].episodes || []);
+  if (ei + 1 < eps.length) { selectEpisode(s, seasons, si, ei + 1); return true; }
+  if (si + 1 < seasons.length && (seasons[si + 1].episodes || []).length) {
+    selectEpisode(s, seasons, si + 1, 0);
+    return true;
+  }
+  return false;
+}
+
+$("playerVideo").addEventListener("loadedmetadata", () => {
+  const v = $("playerVideo");
+  if (pendingSeek > 0) {
+    try { v.currentTime = pendingSeek; } catch (e) {}
+    pendingSeek = 0;
+  }
+  applySpeed();
+});
+$("playerVideo").addEventListener("ended", () => {
+  if (seriesCtx && nextEpisode()) return;
+  clearProgress();
+});
+$("playerVideo").addEventListener("timeupdate", () => saveProgress(false));
+$("playerVideo").addEventListener("pause", () => saveProgress(true));
+
+/* =====================================================
+   ENDELEA KUTAZAMA
+===================================================== */
+function progressRef(id) {
+  return db.collection("users").doc(currentUser.uid).collection("progress").doc(id);
+}
+
+function saveProgress(force) {
+  if (!currentUser || !playCtx) return;
+  const v = $("playerVideo");
+  if (v.style.display === "none" || v.ended || !v.duration || isNaN(v.duration)) return;
+  const now = Date.now();
+  if (!force && now - lastSave < 15000) return;
+  lastSave = now;
+  const pos = Math.floor(v.currentTime), dur = Math.floor(v.duration);
+
+  if (playCtx.kind === "movie") {
+    if (dur - pos < 30) { progressRef(playCtx.id).delete().catch(() => {}); return; }
+    if (pos < 10) return;
+  }
+  progressRef(playCtx.id).set({
+    itemId: playCtx.id, kind: playCtx.kind, title: playCtx.title, poster: playCtx.poster,
+    position: pos, duration: dur, si: playCtx.si || 0, ei: playCtx.ei || 0,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).catch(() => {});
+}
+
+function savePointer(seekPos) {
+  if (!currentUser || !playCtx) return;
+  progressRef(playCtx.id).set({
+    itemId: playCtx.id, kind: "series", title: playCtx.title, poster: playCtx.poster,
+    position: seekPos || 0, duration: 0, si: playCtx.si || 0, ei: playCtx.ei || 0,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).catch(() => {});
+}
+
+function clearProgress() {
+  if (!currentUser || !playCtx) return;
+  progressRef(playCtx.id).delete().catch(() => {});
+}
+
+function renderContinue() {
+  const grid = $("contGrid"), h = $("contH");
+  grid.replaceChildren();
+  const items = [];
+  progressList.forEach(p => {
+    const item = (p.kind === "series" ? seriesList : ownList).find(x => x.id === p.itemId);
+    if (item) items.push({ p, item });
+  });
+  grid.classList.toggle("hidden", !items.length);
+  h.classList.toggle("hidden", !items.length);
+
+  items.forEach(({ p, item }) => {
+    const pct = p.duration > 0 ? Math.min(100, Math.round(p.position / p.duration * 100)) : 0;
+    const card = makeCard({
+      title: item.title || "Bila jina",
+      sub: p.kind === "series" ? "Ep " + ((p.ei || 0) + 1) + (pct ? " · " + pct + "%" : "") : pct + "% imetazamwa",
+      poster: item.poster, badge: "Endelea",
+      onClick: () => resumeItem(item, p)
+    });
+    const bar = el("div", "prog");
+    const fill = document.createElement("i");
+    fill.style.width = pct + "%";
+    bar.append(fill);
+    card.querySelector(".poster").append(bar);
+    grid.append(card);
+  });
+}
+
+function resumeItem(item, p) {
+  if (p.kind === "series") openSeries(item, { si: p.si, ei: p.ei, seek: p.position });
+  else playOwn(item, p.position);
+}
+
+/* =====================================================
+   HESABU YA KUTAZAMA (kwa admin dashboard)
+===================================================== */
+function countView(item, kind) {
+  if (!currentUser || !item || !item.id) return;
+  db.collection("viewCounts").doc(item.id).set({
+    title: item.title || "", kind: kind,
+    count: firebase.firestore.FieldValue.increment(1),
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  }, { merge: true }).catch(() => {});
+}
+
 /* ---------- FILAMU ZETU ---------- */
 async function getMovieUrl(m) {
   if (!(m.price > 0)) return m.videoUrl;
@@ -974,7 +1174,7 @@ async function getMovieUrl(m) {
   return snap.exists ? (snap.data().videoUrl || "") : "";
 }
 
-async function playOwn(m) {
+async function playOwn(m, seek) {
   if (!isUnlocked(m)) return openPay(m);
   try {
     const url = await getMovieUrl(m);
@@ -982,8 +1182,13 @@ async function playOwn(m) {
     currentImdbID = null;
     $("playerTitle").textContent = m.title || "Filamu";
     setServers(false);
+    seriesCtx = null;
+    playCtx = { id: m.id, kind: "movie", title: m.title || "", poster: m.poster || "" };
+    pendingSeek = seek || 0;
+    $("pNext").classList.add("hidden");
     loadInPlayer(url);
     openModal("playerModal");
+    countView(m, "movie");
   } catch (error) {
     showMessage(error.code === "permission-denied"
       ? "Bado hujafungua filamu hii. Lipia kwanza, au subiri idhini."
@@ -1006,6 +1211,7 @@ function renderOwn() {
     }));
   });
   renderGenres();
+  renderContinue();
 }
 
 async function loadOwnMovies() {
@@ -1050,6 +1256,7 @@ function renderSeriesList() {
     }));
   });
   renderGenres();
+  renderContinue();
 }
 
 async function loadSeries() {
@@ -1073,7 +1280,7 @@ async function loadSeries() {
   }
 }
 
-async function openSeries(s) {
+async function openSeries(s, resume) {
   if (!isUnlocked(s)) return openPay(s);
 
   const seasons = JSON.parse(JSON.stringify(s.seasons || []))
@@ -1100,7 +1307,15 @@ async function openSeries(s) {
   currentImdbID = null;
   setServers(false);
   openModal("playerModal");
-  selectEpisode(s, seasons, 0, 0);
+  let si = 0, ei = 0, seek = 0;
+  if (resume) {
+    si = Math.min(Math.max(resume.si || 0, 0), seasons.length - 1);
+    const n = (seasons[si].episodes || []).length;
+    ei = Math.min(Math.max(resume.ei || 0, 0), Math.max(n - 1, 0));
+    seek = resume.seek || 0;
+  }
+  selectEpisode(s, seasons, si, ei, seek);
+  countView(s, "series");
 }
 
 /* Jina la season au connection (inatumia "label" ikiwepo) */
@@ -1108,13 +1323,20 @@ function seasonName(se) {
   return se.label || ("Season " + se.number);
 }
 
-function selectEpisode(s, seasons, si, ei) {
+function selectEpisode(s, seasons, si, ei, seek) {
   const season = seasons[si];
   const episodes = (season.episodes || []).slice().sort((a, b) => a.number - b.number);
   const ep = episodes[ei];
   if (!ep) return showMessage("Season hii haina episodes.", true);
 
   $("playerTitle").textContent = s.title + " · " + seasonName(season) + " · Ep " + ep.number + (ep.title ? " · " + ep.title : "");
+  const hasNext = ei + 1 < episodes.length ||
+    (si + 1 < seasons.length && (seasons[si + 1].episodes || []).length > 0);
+  seriesCtx = { s, seasons, si, ei };
+  playCtx = { id: s.id, kind: "series", title: s.title || "", poster: s.poster || "", si, ei };
+  $("pNext").classList.toggle("hidden", !hasNext);
+  savePointer(seek);
+  pendingSeek = seek || 0;
   if (ep.videoUrl) loadInPlayer(ep.videoUrl);
   else showMessage("Episode hii haina link ya video.", true);
 
