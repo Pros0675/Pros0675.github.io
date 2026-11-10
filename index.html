@@ -1019,7 +1019,8 @@ function renderSeriesList() {
   if (!seriesList.length) return;
   grid.replaceChildren();
   seriesList.forEach(s => {
-    const n = (s.seasons || []).length;
+    /* Connection haihesabiwi kama season */
+    const n = (s.seasons || []).filter(x => x.kind !== "connection").length;
     const paid = s.price > 0;
     const open = paid && isUnlocked(s);
     grid.append(makeCard({
@@ -1083,13 +1084,18 @@ async function openSeries(s) {
   selectEpisode(s, seasons, 0, 0);
 }
 
+/* Jina la season au connection (inatumia "label" ikiwepo) */
+function seasonName(se) {
+  return se.label || ("Season " + se.number);
+}
+
 function selectEpisode(s, seasons, si, ei) {
   const season = seasons[si];
   const episodes = (season.episodes || []).slice().sort((a, b) => a.number - b.number);
   const ep = episodes[ei];
   if (!ep) return showMessage("Season hii haina episodes.", true);
 
-  $("playerTitle").textContent = s.title + " · S" + season.number + " E" + ep.number + (ep.title ? " · " + ep.title : "");
+  $("playerTitle").textContent = s.title + " · " + seasonName(season) + " · Ep " + ep.number + (ep.title ? " · " + ep.title : "");
   if (ep.videoUrl) loadInPlayer(ep.videoUrl);
   else showMessage("Episode hii haina link ya video.", true);
 
@@ -1099,7 +1105,7 @@ function selectEpisode(s, seasons, si, ei) {
 
   const sRow = el("div", "chips"); sRow.style.marginBottom = "10px";
   seasons.forEach((se, i) => {
-    const b = el("button", "chip" + (i === si ? " on" : ""), "Season " + se.number);
+    const b = el("button", "chip" + (i === si ? " on" : ""), (se.kind === "connection" ? "🔗 " : "") + seasonName(se));
     b.type = "button";
     b.addEventListener("click", () => selectEpisode(s, seasons, i, 0));
     sRow.append(b);
