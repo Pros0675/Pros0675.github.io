@@ -191,6 +191,60 @@
       flex-wrap: wrap;
     }
 
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin: 6px 0 4px;
+    }
+
+    .stat {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .stat small {
+      display: block;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .stat b {
+      font-size: 22px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      margin: 16px 0 4px;
+      padding-bottom: 4px;
+    }
+
+    .tabs button {
+      white-space: nowrap;
+    }
+
+    .tabs button.on {
+      background: var(--accent);
+    }
+
+    .row2 {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 11px 0;
+      border-top: 1px solid var(--border);
+      overflow-wrap: anywhere;
+    }
+
+    .row2 small {
+      color: var(--muted);
+      display: block;
+    }
+
     .field .genre-boxes label {
       display: inline-flex;
       align-items: center;
@@ -294,7 +348,25 @@
   <!-- ADMIN DASHBOARD -->
   <main id="dashboard" class="hidden">
 
-    <section class="panel">
+    <section class="stats">
+      <div class="stat"><small>Filamu</small><b id="stFilamu">-</b></div>
+      <div class="stat"><small>Series</small><b id="stSeries">-</b></div>
+      <div class="stat"><small>Watumiaji</small><b id="stUsers">-</b></div>
+      <div class="stat"><small>Malipo yanayosubiri</small><b id="stPending">-</b></div>
+      <div class="stat"><small>Mapato (yaliyoidhinishwa)</small><b id="stRevenue">-</b></div>
+      <div class="stat"><small>Mara zilizotazamwa</small><b id="stViews">-</b></div>
+    </section>
+
+    <nav class="tabs" id="tabs">
+      <button type="button" data-tab="movies" class="on">🎬 Filamu</button>
+      <button type="button" data-tab="series" class="secondary">📺 Series</button>
+      <button type="button" data-tab="pay" class="secondary">💰 Malipo</button>
+      <button type="button" data-tab="users" class="secondary">👥 Watumiaji</button>
+      <button type="button" data-tab="views" class="secondary">👁️ Tazama</button>
+      <button type="button" data-tab="intro" class="secondary">🖼️ Intro</button>
+    </nav>
+
+    <section class="panel tab" data-tab="movies">
       <h2>🎬 Ongeza Filamu</h2>
 
       <p class="muted">
@@ -415,7 +487,7 @@
     </section>
 
     <!-- INTRO -->
-    <section class="panel">
+    <section class="panel tab" data-tab="intro">
       <h2>🖼️ Intro / Tangazo</h2>
 
       <p class="muted">
@@ -464,7 +536,7 @@
     </section>
 
     <!-- PAYMENTS -->
-    <section class="panel">
+    <section class="panel tab" data-tab="pay">
       <h2>💰 Malipo Yanayosubiri</h2>
 
       <p class="muted">
@@ -482,7 +554,7 @@
     </section>
 
     <!-- MOVIE LIST -->
-    <section class="panel">
+    <section class="panel tab" data-tab="movies">
       <h2>📚 Filamu Zilizopo</h2>
 
       <p class="muted">
@@ -492,6 +564,33 @@
       <div id="movieList">
         Inapakia filamu...
       </div>
+    </section>
+
+    <!-- SERIES -->
+    <section class="panel tab" data-tab="series">
+      <h2>📺 Series</h2>
+      <p class="muted">Kuongeza au kuhariri series (season, episodes, connection, bei), tumia Series Admin.</p>
+      <a href="./series-admin.html"><button type="button">Fungua Series Admin</button></a>
+      <div id="seriesListAdmin" style="margin-top:12px">Inapakia...</div>
+    </section>
+
+    <!-- APPROVED -->
+    <section class="panel tab" data-tab="pay">
+      <h2>✅ Malipo Yaliyoidhinishwa</h2>
+      <div id="approvedList">Inapakia...</div>
+    </section>
+
+    <!-- USERS -->
+    <section class="panel tab" data-tab="users">
+      <h2>👥 Watumiaji</h2>
+      <p class="muted">Watumiaji walioingia kwenye app (wanaonekana baada ya kuingia mara ya kwanza).</p>
+      <div id="usersList">Inapakia...</div>
+    </section>
+
+    <!-- VIEWS -->
+    <section class="panel tab" data-tab="views">
+      <h2>👁️ Zilizotazamwa Zaidi</h2>
+      <div id="viewsList">Inapakia...</div>
     </section>
 
   </main>
@@ -664,6 +763,9 @@ auth.onAuthStateChanged(async user => {
     await loadMovies();
     await loadIntro();
     await loadPayments();
+
+    showTab("movies");
+    loadStats();
 
   } catch (error) {
     showMessage(getErrorMessage(error), true);
@@ -1085,6 +1187,180 @@ async function removePayment(id) {
 }
 
 $("refreshPayBtn").addEventListener("click", loadPayments);
+
+/* =========================================
+   DASHBOARD: tabs, hesabu na orodha
+========================================= */
+
+function money(n) {
+  return "TSh " + Number(n || 0).toLocaleString("en-US");
+}
+
+function tsStr(ts) {
+  return ts && ts.seconds ? new Date(ts.seconds * 1000).toLocaleString() : "-";
+}
+
+function addRow(list, title, sub, right) {
+  const row = document.createElement("div");
+  row.className = "row2";
+
+  const left = document.createElement("div");
+  const t = document.createElement("strong");
+  t.textContent = title;
+  const s = document.createElement("small");
+  s.textContent = sub;
+  left.append(t, s);
+  row.append(left);
+
+  if (right) {
+    const r = document.createElement("div");
+    r.textContent = right;
+    row.append(r);
+  }
+
+  list.append(row);
+}
+
+const safe = promise => promise.catch(() => null);
+
+async function loadStats() {
+  if (!isAdmin) return;
+
+  const [m, s, u, pe, ap, vw] = await Promise.all([
+    safe(db.collection("movies").get()),
+    safe(db.collection("series").get()),
+    safe(db.collection("profiles").get()),
+    safe(db.collection("payments").where("status", "==", "pending").get()),
+    safe(db.collection("payments").where("status", "==", "approved").get()),
+    safe(db.collection("viewCounts").get())
+  ]);
+
+  $("stFilamu").textContent = m ? m.size : "?";
+  $("stSeries").textContent = s ? s.size : "?";
+  $("stUsers").textContent = u ? u.size : "?";
+  $("stPending").textContent = pe ? pe.size : "?";
+
+  if (ap) {
+    let rev = 0;
+    ap.forEach(d => { rev += Number(d.data().amount) || 0; });
+    $("stRevenue").textContent = money(rev);
+  } else {
+    $("stRevenue").textContent = "?";
+  }
+
+  if (vw) {
+    let n = 0;
+    vw.forEach(d => { n += Number(d.data().count) || 0; });
+    $("stViews").textContent = n;
+  } else {
+    $("stViews").textContent = "?";
+  }
+}
+
+async function loadSeriesAdmin() {
+  const list = $("seriesListAdmin");
+  list.textContent = "Inapakia...";
+  try {
+    const snap = await db.collection("series").get();
+    list.replaceChildren();
+    if (snap.empty) { list.textContent = "Bado hakuna series."; return; }
+    snap.forEach(d => {
+      const x = d.data();
+      const all = x.seasons || [];
+      const conns = all.filter(a => a.kind === "connection").length;
+      const eps = all.reduce((n, a) => n + (a.episodes || []).length, 0);
+      addRow(list, x.title || "Series",
+        (all.length - conns) + " season" + (conns ? ", " + conns + " connection" : "") + ", " + eps + " episodes" +
+        ((x.genres || []).length ? " · " + x.genres.join(", ") : ""),
+        x.price > 0 ? money(x.price) : "Bure");
+    });
+  } catch (error) {
+    list.textContent = "Imeshindikana kupakia series.";
+    showMessage(getErrorMessage(error), true);
+  }
+}
+
+async function loadApproved() {
+  const list = $("approvedList");
+  list.textContent = "Inapakia...";
+  try {
+    const snap = await db.collection("payments").where("status", "==", "approved").get();
+    list.replaceChildren();
+    if (snap.empty) { list.textContent = "Bado hakuna malipo yaliyoidhinishwa."; return; }
+    snap.docs
+      .sort((a, b) => ((b.data().decidedAt || {}).seconds || 0) - ((a.data().decidedAt || {}).seconds || 0))
+      .slice(0, 50)
+      .forEach(d => {
+        const p = d.data();
+        addRow(list, (p.movieTitle || p.movieId) + " · " + money(p.amount),
+          (p.email || p.uid) + " · Code: " + p.txCode + " · " + tsStr(p.decidedAt));
+      });
+  } catch (error) {
+    list.textContent = "Imeshindikana kupakia malipo.";
+    showMessage(getErrorMessage(error), true);
+  }
+}
+
+async function loadUsers() {
+  const list = $("usersList");
+  list.textContent = "Inapakia...";
+  try {
+    const snap = await db.collection("profiles").get();
+    list.replaceChildren();
+    if (snap.empty) { list.textContent = "Bado hakuna watumiaji walioonekana."; return; }
+    snap.docs
+      .sort((a, b) => ((b.data().lastLogin || {}).seconds || 0) - ((a.data().lastLogin || {}).seconds || 0))
+      .forEach(d => {
+        const u = d.data();
+        addRow(list, u.email || d.id, "Aliingia mwisho: " + tsStr(u.lastLogin));
+      });
+  } catch (error) {
+    list.textContent = "Imeshindikana kupakia watumiaji. Hakikisha rules za \"profiles\" zimewekwa.";
+    showMessage(getErrorMessage(error), true);
+  }
+}
+
+async function loadViews() {
+  const list = $("viewsList");
+  list.textContent = "Inapakia...";
+  try {
+    const snap = await db.collection("viewCounts").get();
+    list.replaceChildren();
+    if (snap.empty) { list.textContent = "Bado hakuna aliyetazama."; return; }
+    snap.docs
+      .sort((a, b) => (b.data().count || 0) - (a.data().count || 0))
+      .slice(0, 30)
+      .forEach(d => {
+        const v = d.data();
+        addRow(list, v.title || d.id, v.kind === "series" ? "Series" : "Filamu", v.count + " mara");
+      });
+  } catch (error) {
+    list.textContent = "Imeshindikana kupakia. Hakikisha rules za \"viewCounts\" zimewekwa.";
+    showMessage(getErrorMessage(error), true);
+  }
+}
+
+function showTab(name) {
+  document.querySelectorAll(".tab").forEach(p =>
+    p.classList.toggle("hidden", p.dataset.tab !== name));
+
+  document.querySelectorAll("#tabs button").forEach(b => {
+    const on = b.dataset.tab === name;
+    b.classList.toggle("on", on);
+    b.classList.toggle("secondary", !on);
+  });
+
+  if (!isAdmin) return;
+
+  loadStats();
+  if (name === "series") loadSeriesAdmin();
+  if (name === "pay") { loadPayments(); loadApproved(); }
+  if (name === "users") loadUsers();
+  if (name === "views") loadViews();
+}
+
+document.querySelectorAll("#tabs button").forEach(b =>
+  b.addEventListener("click", () => showTab(b.dataset.tab)));
 
 /* =========================================
    SAVE INTRO
