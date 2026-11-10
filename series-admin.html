@@ -27,6 +27,7 @@
   .msg.err{background:#3a1c28;color:#ffc0ce}
   .hidden{display:none!important}
   .season{border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:14px;background:var(--bg)}
+  .season.conn{border-color:#ffc857}
   .ep{display:grid;grid-template-columns:54px 1fr;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
   .ep .num{width:54px;text-align:center;padding:12px 4px}
   .ep .fields{display:grid;gap:8px}
@@ -91,9 +92,12 @@
     <div class="card">
       <div class="row between">
         <h2 style="margin:0">Seasons na Episodes</h2>
-        <button id="addSeason" class="sec">+ Ongeza Season</button>
+        <div class="row">
+          <button id="addSeason" class="sec">+ Season</button>
+          <button id="addConn" class="sec">🔗 + Connection</button>
+        </div>
       </div>
-      <p class="muted" style="margin:8px 0 0">Episodes zinaonekana kwa mpangilio wa namba. Tumia ▲ ▼ kubadilisha nafasi.</p>
+      <p class="muted" style="margin:8px 0 0">Episodes zinaonekana kwa mpangilio wa namba. Tumia ▲ ▼ kubadilisha nafasi. <b>Connection</b> ni video ya kuunganisha, kama season ya kati (mfano kati ya Season 1 na Season 2). Iweke mahali unapotaka kwa ▲ ▼.</p>
       <div id="seasons"></div>
     </div>
 
@@ -126,7 +130,7 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 const $ = id => document.getElementById(id);
 
-/* state: seasons = [{ number, episodes: [{ number, title, videoUrl }] }] */
+/* state: seasons = [{ number, kind: "season"|"connection", label, episodes: [{ number, title, videoUrl }] }] */
 let seasons = [];
 let editingId = null;
 
@@ -172,6 +176,21 @@ function renumber(season) {
   season.episodes.forEach((ep, i) => ep.number = i + 1);
 }
 
+/* "number" ni nafasi (1, 2, 3...) na ndiyo inayopanga. "label" ndiyo jina linaloonekana.
+   Season zinahesabiwa upya bila connection: Season 1, Connection, Season 2 */
+function relabel() {
+  let k = 0;
+  seasons.forEach((x, i) => {
+    x.number = i + 1;
+    if (x.kind === "connection") {
+      if (!x.label || /^Season /.test(x.label)) x.label = "Connection";
+    } else {
+      k++;
+      x.label = "Season " + k;
+    }
+  });
+}
+
 function field(value, placeholder, onInput, cls) {
   const i = document.createElement("input");
   i.value = value || "";
@@ -204,34 +223,42 @@ function render() {
   if (!seasons.length) {
     const p = document.createElement("p");
     p.className = "muted";
-    p.textContent = "Bado hakuna season. Bonyeza \"+ Ongeza Season\".";
+    p.textContent = "Bado hakuna season. Bonyeza \"+ Season\".";
     box.append(p);
     return;
   }
 
   seasons.forEach((season, si) => {
+    const isConn = season.kind === "connection";
+
     const sBox = document.createElement("div");
-    sBox.className = "season";
+    sBox.className = "season" + (isConn ? " conn" : "");
 
     const head = document.createElement("div");
     head.className = "row between";
     const h = document.createElement("h3");
     h.style.margin = "0";
-    h.textContent = "Season " + season.number;
+    h.textContent = (isConn ? "🔗 " : "") + season.label;
     const tools = document.createElement("div");
     tools.className = "row";
     tools.append(
-      btn("▲", "sec sm", () => { if (move(seasons, si, -1)) { seasons.forEach((s, i) => s.number = i + 1); render(); } }),
-      btn("▼", "sec sm", () => { if (move(seasons, si, 1)) { seasons.forEach((s, i) => s.number = i + 1); render(); } }),
-      btn("Futa Season", "del sm", () => {
-        if (!confirm("Futa Season " + season.number + " na episodes zake zote?")) return;
+      btn("▲", "sec sm", () => { if (move(seasons, si, -1)) { relabel(); render(); } }),
+      btn("▼", "sec sm", () => { if (move(seasons, si, 1)) { relabel(); render(); } }),
+      btn(isConn ? "Futa Connection" : "Futa Season", "del sm", () => {
+        if (!confirm("Futa " + season.label + " na episodes zake zote?")) return;
         seasons.splice(si, 1);
-        seasons.forEach((s, i) => s.number = i + 1);
+        relabel();
         render();
       })
     );
     head.append(h, tools);
     sBox.append(head);
+
+    if (isConn) {
+      const lab = field(season.label, "Jina la connection (mfano: Connection, Special)", v => season.label = v);
+      lab.style.marginTop = "10px";
+      sBox.append(lab);
+    }
 
     season.episodes.forEach((ep, ei) => {
       const row = document.createElement("div");
@@ -274,7 +301,14 @@ function render() {
 }
 
 $("addSeason").addEventListener("click", () => {
-  seasons.push({ number: seasons.length + 1, episodes: [{ number: 1, title: "", videoUrl: "" }] });
+  seasons.push({ number: seasons.length + 1, kind: "season", episodes: [{ number: 1, title: "", videoUrl: "" }] });
+  relabel();
+  render();
+});
+
+$("addConn").addEventListener("click", () => {
+  seasons.push({ number: seasons.length + 1, kind: "connection", label: "Connection", episodes: [{ number: 1, title: "", videoUrl: "" }] });
+  relabel();
   render();
 });
 
@@ -294,7 +328,7 @@ function isHttps(u) {
   try { return new URL(u).protocol === "https:"; } catch (e) { return false; }
 }
 
-/* Funguo za link za siri: "season_episode", mfano "1_3" */
+/* Funguo za link za siri: "nafasi_episode", mfano "1_3" */
 function urlKey(season, ep) {
   return season.number + "_" + ep.number;
 }
@@ -304,11 +338,13 @@ $("saveBtn").addEventListener("click", async () => {
   if (!title) return msg("Andika jina la series.", true);
   if (!seasons.length) return msg("Ongeza angalau season moja.", true);
 
+  relabel();
+
   for (const s of seasons) {
-    if (!s.episodes.length) return msg("Season " + s.number + " haina episode.", true);
+    if (!s.episodes.length) return msg(s.label + " haina episode.", true);
     for (const ep of s.episodes) {
       if (!isHttps((ep.videoUrl || "").trim()))
-        return msg("Season " + s.number + " Episode " + ep.number + ": URL ya video lazima iwe HTTPS.", true);
+        return msg(s.label + " Episode " + ep.number + ": URL ya video lazima iwe HTTPS.", true);
     }
   }
 
@@ -326,6 +362,8 @@ $("saveBtn").addEventListener("click", async () => {
     price: price,
     seasons: seasons.map(s => ({
       number: s.number,
+      kind: s.kind === "connection" ? "connection" : "season",
+      label: s.label,
       episodes: s.episodes.map(ep => {
         const url = ep.videoUrl.trim();
         if (paid) secretUrls[urlKey(s, ep)] = url;
@@ -383,14 +421,17 @@ async function loadList() {
       row.className = "saved";
 
       const info = document.createElement("div");
-      const eps = (d.seasons || []).reduce((n, s) => n + s.episodes.length, 0);
+      const all = d.seasons || [];
+      const eps = all.reduce((n, s) => n + s.episodes.length, 0);
+      const conns = all.filter(x => x.kind === "connection").length;
       const t = document.createElement("strong");
       t.textContent = d.title;
       const sub = document.createElement("div");
       sub.className = "muted";
       sub.style.fontSize = "13px";
       sub.textContent =
-        (d.seasons || []).length + " season, " + eps + " episodes" +
+        (all.length - conns) + " season, " +
+        (conns ? conns + " connection, " : "") + eps + " episodes" +
         (d.price > 0 ? " · TSh " + d.price : " · Bure");
       info.append(t, sub);
 
@@ -398,7 +439,8 @@ async function loadList() {
       tools.className = "row";
       tools.append(
         btn("Hariri", "sec sm", async () => {
-          const copy = JSON.parse(JSON.stringify(d.seasons || []));
+          const copy = JSON.parse(JSON.stringify(d.seasons || []))
+            .sort((a, b) => a.number - b.number);
 
           if (d.price > 0) {
             try {
@@ -420,6 +462,7 @@ async function loadList() {
           $("desc").value = d.description || "";
           $("price").value = d.price || 0;
           seasons = copy;
+          relabel();
           $("formTitle").textContent = "Hariri: " + d.title;
           $("newBtn").classList.remove("hidden");
           render();
@@ -449,4 +492,3 @@ async function loadList() {
 </script>
 </body>
 </html>
- 
