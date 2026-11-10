@@ -147,6 +147,13 @@ body:not(.locked) .gate{display:none}
 .admin-card svg{width:20px;height:20px;color:var(--gold)}
 .pay-card{margin:14px 18px 0;background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:20px}
 .pay-card h3{font-family:var(--display);margin:0 0 4px;font-size:19px}
+/* makundi */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;padding:0 18px}
+.tile{height:88px;border-radius:16px;text-align:left;display:flex;flex-direction:column;justify-content:flex-end;padding:12px;color:#fff;font-family:var(--display);font-weight:800;font-size:17px;line-height:1.1;position:relative;overflow:hidden}
+.tile::after{content:"";position:absolute;right:-18px;top:-18px;width:70px;height:70px;border-radius:50%;background:#ffffff22}
+.tile small{font-family:var(--body);font-weight:500;opacity:.85;font-size:12px;margin-top:3px}
+.gchips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.gchip{padding:5px 11px;font-size:12.5px;border-radius:99px;background:var(--panel2);color:var(--text)}
 footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
 
 @media(max-width:560px){
@@ -207,7 +214,17 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
     <h2>Series</h2>
     <div id="seriesGrid" class="rail"><div class="empty">Inapakia...</div></div>
 
+    <h2>Makundi</h2>
+    <div id="genreGrid" class="tiles"><div class="empty">Inapakia...</div></div>
+
     <footer>© <span id="yearNow"></span> Prosper Movies</footer>
+  </main>
+
+  <!-- ============ KUNDI ============ -->
+  <main id="viewGenre" class="view">
+    <div class="pad" style="padding-top:14px"><button type="button" class="ghost sm" id="genreBack">← Rudi</button></div>
+    <h2 id="genreTitle" class="page-title">Kundi</h2>
+    <div id="genreItems" class="grid"></div>
   </main>
 
   <!-- ============ TAFUTA ============ -->
@@ -277,7 +294,7 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
 <!-- MAELEZO -->
 <div id="detailModal" class="modal hidden">
   <div class="box">
-    <div class="bar"><h2>Maelezo ya Filamu</h2><button type="button" class="ghost sm" data-close="detailModal">Funga</button></div>
+    <div class="bar"><h2 id="detailTitle">Maelezo ya Filamu</h2><button type="button" class="ghost sm" data-close="detailModal">Funga</button></div>
     <div id="detailContent"></div>
   </div>
 </div>
@@ -985,9 +1002,10 @@ function renderOwn() {
       title: m.title || "Filamu", sub: m.year || "", poster: m.poster,
       badge: paid ? (open ? "Imefunguliwa" : fmtPrice(m.price)) : "Filamu",
       badgeClass: paid ? (open ? "open" : "paid") : "",
-      onClick: () => playOwn(m)
+      onClick: () => openDetailOwn(m, "movie")
     }));
   });
+  renderGenres();
 }
 
 async function loadOwnMovies() {
@@ -1028,9 +1046,10 @@ function renderSeriesList() {
       poster: s.poster,
       badge: paid ? (open ? "Imefunguliwa" : fmtPrice(s.price)) : "Series",
       badgeClass: paid ? (open ? "open" : "paid") : "",
-      onClick: () => openSeries(s)
+      onClick: () => openDetailOwn(s, "series")
     }));
   });
+  renderGenres();
 }
 
 async function loadSeries() {
@@ -1119,6 +1138,109 @@ function selectEpisode(s, seasons, si, ei) {
     eRow.append(b);
   });
   panel.append(sRow, eRow);
+}
+
+/* ---------- MAKUNDI ---------- */
+const GENRES = [
+  ["Action", "#c0392b"], ["Comedy", "#d68910"], ["Drama", "#8e44ad"], ["Horror", "#7b1d1d"],
+  ["Adventure", "#1e8449"], ["Animation", "#2471a3"], ["Romance", "#c2185b"], ["Sci-Fi", "#1a5276"],
+  ["Documentary", "#5d6d7e"], ["Family", "#148f77"], ["Nyingine", "#3a3560"]
+];
+
+function itemsForGenre(name) {
+  const all = ownList.map(x => ({ item: x, kind: "movie" }))
+    .concat(seriesList.map(x => ({ item: x, kind: "series" })));
+  return all.filter(({ item }) => name === "Nyingine"
+    ? !(item.genres && item.genres.length)
+    : (item.genres || []).includes(name));
+}
+
+function renderGenres() {
+  const box = $("genreGrid");
+  box.replaceChildren();
+  GENRES.forEach(([name, color]) => {
+    const n = itemsForGenre(name).length;
+    if (!n) return;
+    const t = el("button", "tile");
+    t.type = "button";
+    t.style.background = "linear-gradient(135deg," + color + "," + color + "bb)";
+    t.append(document.createTextNode(name), el("small", "", n + (n === 1 ? " kitu" : " vitu")));
+    t.addEventListener("click", () => showGenre(name));
+    box.append(t);
+  });
+  if (!box.children.length) {
+    box.append(el("div", "empty", "Makundi yataonekana baada ya admin kuweka kundi kwenye filamu au series."));
+  }
+}
+
+function showGenre(name) {
+  showView("Genre");
+  $("genreTitle").textContent = name;
+  const grid = $("genreItems");
+  grid.replaceChildren();
+  const list = itemsForGenre(name);
+  if (!list.length) { grid.append(el("div", "empty", "Hakuna kitu kwenye kundi hili.")); return; }
+  list.forEach(({ item, kind }) => grid.append(makeCard({
+    title: item.title || "Bila jina",
+    sub: (item.year ? item.year + " · " : "") + (kind === "series" ? "Series" : "Filamu"),
+    poster: item.poster,
+    badge: item.price > 0 ? (isUnlocked(item) ? "Imefunguliwa" : fmtPrice(item.price)) : "",
+    badgeClass: item.price > 0 ? (isUnlocked(item) ? "open" : "paid") : "",
+    onClick: () => openDetailOwn(item, kind)
+  })));
+}
+$("genreBack").addEventListener("click", () => showView("Home"));
+
+/* ---------- UKURASA WA MAELEZO (filamu na series zetu) ---------- */
+function openDetailOwn(item, kind) {
+  $("detailTitle").textContent = kind === "series" ? "Maelezo ya Series" : "Maelezo ya Filamu";
+
+  const layout = el("div", "detail");
+  const poster = document.createElement("img");
+  poster.src = item.poster || placeholderPoster;
+  poster.alt = "Poster ya " + (item.title || "");
+  poster.onerror = () => { poster.src = placeholderPoster; };
+
+  const info = el("div");
+  info.append(el("h3", "", item.title || "Bila jina"));
+
+  const meta = [item.year, item.runtime, item.age].filter(Boolean);
+  if (kind === "series") {
+    const all = item.seasons || [];
+    const conns = all.filter(x => x.kind === "connection").length;
+    const eps = all.reduce((n, x) => n + (x.episodes || []).length, 0);
+    meta.push((all.length - conns) + " Season" + (conns ? " + " + conns + " Connection" : "") + " · " + eps + " Episodes");
+  }
+  if (meta.length) info.append(el("p", "muted", meta.join(" · ")));
+
+  if ((item.genres || []).length) {
+    const chips = el("div", "gchips");
+    item.genres.forEach(g => {
+      const c = el("button", "gchip", g);
+      c.type = "button";
+      c.addEventListener("click", () => { closeModal("detailModal"); showGenre(g); });
+      chips.append(c);
+    });
+    info.append(chips);
+  }
+
+  info.append(el("p", "", item.description || "Maelezo hayapo."));
+
+  const locked = item.price > 0 && !isUnlocked(item);
+  if (locked) info.append(el("div", "price-tag", fmtPrice(item.price)));
+
+  const row = el("div", "actions-row");
+  const play = el("button", "", locked ? "Lipia kutazama" : (kind === "series" ? "▶ Tazama" : "▶ Cheza"));
+  play.addEventListener("click", () => {
+    closeModal("detailModal");
+    if (kind === "series") openSeries(item); else playOwn(item);
+  });
+  row.append(play);
+  info.append(row);
+
+  layout.append(poster, info);
+  $("detailContent").replaceChildren(layout);
+  openModal("detailModal");
 }
 
 /* ---------- SAVED ---------- */
