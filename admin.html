@@ -363,6 +363,7 @@
       <button type="button" data-tab="pay" class="secondary">💰 Malipo</button>
       <button type="button" data-tab="users" class="secondary">👥 Watumiaji</button>
       <button type="button" data-tab="views" class="secondary">👁️ Tazama</button>
+      <button type="button" data-tab="notice" class="secondary">📣 Tangazo</button>
       <button type="button" data-tab="intro" class="secondary">🖼️ Intro</button>
     </nav>
 
@@ -440,6 +441,16 @@
             type="url"
             maxlength="2000"
             placeholder="https://example.com/video"
+          >
+        </div>
+
+        <div class="field">
+          <label for="subtitleUrl">Manukuu (.srt au .vtt), hiari</label>
+
+          <input
+            id="subtitleUrl"
+            maxlength="1500"
+            placeholder="subs/jina.srt  au  https://example.com/jina.vtt"
           >
         </div>
 
@@ -566,6 +577,23 @@
       </div>
     </section>
 
+    <!-- TANGAZO -->
+    <section class="panel tab" data-tab="notice">
+      <h2>📣 Tangazo kwa Watumiaji</h2>
+      <p class="muted">
+        Ujumbe mfupi unaoonekana juu ya ukurasa wa Mwanzo. Mfano: "Filamu mpya imeongezwa!".
+        Kila tangazo jipya linaonekana tena hata kwa waliofunga la zamani.
+      </p>
+      <div class="field">
+        <label for="noticeText">Ujumbe</label>
+        <textarea id="noticeText" maxlength="300"></textarea>
+      </div>
+      <div class="actions">
+        <button type="button" id="saveNoticeBtn">Tuma Tangazo</button>
+        <button type="button" id="removeNoticeBtn" class="danger">Ondoa Tangazo</button>
+      </div>
+    </section>
+
     <!-- SERIES -->
     <section class="panel tab" data-tab="series">
       <h2>📺 Series</h2>
@@ -681,6 +709,12 @@ function getErrorMessage(error) {
   }
 
   return error.message || "Hitilafu imetokea.";
+}
+
+function validSub(value) {
+  if (!value) return true;
+  if (/^subs\/[\w\-. ]+\.(srt|vtt)$/i.test(value)) return true;
+  return validHttps(value);
 }
 
 function validHttps(value, optional = false) {
@@ -835,6 +869,13 @@ $("movieForm").addEventListener("submit", async event => {
     return;
   }
 
+  const subUrl = $("subtitleUrl").value.trim();
+
+  if (!validSub(subUrl)) {
+    showMessage("Manukuu: tumia subs/jina.srt (faili ndani ya repo) au link ya HTTPS.", true);
+    return;
+  }
+
   const price = Math.max(0, parseInt($("price").value, 10) || 0);
   const paid = price > 0;
 
@@ -855,6 +896,7 @@ $("movieForm").addEventListener("submit", async event => {
     poster: poster,
     description: $("description").value.trim(),
     videoUrl: paid ? "" : videoUrl,
+    subtitleUrl: subUrl,
     price: price,
     genres: getGenres(),
     runtime: $("runtime").value.trim(),
@@ -933,6 +975,7 @@ async function startEdit(id, movie) {
   $("poster").value = movie.poster || "";
   $("description").value = movie.description || "";
   $("videoUrl").value = url;
+  $("subtitleUrl").value = movie.subtitleUrl || "";
   $("price").value = movie.price || 0;
   $("runtime").value = movie.runtime || "";
   $("age").value = movie.age || "";
@@ -1340,6 +1383,43 @@ async function loadViews() {
   }
 }
 
+async function loadNoticeAdmin() {
+  try {
+    const snap = await db.collection("settings").doc("announcement").get();
+    $("noticeText").value = snap.exists ? (snap.data().text || "") : "";
+  } catch (error) {
+    showMessage(getErrorMessage(error), true);
+  }
+}
+
+$("saveNoticeBtn").addEventListener("click", async () => {
+  if (!isAdmin) return;
+  const text = $("noticeText").value.trim();
+  if (!text) return showMessage("Andika ujumbe kwanza.", true);
+  try {
+    await db.collection("settings").doc("announcement").set({
+      text: text,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy: auth.currentUser.uid
+    });
+    showMessage("Tangazo limetumwa.");
+  } catch (error) {
+    showMessage(getErrorMessage(error), true);
+  }
+});
+
+$("removeNoticeBtn").addEventListener("click", async () => {
+  if (!isAdmin) return;
+  if (!confirm("Ondoa tangazo la sasa?")) return;
+  try {
+    await db.collection("settings").doc("announcement").delete();
+    $("noticeText").value = "";
+    showMessage("Tangazo limeondolewa.");
+  } catch (error) {
+    showMessage(getErrorMessage(error), true);
+  }
+});
+
 function showTab(name) {
   document.querySelectorAll(".tab").forEach(p =>
     p.classList.toggle("hidden", p.dataset.tab !== name));
@@ -1357,6 +1437,7 @@ function showTab(name) {
   if (name === "pay") { loadPayments(); loadApproved(); }
   if (name === "users") loadUsers();
   if (name === "views") loadViews();
+  if (name === "notice") loadNoticeAdmin();
 }
 
 document.querySelectorAll("#tabs button").forEach(b =>
