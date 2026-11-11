@@ -147,12 +147,38 @@ body:not(.locked) .gate{display:none}
 .admin-card svg{width:20px;height:20px;color:var(--gold)}
 .pay-card{margin:14px 18px 0;background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:20px}
 .pay-card h3{font-family:var(--display);margin:0 0 4px;font-size:19px}
+/* ===== kicheza cha kisasa (kama VLC) ===== */
+.pwrap{position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden;margin-top:12px;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+.pwrap video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+.pc{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;opacity:0;transition:opacity .25s;color:#fff;background:linear-gradient(#000c,#0000 30%,#0000 58%,#000d)}
+.pc.show{opacity:1}
+.pc button,.pc input{pointer-events:none}
+.pc.show button,.pc.show input{pointer-events:auto}
+.pc button{background:none;color:#fff;padding:8px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;gap:3px;font-size:12px;line-height:1}
+.pc svg{width:22px;height:22px;flex:none}
+.ptop{display:flex;align-items:center;gap:6px;padding:8px 10px;pointer-events:none}
+.ptop .ttl{flex:1;min-width:0;font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc .spd{border-radius:99px;padding:7px 13px;background:#0008;font-weight:700;font-size:13px}
+.pmid{display:flex;align-items:center;justify-content:center;gap:26px;pointer-events:none}
+.pc .pmid button{background:#0008;width:50px;height:50px;flex-direction:column}
+.pc .pmid button span{font-size:10px;font-weight:700;margin-top:-2px}
+.pc .pmid button.big{width:68px;height:68px;background:var(--accent)}
+.pc .pmid button.big svg{width:30px;height:30px}
+.pbot{padding:0 12px 8px;pointer-events:none}
+.pseek{display:flex;align-items:center;gap:10px}
+.pseek span{font-size:12px;min-width:38px;font-variant-numeric:tabular-nums;text-align:center}
+.pseek input[type=range]{flex:1;min-width:0;padding:0;height:26px;background:none;border:0;-webkit-appearance:none;appearance:none}
+.pseek input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:linear-gradient(to right,var(--gold) var(--p,0%),#ffffff55 var(--p,0%))}
+.pseek input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;margin-top:-6px;border-radius:50%;background:var(--gold);border:0}
+.prow{display:flex;justify-content:space-between;align-items:center;margin-top:2px;pointer-events:none}
+.prow .g{display:flex;gap:4px;align-items:center}
+#pBackBtn{display:none}
+body.pfs #pBackBtn,#pwrap:fullscreen #pBackBtn,#pwrap:-webkit-full-screen #pBackBtn{display:inline-flex}
+#pwrap:fullscreen,#pwrap:-webkit-full-screen{aspect-ratio:auto;border-radius:0;width:100%;height:100%}
 /* skrini nzima ya app (inafanya kazi hata WebView ya APK) */
-#pfsExit{display:none;position:fixed;top:calc(10px + env(safe-area-inset-top));right:12px;z-index:101;background:#000a;backdrop-filter:blur(6px)}
-body.pfs #pfsExit{display:block}
-body.pfs #playerVideo{position:fixed!important;z-index:100;background:#000;border-radius:0!important;margin:0!important;object-fit:contain;aspect-ratio:auto!important}
-body.pfs.land #playerVideo{left:0;top:0;width:100vw;height:100vh}
-body.pfs.port #playerVideo{top:0;left:100vw;width:100vh;height:100vw;transform-origin:top left;transform:rotate(90deg)}
+body.pfs #pwrap{position:fixed!important;z-index:100;margin:0!important;border-radius:0!important;aspect-ratio:auto!important}
+body.pfs.land #pwrap{left:0;top:0;width:100vw;height:100vh}
+body.pfs.port #pwrap{top:0;left:100vw;width:100vh;height:100vw;transform-origin:top left;transform:rotate(90deg)}
 /* player bar */
 .pbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .card .prog{position:absolute;left:0;right:0;bottom:0;height:5px;background:#0009}
@@ -177,7 +203,6 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
 <body class="locked">
 
 <div id="toast" class="toast hidden" role="status"></div>
-<button type="button" id="pfsExit">✕ Toka skrini nzima</button>
 
 <section id="gate" class="gate">
   <h1>Ingia ili kuendelea</h1>
@@ -390,15 +415,48 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
       style="margin-top:12px"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
       referrerpolicy="strict-origin-when-cross-origin"></iframe>
-    <video id="playerVideo" class="player" controls playsinline controlsList="nodownload noremoteplayback nofullscreen" disablePictureInPicture style="display:none;margin-top:12px"></video>
+    <div id="pwrap" class="pwrap" style="display:none">
+      <video id="playerVideo" playsinline disablePictureInPicture></video>
 
-    <div id="playerBar" class="pbar hidden">
-      <button type="button" class="chip" id="pBack">⏪ 10s</button>
-      <button type="button" class="chip" id="pFwd">10s ⏩</button>
-      <button type="button" class="chip" id="pMute">🔊 Sauti</button>
-      <button type="button" class="chip" id="pSpeed">⚡ 1x</button>
-      <button type="button" class="chip" id="pFull">⛶ Skrini nzima</button>
-      <button type="button" class="chip hidden" id="pNext">⏭ Ep inayofuata</button>
+      <div id="pc" class="pc show">
+        <div class="ptop">
+          <button type="button" id="pBackBtn" aria-label="Toka skrini nzima">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+          </button>
+          <span class="ttl" id="pTitle"></span>
+          <button type="button" id="pMute" aria-label="Sauti"></button>
+          <button type="button" id="pSpeed" class="spd" aria-label="Kasi">1x</button>
+        </div>
+
+        <div class="pmid">
+          <button type="button" id="pBack" aria-label="Rudi sekunde 10">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 109-9 9 9 0 00-6.4 2.6L3 8"/><path d="M3 3v5h5"/></svg><span>10</span>
+          </button>
+          <button type="button" id="pPlay" class="big" aria-label="Cheza au simamisha"></button>
+          <button type="button" id="pFwd" aria-label="Ruka sekunde 10">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-9-9 9 9 0 016.4 2.6L21 8"/><path d="M21 3v5h-5"/></svg><span>10</span>
+          </button>
+        </div>
+
+        <div class="pbot">
+          <div class="pseek">
+            <span id="pCur">0:00</span>
+            <input type="range" id="pSeek" min="0" max="1000" step="1" value="0" aria-label="Mahali pa video">
+            <span id="pDur">0:00</span>
+          </div>
+          <div class="prow">
+            <div class="g"></div>
+            <div class="g">
+              <button type="button" id="pNext" class="hidden" aria-label="Ep inayofuata">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5l9 7-9 7zM17 5h2v14h-2z"/></svg>
+              </button>
+              <button type="button" id="pFull" aria-label="Skrini nzima">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div id="episodePanel" class="hidden" style="margin-top:14px"></div>
@@ -942,20 +1000,19 @@ function loadInPlayer(url) {
   if (r.type === "video") {
     frame.src = "about:blank";
     frame.style.display = "none";
-    video.style.display = "block";
-    video.setAttribute("controlsList", "nodownload noremoteplayback nofullscreen");
+    $("pwrap").style.display = "block";
+    video.controls = false;
     video.disablePictureInPicture = true;
     video.oncontextmenu = ev => ev.preventDefault();
     video.src = r.src;
-    $("playerBar").classList.remove("hidden");
     applySpeed();
     syncMute();
+    showControls();
     video.play().catch(() => {});
   } else {
-    $("playerBar").classList.add("hidden");
+    $("pwrap").style.display = "none";
     video.pause();
     video.removeAttribute("src");
-    video.style.display = "none";
     frame.style.display = "block";
     frame.src = r.src;
   }
@@ -965,7 +1022,7 @@ function closePlayer() {
   saveProgress(true);
   exitPfs();
   playCtx = null; seriesCtx = null; pendingSeek = 0;
-  $("playerBar").classList.add("hidden");
+  $("pwrap").style.display = "none";
   const video = $("playerVideo");
   video.pause();
   video.removeAttribute("src");
@@ -1021,26 +1078,78 @@ $("playerVideo").addEventListener("loadedmetadata", () => {
 });
 
 /* =====================================================
-   KICHEZA: sauti, kasi, skrini nzima, kuruka, episode inayofuata
+   KICHEZA CHA KISASA: vidhibiti vyake vyenyewe
 ===================================================== */
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
+const IC = {
+  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>',
+  pause: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>',
+  vol: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><path d="M16.5 9a4 4 0 010 6M19 6.5a8 8 0 010 11"/></svg>',
+  mute: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><path d="M17 9l5 6M22 9l-5 6"/></svg>'
+};
+
+let hideTimer = null, seeking = false, lastTap = 0;
+
+function fmtT(t) {
+  t = Math.max(0, Math.floor(t || 0));
+  const h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), s = t % 60;
+  return (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(s).padStart(2, "0");
+}
 
 function applySpeed() {
   $("playerVideo").playbackRate = SPEEDS[speedIdx];
-  $("pSpeed").textContent = "⚡ " + SPEEDS[speedIdx] + "x";
+  $("pSpeed").textContent = SPEEDS[speedIdx] + "x";
 }
-function syncMute() {
-  $("pMute").textContent = $("playerVideo").muted ? "🔇 Imenyamazishwa" : "🔊 Sauti";
+function syncMute() { $("pMute").innerHTML = $("playerVideo").muted ? IC.mute : IC.vol; }
+function syncPlay() { $("pPlay").innerHTML = $("playerVideo").paused ? IC.play : IC.pause; }
+
+function updateSeek() {
+  const v = $("playerVideo"), d = v.duration || 0;
+  $("pCur").textContent = fmtT(v.currentTime);
+  $("pDur").textContent = fmtT(d);
+  if (seeking) return;
+  const frac = d ? v.currentTime / d : 0;
+  $("pSeek").value = Math.round(frac * 1000);
+  $("pSeek").style.setProperty("--p", (frac * 100) + "%");
 }
 
-$("pBack").addEventListener("click", () => {
+function showControls() {
+  const pc = $("pc");
+  $("pTitle").textContent = $("playerTitle").textContent;
+  pc.classList.add("show");
+  clearTimeout(hideTimer);
+  if (!$("playerVideo").paused) {
+    hideTimer = setTimeout(() => pc.classList.remove("show"), 3000);
+  }
+}
+
+function skip(sec) {
   const v = $("playerVideo");
-  v.currentTime = Math.max(0, v.currentTime - 10);
+  v.currentTime = Math.min(Math.max(0, v.currentTime + sec), v.duration || 1e9);
+}
+
+/* gusa video: onyesha/ficha vidhibiti; gusa mara mbili kushoto/kulia: ruka sekunde 10 */
+$("pc").addEventListener("click", e => {
+  if (e.target.closest("button, input")) return showControls();
+  const now = Date.now();
+  if (now - lastTap < 300) {
+    const x = e.offsetX / $("pc").clientWidth;
+    if (x < 0.4) skip(-10);
+    else if (x > 0.6) skip(10);
+    lastTap = 0;
+    return showControls();
+  }
+  lastTap = now;
+  if ($("pc").classList.contains("show")) $("pc").classList.remove("show");
+  else showControls();
 });
-$("pFwd").addEventListener("click", () => {
+
+$("pPlay").addEventListener("click", () => {
   const v = $("playerVideo");
-  v.currentTime = Math.min(v.duration || 1e9, v.currentTime + 10);
+  if (v.paused) v.play().catch(() => {}); else v.pause();
 });
+$("pBack").addEventListener("click", () => skip(-10));
+$("pFwd").addEventListener("click", () => skip(10));
 $("pMute").addEventListener("click", () => {
   const v = $("playerVideo");
   v.muted = !v.muted;
@@ -1050,53 +1159,17 @@ $("pSpeed").addEventListener("click", () => {
   speedIdx = (speedIdx + 1) % SPEEDS.length;
   applySpeed();
 });
-/* Skrini nzima: kwanza jaribu ya kweli; ikishindikana (WebView ya APK) tumia ya app yenyewe */
-function updatePfsOrientation() {
-  if (!document.body.classList.contains("pfs")) return;
-  const land = window.innerWidth > window.innerHeight;
-  document.body.classList.toggle("land", land);
-  document.body.classList.toggle("port", !land);
-}
 
-function enterPfs() {
-  document.body.classList.add("pfs");
-  updatePfsOrientation();
-}
-
-function exitPfs() {
-  document.body.classList.remove("pfs", "land", "port");
-}
-
-window.addEventListener("resize", updatePfsOrientation);
-window.addEventListener("orientationchange", () => setTimeout(updatePfsOrientation, 150));
-$("pfsExit").addEventListener("click", exitPfs);
-
-document.addEventListener("fullscreenchange", () => {
-  if (!document.fullscreenElement && screen.orientation && screen.orientation.unlock) {
-    try { screen.orientation.unlock(); } catch (e) {}
-  }
-});
-
-$("pFull").addEventListener("click", async () => {
-  if (document.body.classList.contains("pfs")) return exitPfs();
-
+$("pSeek").addEventListener("input", () => {
   const v = $("playerVideo");
-  const fn = v.requestFullscreen || v.webkitRequestFullscreen || v.webkitEnterFullscreen || v.msRequestFullscreen;
-
-  if (!fn) return enterPfs();
-
-  try {
-    const r = fn.call(v);
-    if (r && r.then) await r;
-    if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock("landscape").catch(() => {});
-    }
-  } catch (e) {
-    enterPfs();
-  }
+  seeking = true;
+  if (v.duration) v.currentTime = $("pSeek").value / 1000 * v.duration;
+  $("pSeek").style.setProperty("--p", ($("pSeek").value / 10) + "%");
+  $("pCur").textContent = fmtT(v.currentTime);
 });
+$("pSeek").addEventListener("change", () => { seeking = false; updateSeek(); });
+
 $("pNext").addEventListener("click", () => { nextEpisode(); });
-$("playerVideo").addEventListener("volumechange", syncMute);
 
 function nextEpisode() {
   if (!seriesCtx) return false;
@@ -1110,6 +1183,66 @@ function nextEpisode() {
   return false;
 }
 
+/* ---- Skrini nzima: ya kweli kwanza; ikishindikana (WebView ya APK) ya app yenyewe ---- */
+function updatePfsOrientation() {
+  if (!document.body.classList.contains("pfs")) return;
+  const land = window.innerWidth > window.innerHeight;
+  document.body.classList.toggle("land", land);
+  document.body.classList.toggle("port", !land);
+}
+function enterPfs() {
+  document.body.classList.add("pfs");
+  updatePfsOrientation();
+  showControls();
+}
+function exitPfs() {
+  document.body.classList.remove("pfs", "land", "port");
+}
+function realFsElement() {
+  return document.fullscreenElement || document.webkitFullscreenElement || null;
+}
+function exitRealFs() {
+  const fn = document.exitFullscreen || document.webkitExitFullscreen;
+  if (fn) { try { fn.call(document); } catch (e) {} }
+}
+
+window.addEventListener("resize", updatePfsOrientation);
+window.addEventListener("orientationchange", () => setTimeout(updatePfsOrientation, 150));
+document.addEventListener("fullscreenchange", () => {
+  if (!document.fullscreenElement && screen.orientation && screen.orientation.unlock) {
+    try { screen.orientation.unlock(); } catch (e) {}
+  }
+});
+
+$("pBackBtn").addEventListener("click", () => {
+  if (realFsElement()) exitRealFs(); else exitPfs();
+});
+
+$("pFull").addEventListener("click", async () => {
+  if (document.body.classList.contains("pfs")) return exitPfs();
+  if (realFsElement()) return exitRealFs();
+
+  const t = $("pwrap");
+  const fn = t.requestFullscreen || t.webkitRequestFullscreen || t.msRequestFullscreen;
+  if (!fn) return enterPfs();
+
+  try {
+    const r = fn.call(t);
+    if (r && r.then) await r;
+    if (screen.orientation && screen.orientation.lock) {
+      screen.orientation.lock("landscape").catch(() => {});
+    }
+  } catch (e) {
+    enterPfs();
+  }
+});
+
+/* ---- matukio ya video ---- */
+$("playerVideo").addEventListener("volumechange", syncMute);
+$("playerVideo").addEventListener("play", () => { syncPlay(); showControls(); });
+$("playerVideo").addEventListener("pause", () => { syncPlay(); showControls(); saveProgress(true); });
+$("playerVideo").addEventListener("durationchange", updateSeek);
+$("playerVideo").addEventListener("timeupdate", () => { updateSeek(); saveProgress(false); });
 $("playerVideo").addEventListener("loadedmetadata", () => {
   const v = $("playerVideo");
   if (pendingSeek > 0) {
@@ -1117,13 +1250,16 @@ $("playerVideo").addEventListener("loadedmetadata", () => {
     pendingSeek = 0;
   }
   applySpeed();
+  updateSeek();
 });
 $("playerVideo").addEventListener("ended", () => {
+  syncPlay();
   if (seriesCtx && nextEpisode()) return;
   clearProgress();
 });
-$("playerVideo").addEventListener("timeupdate", () => saveProgress(false));
-$("playerVideo").addEventListener("pause", () => saveProgress(true));
+
+syncMute();
+syncPlay();
 
 /* =====================================================
    ENDELEA KUTAZAMA
@@ -1135,7 +1271,7 @@ function progressRef(id) {
 function saveProgress(force) {
   if (!currentUser || !playCtx) return;
   const v = $("playerVideo");
-  if (v.style.display === "none" || v.ended || !v.duration || isNaN(v.duration)) return;
+  if ($("pwrap").style.display === "none" || v.ended || !v.duration || isNaN(v.duration)) return;
   const now = Date.now();
   if (!force && now - lastSave < 15000) return;
   lastSave = now;
