@@ -311,7 +311,8 @@ function render() {
       fields.className = "fields";
       fields.append(
         field(ep.title, "Jina la episode (hiari)", v => ep.title = v),
-        field(ep.videoUrl, "URL ya video (HTTPS: Dropbox, .mp4, YouTube)", v => ep.videoUrl = v)
+        field(ep.videoUrl, "URL ya video (HTTPS: Dropbox, .mp4, YouTube)", v => ep.videoUrl = v),
+        field(ep.sub, "Manukuu hiari (subs/jina.srt au https://...)", v => ep.sub = v)
       );
 
       const t = document.createElement("div");
@@ -381,9 +382,13 @@ $("saveBtn").addEventListener("click", async () => {
 
   relabel();
 
+  const subOk = u => !u || /^subs\/[\w\-. ]+\.(srt|vtt)$/i.test(u) || isHttps(u);
+
   for (const s of seasons) {
     if (!s.episodes.length) return msg(s.label + " haina episode.", true);
     for (const ep of s.episodes) {
+      if (!subOk((ep.sub || "").trim()))
+        return msg(s.label + " Episode " + ep.number + ": manukuu yatumie subs/jina.srt au HTTPS.", true);
       if (!isHttps((ep.videoUrl || "").trim()))
         return msg(s.label + " Episode " + ep.number + ": URL ya video lazima iwe HTTPS.", true);
     }
@@ -414,6 +419,7 @@ $("saveBtn").addEventListener("click", async () => {
         return {
           number: ep.number,
           title: (ep.title || "").trim(),
+          sub: (ep.sub || "").trim(),
           videoUrl: paid ? "" : url
         };
       })
