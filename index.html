@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#0c0a14">
 <meta name="description" content="Prosper Movies — tazama filamu na series, hifadhi unazopenda.">
 <title>Prosper Movies</title>
+<link rel="preconnect" href="https://firestore.googleapis.com">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -179,6 +180,13 @@ body.pfs #pBackBtn,#pwrap:fullscreen #pBackBtn,#pwrap:-webkit-full-screen #pBack
 body.pfs #pwrap{position:fixed!important;z-index:100;margin:0!important;border-radius:0!important;aspect-ratio:auto!important}
 body.pfs.land #pwrap{left:0;top:0;width:100vw;height:100vh}
 body.pfs.port #pwrap{top:0;left:100vw;width:100vh;height:100vw;transform-origin:top left;transform:rotate(90deg)}
+/* manukuu */
+video::cue{background:rgba(0,0,0,.68);color:#fff;font-size:1.05em}
+.pc #pCC{font-weight:800;font-size:12px;border:2px solid #fff9;border-radius:6px;padding:3px 7px;opacity:.75}
+.pc #pCC.on{opacity:1;border-color:var(--gold);color:var(--gold)}
+/* tangazo */
+.notice{margin:0 14px 12px;display:flex;gap:10px;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#3a2b86,#241d4d);border:1px solid var(--accent);border-radius:16px;padding:12px 14px}
+.notice span{flex:1;min-width:0;overflow-wrap:anywhere}
 /* player bar */
 .pbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .card .prog{position:absolute;left:0;right:0;bottom:0;height:5px;background:#0009}
@@ -227,6 +235,11 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
 
   <!-- ============ MWANZO ============ -->
   <main id="viewHome" class="view active">
+    <div id="notice" class="notice hidden">
+      <span id="noticeText"></span>
+      <button type="button" id="noticeX" class="ghost sm" aria-label="Funga tangazo">✕</button>
+    </div>
+
     <section id="hero" class="hero">
       <div class="hero-bg"></div>
       <div class="hero-body">
@@ -246,6 +259,9 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
 
     <h2 id="contH" class="hidden">Endelea kutazama</h2>
     <div id="contGrid" class="rail hidden"></div>
+
+    <h2 id="recH" class="hidden">Unaweza kupenda</h2>
+    <div id="recGrid" class="rail hidden"></div>
 
     <h2>Filamu Zetu</h2>
     <div id="ownGrid" class="rail"><div class="empty">Inapakia...</div></div>
@@ -445,7 +461,9 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
             <span id="pDur">0:00</span>
           </div>
           <div class="prow">
-            <div class="g"></div>
+            <div class="g">
+              <button type="button" id="pCC" class="hidden" aria-label="Manukuu">CC</button>
+            </div>
             <div class="g">
               <button type="button" id="pNext" class="hidden" aria-label="Ep inayofuata">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5l9 7-9 7zM17 5h2v14h-2z"/></svg>
@@ -499,6 +517,7 @@ let seriesCtx = null;           // muktadha wa series (episode inayofuata)
 let pendingSeek = 0;            // sekunde za kuendelea
 let lastSave = 0;
 let speedIdx = 2;               // 1x
+let watchedMap = {};            // id -> makundi (kwa mapendekezo)
 
 $("yearNow").textContent = new Date().getFullYear();
 
@@ -570,6 +589,7 @@ function makeCard({ title, sub, poster, badge, badgeClass, onClick }) {
   const p = el("div", "poster");
   const img = document.createElement("img");
   img.loading = "lazy";
+  img.decoding = "async";
   img.alt = "Poster ya " + title;
   img.src = poster || placeholderPoster;
   img.onerror = () => { img.src = placeholderPoster; };
@@ -693,6 +713,7 @@ function startLive() {
         ((b.updatedAt && b.updatedAt.seconds) || Date.now() / 1000) -
         ((a.updatedAt && a.updatedAt.seconds) || Date.now() / 1000));
       renderContinue();
+      renderRecs();
     }, err => console.error("Progress live", err));
 }
 
@@ -838,6 +859,8 @@ function loadContent() {
   if (contentLoaded) return;
   contentLoaded = true;
   loadIntro();
+  loadNotice();
+  loadWatched();
   loadOwnMovies();
   loadSeries();
 }
@@ -897,6 +920,7 @@ auth.onAuthStateChanged(async user => {
     ownList = [];
     seriesList = [];
     progressList = [];
+    watchedMap = {};
     $("payBox").classList.add("hidden");
     closePlayer();
     closeModal("payModal");
@@ -993,7 +1017,7 @@ function toEmbedUrl(url) {
   return { type: "frame", src: url };
 }
 
-function loadInPlayer(url) {
+function loadInPlayer(url, sub) {
   const frame = $("playerFrame"), video = $("playerVideo");
   const r = toEmbedUrl(url);
   $("episodePanel").classList.add("hidden");
@@ -1008,9 +1032,11 @@ function loadInPlayer(url) {
     applySpeed();
     syncMute();
     showControls();
+    setSubtitle(sub || "");
     video.play().catch(() => {});
   } else {
     $("pwrap").style.display = "none";
+    setSubtitle("");
     video.pause();
     video.removeAttribute("src");
     frame.style.display = "block";
@@ -1023,6 +1049,7 @@ function closePlayer() {
   exitPfs();
   playCtx = null; seriesCtx = null; pendingSeek = 0;
   $("pwrap").style.display = "none";
+  setSubtitle("");
   const video = $("playerVideo");
   video.pause();
   video.removeAttribute("src");
@@ -1345,6 +1372,138 @@ function countView(item, kind) {
     count: firebase.firestore.FieldValue.increment(1),
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   }, { merge: true }).catch(() => {});
+
+  /* kwa mapendekezo */
+  watchedMap[item.id] = item.genres || [];
+  db.collection("users").doc(currentUser.uid).collection("watched").doc(item.id).set({
+    title: item.title || "", kind: kind, genres: item.genres || [],
+    at: firebase.firestore.FieldValue.serverTimestamp()
+  }).catch(() => {});
+}
+
+/* =====================================================
+   MANUKUU (subtitles): .srt au .vtt
+===================================================== */
+let subTrack = null, subOn = true, subBlob = null, subToken = 0;
+
+function srtToVtt(t) {
+  t = t.replace(/\r+/g, "").replace(/^\uFEFF/, "");
+  if (/^WEBVTT/.test(t)) return t;
+  return "WEBVTT\n\n" + t.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, "$1.$2");
+}
+
+function syncCC() { $("pCC").classList.toggle("on", subOn); }
+
+async function setSubtitle(url) {
+  const v = $("playerVideo");
+  const my = ++subToken;
+  v.querySelectorAll("track").forEach(t => t.remove());
+  if (subBlob) { URL.revokeObjectURL(subBlob); subBlob = null; }
+  subTrack = null;
+  $("pCC").classList.add("hidden");
+  if (!url) return;
+
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error("subtitle");
+    const text = srtToVtt(await r.text());
+    if (my !== subToken) return;
+    subBlob = URL.createObjectURL(new Blob([text], { type: "text/vtt" }));
+    const tr = document.createElement("track");
+    tr.kind = "subtitles";
+    tr.label = "Manukuu";
+    tr.srclang = "sw";
+    tr.src = subBlob;
+    v.append(tr);
+    tr.track.mode = subOn ? "showing" : "hidden";
+    subTrack = tr;
+    $("pCC").classList.remove("hidden");
+    syncCC();
+  } catch (e) {
+    if (my === subToken) {
+      showMessage("Manukuu hayapatikani. Weka faili ndani ya repo (mfano subs/jina.srt) au link ya HTTPS.", true);
+    }
+  }
+}
+
+$("pCC").addEventListener("click", () => {
+  subOn = !subOn;
+  if (subTrack) subTrack.track.mode = subOn ? "showing" : "hidden";
+  syncCC();
+});
+
+/* =====================================================
+   TANGAZO, "MPYA" NA MAPENDEKEZO
+===================================================== */
+function isNew(item) {
+  const sec = item && item.createdAt && item.createdAt.seconds;
+  return !!sec && (Date.now() / 1000 - sec) < 7 * 86400;
+}
+
+async function loadNotice() {
+  try {
+    const snap = await db.collection("settings").doc("announcement").get();
+    if (!snap.exists) return;
+    const d = snap.data();
+    if (!d || !d.text) return;
+    const key = "notice_" + ((d.createdAt && d.createdAt.seconds) || 0);
+    let seen = false;
+    try { seen = localStorage.getItem(key) === "1"; } catch (e) {}
+    if (seen) return;
+    $("noticeText").textContent = d.text;
+    $("notice").classList.remove("hidden");
+    $("noticeX").onclick = () => {
+      $("notice").classList.add("hidden");
+      try { localStorage.setItem(key, "1"); } catch (e) {}
+    };
+  } catch (e) { console.info("Tangazo", e); }
+}
+
+async function loadWatched() {
+  if (!currentUser) return;
+  try {
+    const snap = await db.collection("users").doc(currentUser.uid).collection("watched").get();
+    watchedMap = {};
+    snap.forEach(d => { watchedMap[d.id] = d.data().genres || []; });
+    renderRecs();
+  } catch (e) { console.info("Watched", e); }
+}
+
+function renderRecs() {
+  const grid = $("recGrid"), h = $("recH");
+  grid.replaceChildren();
+
+  const taste = {};
+  Object.keys(watchedMap).forEach(id => (watchedMap[id] || []).forEach(g => { taste[g] = (taste[g] || 0) + 1; }));
+  progressList.forEach(p => {
+    const it = (p.kind === "series" ? seriesList : ownList).find(x => x.id === p.itemId);
+    if (it) (it.genres || []).forEach(g => { taste[g] = (taste[g] || 0) + 1; });
+  });
+
+  const all = ownList.map(x => ({ item: x, kind: "movie" }))
+    .concat(seriesList.map(x => ({ item: x, kind: "series" })));
+
+  const picks = all
+    .filter(({ item }) => !(item.id in watchedMap) && !progressList.some(p => p.itemId === item.id))
+    .map(({ item, kind }) => ({
+      item, kind,
+      score: (item.genres || []).reduce((n, g) => n + (taste[g] || 0), 0)
+    }))
+    .filter(x => x.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10);
+
+  grid.classList.toggle("hidden", !picks.length);
+  h.classList.toggle("hidden", !picks.length);
+
+  picks.forEach(({ item, kind }) => grid.append(makeCard({
+    title: item.title || "Bila jina",
+    sub: (item.year ? item.year + " · " : "") + (kind === "series" ? "Series" : "Filamu"),
+    poster: item.poster,
+    badge: item.price > 0 ? (isUnlocked(item) ? "Imefunguliwa" : fmtPrice(item.price)) : "",
+    badgeClass: item.price > 0 ? (isUnlocked(item) ? "open" : "paid") : "",
+    onClick: () => openDetailOwn(item, kind)
+  })));
 }
 
 /* ---------- FILAMU ZETU ---------- */
@@ -1366,7 +1525,7 @@ async function playOwn(m, seek) {
     playCtx = { id: m.id, kind: "movie", title: m.title || "", poster: m.poster || "" };
     pendingSeek = seek || 0;
     $("pNext").classList.add("hidden");
-    loadInPlayer(url);
+    loadInPlayer(url, m.subtitleUrl);
     openModal("playerModal");
     countView(m, "movie");
   } catch (error) {
@@ -1385,13 +1544,14 @@ function renderOwn() {
     const open = paid && isUnlocked(m);
     grid.append(makeCard({
       title: m.title || "Filamu", sub: m.year || "", poster: m.poster,
-      badge: paid ? (open ? "Imefunguliwa" : fmtPrice(m.price)) : "Filamu",
+      badge: paid ? (open ? "Imefunguliwa" : fmtPrice(m.price)) : (isNew(m) ? "Mpya" : "Filamu"),
       badgeClass: paid ? (open ? "open" : "paid") : "",
       onClick: () => openDetailOwn(m, "movie")
     }));
   });
   renderGenres();
   renderContinue();
+  renderRecs();
 }
 
 async function loadOwnMovies() {
@@ -1430,13 +1590,14 @@ function renderSeriesList() {
     grid.append(makeCard({
       title: s.title || "Series", sub: (s.year ? s.year + " · " : "") + n + " Season",
       poster: s.poster,
-      badge: paid ? (open ? "Imefunguliwa" : fmtPrice(s.price)) : "Series",
+      badge: paid ? (open ? "Imefunguliwa" : fmtPrice(s.price)) : (isNew(s) ? "Mpya" : "Series"),
       badgeClass: paid ? (open ? "open" : "paid") : "",
       onClick: () => openDetailOwn(s, "series")
     }));
   });
   renderGenres();
   renderContinue();
+  renderRecs();
 }
 
 async function loadSeries() {
@@ -1517,7 +1678,7 @@ function selectEpisode(s, seasons, si, ei, seek) {
   $("pNext").classList.toggle("hidden", !hasNext);
   savePointer(seek);
   pendingSeek = seek || 0;
-  if (ep.videoUrl) loadInPlayer(ep.videoUrl);
+  if (ep.videoUrl) loadInPlayer(ep.videoUrl, ep.sub);
   else showMessage("Episode hii haina link ya video.", true);
 
   const panel = $("episodePanel");
