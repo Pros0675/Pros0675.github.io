@@ -363,6 +363,7 @@
       <button type="button" data-tab="pay" class="secondary">💰 Malipo</button>
       <button type="button" data-tab="users" class="secondary">👥 Watumiaji</button>
       <button type="button" data-tab="views" class="secondary">👁️ Tazama</button>
+      <button type="button" data-tab="ads" class="secondary">💸 Matangazo</button>
       <button type="button" data-tab="notice" class="secondary">📣 Tangazo</button>
       <button type="button" data-tab="intro" class="secondary">🖼️ Intro</button>
     </nav>
@@ -574,6 +575,48 @@
 
       <div id="movieList">
         Inapakia filamu...
+      </div>
+    </section>
+
+    <!-- MATANGAZO (ADS) -->
+    <section class="panel tab" data-tab="ads">
+      <h2>💸 Matangazo (Ads)</h2>
+      <p class="muted">
+        Bandika code ya tangazo kutoka Adsterra (au mtandao mwingine). Pre-roll inaonekana kabla video kuanza,
+        na banner chini ya kicheza. Matangazo hayaonekani kwa admin wala kwa filamu au series za kulipia.
+        Faili <b>ad.html</b> lazima liwepo kwenye repo.
+      </p>
+
+      <div class="field">
+        <label style="display:flex;align-items:center;gap:8px">
+          <input id="adsEnabled" type="checkbox" style="width:auto;margin:0"> Washa matangazo
+        </label>
+      </div>
+
+      <h3>▶ Pre-roll (kabla ya video)</h3>
+      <div class="field">
+        <label for="adsPreroll">Code ya tangazo</label>
+        <textarea id="adsPreroll" maxlength="20000" placeholder="Bandika code ya Adsterra hapa (mfano banner 300x250)"></textarea>
+      </div>
+      <div class="grid">
+        <div class="field"><label for="adsPrerollW">Upana (px)</label><input id="adsPrerollW" type="number" min="50" max="728" value="300"></div>
+        <div class="field"><label for="adsPrerollH">Urefu (px)</label><input id="adsPrerollH" type="number" min="50" max="600" value="250"></div>
+        <div class="field"><label for="adsSeconds">Muda wa tangazo (sekunde 5-20)</label><input id="adsSeconds" type="number" min="5" max="20" value="8"></div>
+        <div class="field"><label for="adsSkip">Kitufe cha Ruka kionekane baada ya (sekunde)</label><input id="adsSkip" type="number" min="3" max="20" value="5"></div>
+      </div>
+
+      <h3>📱 Banner chini ya kicheza</h3>
+      <div class="field">
+        <label for="adsBelow">Code ya tangazo</label>
+        <textarea id="adsBelow" maxlength="20000" placeholder="Bandika code ya banner (mfano 320x50)"></textarea>
+      </div>
+      <div class="grid">
+        <div class="field"><label for="adsBelowW">Upana (px)</label><input id="adsBelowW" type="number" min="50" max="728" value="320"></div>
+        <div class="field"><label for="adsBelowH">Urefu (px)</label><input id="adsBelowH" type="number" min="30" max="600" value="50"></div>
+      </div>
+
+      <div class="actions">
+        <button type="button" id="saveAdsBtn">Hifadhi Matangazo</button>
       </div>
     </section>
 
@@ -1383,6 +1426,47 @@ async function loadViews() {
   }
 }
 
+async function loadAdsAdmin() {
+  try {
+    const snap = await db.collection("settings").doc("ads").get();
+    const d = snap.exists ? snap.data() : {};
+    $("adsEnabled").checked = !!d.enabled;
+    $("adsPreroll").value = d.preroll || "";
+    $("adsPrerollW").value = d.prerollW || 300;
+    $("adsPrerollH").value = d.prerollH || 250;
+    $("adsSeconds").value = d.prerollSeconds || 8;
+    $("adsSkip").value = d.skipAfter || 5;
+    $("adsBelow").value = d.below || "";
+    $("adsBelowW").value = d.belowW || 320;
+    $("adsBelowH").value = d.belowH || 50;
+  } catch (error) {
+    showMessage(getErrorMessage(error), true);
+  }
+}
+
+$("saveAdsBtn").addEventListener("click", async () => {
+  if (!isAdmin) return;
+  const num = (id, min, max, def) => Math.min(Math.max(parseInt($(id).value, 10) || def, min), max);
+  try {
+    await db.collection("settings").doc("ads").set({
+      enabled: $("adsEnabled").checked,
+      preroll: $("adsPreroll").value.trim(),
+      prerollW: num("adsPrerollW", 50, 728, 300),
+      prerollH: num("adsPrerollH", 50, 600, 250),
+      prerollSeconds: num("adsSeconds", 5, 20, 8),
+      skipAfter: num("adsSkip", 3, 20, 5),
+      below: $("adsBelow").value.trim(),
+      belowW: num("adsBelowW", 50, 728, 320),
+      belowH: num("adsBelowH", 30, 600, 50),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedBy: auth.currentUser.uid
+    });
+    showMessage("Matangazo yamehifadhiwa.");
+  } catch (error) {
+    showMessage(getErrorMessage(error), true);
+  }
+});
+
 async function loadNoticeAdmin() {
   try {
     const snap = await db.collection("settings").doc("announcement").get();
@@ -1438,6 +1522,7 @@ function showTab(name) {
   if (name === "users") loadUsers();
   if (name === "views") loadViews();
   if (name === "notice") loadNoticeAdmin();
+  if (name === "ads") loadAdsAdmin();
 }
 
 document.querySelectorAll("#tabs button").forEach(b =>
