@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0c0a14">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta property="og:title" content="Prosper Movies">
+<meta property="og:description" content="Tazama filamu na series, hifadhi unazopenda.">
+<meta property="og:type" content="website">
 <meta name="description" content="Prosper Movies — tazama filamu na series, hifadhi unazopenda.">
 <title>Prosper Movies</title>
 <link rel="preconnect" href="https://firestore.googleapis.com">
@@ -180,6 +188,38 @@ body.pfs #pBackBtn,#pwrap:fullscreen #pBackBtn,#pwrap:-webkit-full-screen #pBack
 body.pfs #pwrap{position:fixed!important;z-index:100;margin:0!important;border-radius:0!important;aspect-ratio:auto!important}
 body.pfs.land #pwrap{left:0;top:0;width:100vw;height:100vh}
 body.pfs.port #pwrap{top:0;left:100vw;width:100vh;height:100vw;transform-origin:top left;transform:rotate(90deg)}
+/* ===== mwonekano ===== */
+@keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes kb{from{transform:scale(1)}to{transform:scale(1.09)}}
+.sk{flex:0 0 138px;aspect-ratio:2/3;border-radius:16px;background:linear-gradient(90deg,var(--panel2) 25%,#2c2656 50%,var(--panel2) 75%);background-size:200% 100%;animation:sh 1.3s linear infinite}
+.sk-tile{height:88px;border-radius:16px;background:linear-gradient(90deg,var(--panel2) 25%,#2c2656 50%,var(--panel2) 75%);background-size:200% 100%;animation:sh 1.3s linear infinite}
+.view.active{animation:fadeUp .3s ease both}
+.card .poster{transition:transform .25s ease,box-shadow .25s ease}
+.card:active .poster{transform:scale(.96)}
+@media(hover:hover){.card:hover .poster{transform:translateY(-4px) scale(1.02);box-shadow:0 14px 30px #0009}}
+.hero-bg{animation:kb 16s ease-in-out infinite alternate}
+.hero-body{transition:opacity .3s}
+.hero-dots{display:flex;gap:6px;margin-top:14px}
+.hero-dots i{width:7px;height:7px;border-radius:99px;background:#ffffff55;transition:all .3s}
+.hero-dots i.on{width:22px;background:var(--gold)}
+.hero .actions{align-items:center}
+.btn-info{background:#ffffff22;backdrop-filter:blur(6px);color:#fff;padding:13px 20px}
+.hlabel{grid-column:1/-1;font-family:var(--display);font-weight:800;font-size:17px;margin:12px 0 0;display:flex;align-items:center;gap:8px}
+.hlabel small{color:var(--muted);font-family:var(--body);font-weight:500;font-size:12.5px}
+.footlinks{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin:6px 0 0}
+.footlinks a{color:var(--muted);font-size:12.5px;text-decoration:none}
+.footlinks a:hover{color:var(--text)}
+.pc #pQual{border-radius:99px;padding:6px 11px;background:#0008;font-weight:700;font-size:12px}
+body.locked{background:radial-gradient(900px 520px at 50% -8%,#3a2b8677,transparent),var(--bg)}
+.landing-logo{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:-.02em}
+.landing-logo svg{width:40px;height:40px}
+.landing-logo b{color:var(--accent)}
+.feats{display:grid;gap:10px;width:min(420px,100%);margin:6px 0 4px;text-align:left}
+.feat{display:flex;gap:12px;align-items:flex-start;background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:12px 14px}
+.feat b{display:block}
+.feat span{color:var(--muted);font-size:13.5px}
+.feat svg{width:24px;height:24px;color:var(--gold);flex:none;margin-top:2px}
 /* matangazo */
 .adlayer{position:fixed;inset:0;z-index:120;background:#000f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}
 .adlayer .adhead{display:flex;gap:12px;align-items:center;color:#fffb;font-size:13px}
@@ -227,8 +267,26 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
 </div>
 
 <section id="gate" class="gate">
+  <div class="landing-logo">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#8b6bff"/><path d="M12 9.5v13l11-6.5z" fill="#ffc857"/></svg>
+    <span>Prosper<b>Movies</b></span>
+  </div>
   <h1>Ingia ili kuendelea</h1>
   <p id="gateText">Inapakia...</p>
+  <div class="feats">
+    <div class="feat">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9.5v5l4.5-2.5z" fill="currentColor"/></svg>
+      <div><b>Filamu na series</b><span>Tazama kwa mpangilio wa season, na sehemu za connection.</span></div>
+    </div>
+    <div class="feat">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      <div><b>Endelea ulipoishia</b><span>Video inakumbuka ulipofika, ukiwa umeingia kwenye akaunti yako.</span></div>
+    </div>
+    <div class="feat">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="3"/><circle cx="12" cy="12" r="2.5"/></svg>
+      <div><b>Malipo rahisi</b><span>Filamu za kulipia zinafunguka baada ya malipo ya Tigo Pesa kuthibitishwa.</span></div>
+    </div>
+  </div>
   <form id="gateForm" class="gate-form hidden">
     <input id="gEmail" type="email" placeholder="Barua pepe" autocomplete="email" required>
     <input id="gPassword" type="password" placeholder="Nenosiri" minlength="6" autocomplete="current-password" required>
@@ -236,6 +294,7 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
     <button id="gToggle" type="button" class="ghost">Tengeneza akaunti</button>
     <button id="gReset" type="button" class="ghost sm">Nimesahau nenosiri</button>
   </form>
+  <div class="footlinks"><a href="privacy.html">Faragha</a><a href="terms.html">Masharti</a></div>
 </section>
 
 <div class="topbar">
@@ -265,7 +324,9 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>
             <span id="heroPlayText">Tafuta filamu</span>
           </button>
+          <button id="heroInfo" type="button" class="btn-info">Maelezo</button>
         </div>
+        <div class="hero-dots" id="heroDots"></div>
       </div>
     </section>
 
@@ -278,15 +339,22 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
     <div id="recGrid" class="rail hidden"></div>
 
     <h2>Filamu Zetu</h2>
-    <div id="ownGrid" class="rail"><div class="empty">Inapakia...</div></div>
+    <div id="ownGrid" class="rail"><div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div></div>
 
     <h2>Series</h2>
-    <div id="seriesGrid" class="rail"><div class="empty">Inapakia...</div></div>
+    <div id="seriesGrid" class="rail"><div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div></div>
 
     <h2>Makundi</h2>
-    <div id="genreGrid" class="tiles"><div class="empty">Inapakia...</div></div>
+    <div id="genreGrid" class="tiles"><div class="sk-tile"></div><div class="sk-tile"></div><div class="sk-tile"></div><div class="sk-tile"></div></div>
 
-    <footer>© <span id="yearNow"></span> Prosper Movies</footer>
+    <footer>
+      <div class="footlinks">
+        <a href="privacy.html">Faragha</a>
+        <a href="terms.html">Masharti</a>
+        <a href="https://wa.me/255675295764?text=Habari%2C%20nahitaji%20msaada%20wa%20Prosper%20Movies." target="_blank" rel="noopener">Msaada</a>
+      </div>
+      <div style="margin-top:8px">© <span id="yearNow"></span> Prosper Movies</div>
+    </footer>
   </main>
 
   <!-- ============ KUNDI ============ -->
@@ -456,6 +524,7 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
           <span class="ttl" id="pTitle"></span>
           <button type="button" id="pMute" aria-label="Sauti"></button>
           <button type="button" id="pSpeed" class="spd" aria-label="Kasi">1x</button>
+          <button type="button" id="pQual" class="spd hidden" aria-label="Ubora"></button>
         </div>
 
         <div class="pmid">
@@ -539,6 +608,7 @@ let speedIdx = 2;               // 1x
 let watchedMap = {};            // id -> makundi (kwa mapendekezo)
 let adsCfg = null;              // mipangilio ya matangazo
 let adPending = false;          // onyesha pre-roll kwa episode ya kwanza
+let deferredInstall = null;     // kitufe cha kusakinisha app
 
 $("yearNow").textContent = new Date().getFullYear();
 
@@ -622,15 +692,66 @@ function makeCard({ title, sub, poster, badge, badgeClass, onClick }) {
 }
 
 /* ---------- hero ---------- */
-function setHero({ tag, title, text, poster, playText, onPlay }) {
-  if (heroSet) return;
-  heroSet = true;
-  $("heroTag").textContent = tag;
-  $("heroTitle").textContent = title;
-  $("heroText").textContent = text || "";
-  $("heroPlayText").textContent = playText;
-  if (poster) $("hero").querySelector(".hero-bg").style.backgroundImage = "url('" + poster.replace(/'/g, "%27") + "')";
-  $("heroPlay").onclick = onPlay;
+let heroItems = [], heroIdx = 0, heroTimer = null, heroKey = "";
+
+function setHero() { /* imebadilishwa na buildHero() */ }
+
+function heroPlayLabel(item, kind) {
+  return item.price > 0 && !isUnlocked(item)
+    ? "Lipia " + fmtPrice(item.price)
+    : (kind === "series" ? "Tazama" : "Cheza sasa");
+}
+
+function renderHero() {
+  const h = heroItems[heroIdx];
+  if (!h) return;
+  const item = h.item, kind = h.kind;
+  const body = document.querySelector("#hero .hero-body");
+  const bg = document.querySelector("#hero .hero-bg");
+  body.style.opacity = 0;
+  setTimeout(() => {
+    $("heroTag").textContent = kind === "series" ? "Series" : (isNew(item) ? "Mpya kwenye Prosper" : "Filamu");
+    $("heroTitle").textContent = item.title || "Bila jina";
+    $("heroText").textContent = item.description || (item.year ? "Mwaka " + item.year : "");
+    $("heroPlayText").textContent = heroPlayLabel(item, kind);
+    bg.style.backgroundImage = item.poster ? "url('" + item.poster.replace(/'/g, "%27") + "')" : "";
+    $("heroPlay").onclick = () => { if (kind === "series") openSeries(item); else playOwn(item); };
+    $("heroInfo").onclick = () => openDetailOwn(item, kind);
+    const dots = heroItems.map((_, i) => {
+      const d = document.createElement("i");
+      if (i === heroIdx) d.className = "on";
+      return d;
+    });
+    $("heroDots").replaceChildren(...dots);
+    body.style.opacity = 1;
+  }, 180);
+}
+
+function buildHero() {
+  const items = [];
+  ownList.slice(0, 3).forEach(x => items.push({ item: x, kind: "movie" }));
+  seriesList.slice(0, 3).forEach(x => items.push({ item: x, kind: "series" }));
+  if (!items.length) return;
+
+  const key = items.map(x => x.item.id).join(",");
+  if (key === heroKey && heroItems.length) {
+    const cur = heroItems[heroIdx];
+    if (cur) $("heroPlayText").textContent = heroPlayLabel(cur.item, cur.kind);
+    return;
+  }
+  heroKey = key;
+  heroItems = items;
+  heroIdx = 0;
+  renderHero();
+
+  clearInterval(heroTimer);
+  if (items.length > 1) {
+    heroTimer = setInterval(() => {
+      if (!$("viewHome").classList.contains("active")) return;
+      heroIdx = (heroIdx + 1) % heroItems.length;
+      renderHero();
+    }, 7000);
+  }
 }
 $("heroPlay").onclick = () => showView("Search");
 
@@ -854,8 +975,30 @@ function renderAccount() {
   out.addEventListener("click", async () => {
     try { await auth.signOut(); } catch (err) { showMessage(friendlyError(err), true); }
   });
-  stack.append(out);
-  box.append(stack);
+  if (deferredInstall) {
+    const inst = el("button", "", "📲 Sakinisha app");
+    inst.addEventListener("click", async () => {
+      deferredInstall.prompt();
+      try { await deferredInstall.userChoice; } catch (e) {}
+      deferredInstall = null;
+      renderAccount();
+    });
+    stack.append(inst);
+  }
+  const hist = el("button", "ghost", "Futa historia ya kutazama");
+  hist.addEventListener("click", clearHistory);
+  stack.append(hist, out);
+
+  const links = el("div", "footlinks");
+  links.style.marginTop = "14px";
+  [["privacy.html", "Faragha"], ["terms.html", "Masharti"],
+   ["https://wa.me/255675295764?text=Habari%2C%20nahitaji%20msaada%20wa%20Prosper%20Movies.", "Msaada"]].forEach(([h, t]) => {
+    const a = el("a", "", t);
+    a.href = h;
+    if (h.indexOf("http") === 0) { a.target = "_blank"; a.rel = "noopener"; }
+    links.append(a);
+  });
+  box.append(stack, links);
 
   /* Sehemu ya admin inaonekana kwa admin tu */
   if (admin) {
@@ -883,6 +1026,7 @@ function loadContent() {
   loadAds();
   loadNotice();
   loadWatched();
+  loadSavedOwnIds();
   loadOwnMovies();
   loadSeries();
 }
@@ -937,12 +1081,14 @@ auth.onAuthStateChanged(async user => {
     document.body.classList.add("locked");
     contentLoaded = false;
     heroSet = false;
+    clearInterval(heroTimer); heroItems = []; heroKey = "";
     purchased = new Set();
     myPayments = [];
     ownList = [];
     seriesList = [];
     progressList = [];
     watchedMap = {};
+    savedOwn = new Set();
     $("payBox").classList.add("hidden");
     closePlayer();
     closeModal("payModal");
@@ -960,10 +1106,62 @@ $("searchForm").addEventListener("submit", e => {
   searchMovies(q);
 });
 
+function ownMatches(q) {
+  q = q.toLowerCase();
+  return ownList.map(x => ({ item: x, kind: "movie" }))
+    .concat(seriesList.map(x => ({ item: x, kind: "series" })))
+    .filter(({ item }) =>
+      (item.title || "").toLowerCase().includes(q) ||
+      (item.description || "").toLowerCase().includes(q) ||
+      (item.genres || []).some(g => g.toLowerCase().includes(q)));
+}
+
+function gridHeading(grid, text, sub) {
+  const h = el("div", "hlabel", text);
+  if (sub) h.append(el("small", "", sub));
+  grid.append(h);
+}
+
+function renderOwnResults(grid, matches) {
+  gridHeading(grid, "Kwenye Prosper", matches.length + (matches.length === 1 ? " kitu" : " vitu"));
+  matches.forEach(({ item, kind }) => grid.append(makeCard({
+    title: item.title || "Bila jina",
+    sub: (item.year ? item.year + " · " : "") + (kind === "series" ? "Series" : "Filamu"),
+    poster: item.poster,
+    badge: item.price > 0 ? (isUnlocked(item) ? "Imefunguliwa" : fmtPrice(item.price)) : "",
+    badgeClass: item.price > 0 ? (isUnlocked(item) ? "open" : "paid") : "",
+    onClick: () => openDetailOwn(item, kind)
+  })));
+}
+
+/* matokeo ya papo hapo kutoka kwenye maktaba ya Prosper unapoandika */
+let liveTimer = null;
+$("searchInput").addEventListener("input", () => {
+  clearTimeout(liveTimer);
+  liveTimer = setTimeout(() => {
+    const q = $("searchInput").value.trim();
+    if (q.length < 2) return;
+    searchToken++;
+    $("sectionTitle").textContent = "Kwenye Prosper";
+    const grid = $("movieGrid");
+    grid.replaceChildren();
+    const m = ownMatches(q);
+    if (m.length) renderOwnResults(grid, m);
+    else grid.append(el("div", "empty", "Hakuna kwenye Prosper. Bonyeza Tafuta kutafuta mtandaoni."));
+  }, 250);
+});
+
 async function searchMovies(query) {
   const token = ++searchToken;
   $("sectionTitle").textContent = "Matokeo ya: " + query;
-  $("movieGrid").innerHTML = '<div class="empty">Inatafuta filamu...</div>';
+  const grid = $("movieGrid");
+  grid.replaceChildren();
+
+  const mine = ownMatches(query);
+  if (mine.length) renderOwnResults(grid, mine);
+  const status = el("div", "empty", "Inatafuta mtandaoni...");
+  grid.append(status);
+
   try {
     const url = "https://www.omdbapi.com/?apikey=" + encodeURIComponent(OMDB_API_KEY) +
       "&s=" + encodeURIComponent(query) + "&type=movie";
@@ -971,12 +1169,13 @@ async function searchMovies(query) {
     if (!response.ok) throw new Error("Huduma ya utafutaji haipatikani.");
     const data = await response.json();
     if (token !== searchToken) return;
+    status.remove();
+
     if (data.Response !== "True") {
-      $("movieGrid").innerHTML = '<div class="empty">Hakuna filamu iliyopatikana. Jaribu jina jingine.</div>';
+      if (!mine.length) grid.append(el("div", "empty", "Hakuna filamu iliyopatikana. Jaribu jina jingine."));
       return;
     }
-    const grid = $("movieGrid");
-    grid.replaceChildren();
+    gridHeading(grid, "Kutoka mtandaoni", "OMDb");
     (data.Search || []).forEach(m => grid.append(makeCard({
       title: m.Title, sub: m.Year || "",
       poster: m.Poster && m.Poster !== "N/A" ? m.Poster : "",
@@ -984,8 +1183,11 @@ async function searchMovies(query) {
     })));
   } catch (error) {
     if (token !== searchToken) return;
-    $("movieGrid").innerHTML = '<div class="empty">Imeshindikana kutafuta filamu. Kagua intaneti na API key.</div>';
-    showMessage(error.message, true);
+    status.remove();
+    if (!mine.length) {
+      grid.append(el("div", "empty", "Imeshindikana kutafuta mtandaoni. Kagua intaneti."));
+      showMessage(error.message, true);
+    }
   }
 }
 
@@ -1039,9 +1241,16 @@ function toEmbedUrl(url) {
   return { type: "frame", src: url };
 }
 
-function loadInPlayer(url, sub) {
+function loadInPlayer(url, sub, q) {
   const frame = $("playerFrame"), video = $("playerVideo");
-  const r = toEmbedUrl(url);
+  let r = toEmbedUrl(url);
+  if (r.type === "video") {
+    setupQuality(url, q);
+    r = toEmbedUrl(qOpts[qIdx].url);
+  } else {
+    qOpts = []; qIdx = 0;
+    $("pQual").classList.add("hidden");
+  }
   $("episodePanel").classList.add("hidden");
   if (r.type === "video") {
     frame.src = "about:blank";
@@ -1617,17 +1826,135 @@ function hideBelow() {
   $("adBelowFrame").src = "about:blank";
 }
 
+/* =====================================================
+   UBORA WA VIDEO (480p / 720p)
+===================================================== */
+let qOpts = [], qIdx = 0;
+
+function syncQual() {
+  $("pQual").textContent = qOpts[qIdx] ? qOpts[qIdx].label : "";
+  $("pQual").classList.toggle("hidden", qOpts.length < 2);
+}
+
+function setupQuality(url, q) {
+  qOpts = [{ label: "Kawaida", url: url }];
+  if (q && q.q720) qOpts.push({ label: "HD 720p", url: q.q720 });
+  if (q && q.q480) qOpts.push({ label: "480p", url: q.q480 });
+  qIdx = 0;
+  const c = navigator.connection || {};
+  const slow = c.saveData || /^(slow-2g|2g|3g)$/.test(c.effectiveType || "");
+  if (slow) {
+    const i = qOpts.findIndex(o => o.label === "480p");
+    if (i > 0) qIdx = i;
+  }
+  syncQual();
+}
+
+$("pQual").addEventListener("click", () => {
+  if (qOpts.length < 2) return;
+  const v = $("playerVideo"), t = v.currentTime, was = !v.paused;
+  qIdx = (qIdx + 1) % qOpts.length;
+  pendingSeek = t;
+  v.src = toEmbedUrl(qOpts[qIdx].url).src;
+  syncQual();
+  if (was) v.play().catch(() => {});
+  showMessage("Ubora: " + qOpts[qIdx].label);
+});
+
+/* =====================================================
+   HIFADHI (filamu na series zetu), SHIRIKI, FUTA HISTORIA
+===================================================== */
+let savedOwn = new Set();
+
+async function loadSavedOwnIds() {
+  if (!currentUser) return;
+  try {
+    const snap = await db.collection("users").doc(currentUser.uid).collection("savedMovies").get();
+    savedOwn = new Set();
+    snap.forEach(d => { if (d.data().own) savedOwn.add(d.id); });
+  } catch (e) { console.info("Saved ids", e); }
+}
+
+async function toggleSaveOwn(item, kind) {
+  if (!currentUser) {
+    showMessage("Ingia kwenye akaunti kwanza ili kuhifadhi.", true);
+    openAuth("login");
+    return false;
+  }
+  const sid = "own_" + item.id;
+  const ref = db.collection("users").doc(currentUser.uid).collection("savedMovies").doc(sid);
+  try {
+    if (savedOwn.has(sid)) {
+      await ref.delete();
+      savedOwn.delete(sid);
+      showMessage("Imeondolewa kwenye orodha yako.");
+      return false;
+    }
+    await ref.set({
+      own: true, itemId: item.id, kind: kind,
+      title: item.title || "", year: item.year || "", poster: item.poster || "",
+      savedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    savedOwn.add(sid);
+    showMessage("Imehifadhiwa.");
+    return true;
+  } catch (error) {
+    showMessage(friendlyError(error), true);
+    return savedOwn.has(sid);
+  }
+}
+
+function openSaved(movie) {
+  if (movie.own) {
+    const list = movie.kind === "series" ? seriesList : ownList;
+    const it = list.find(x => x.id === movie.itemId);
+    if (it) return openDetailOwn(it, movie.kind);
+    return showMessage("Hii haipatikani tena kwenye Prosper.", true);
+  }
+  showMovieDetails(movie.imdbID);
+}
+
+async function shareItem(item) {
+  const data = {
+    title: "Prosper Movies",
+    text: (item.title || "Filamu") + " kwenye Prosper Movies",
+    url: location.origin + location.pathname.replace(/[^/]*$/, "")
+  };
+  try {
+    if (navigator.share) await navigator.share(data);
+    else { await navigator.clipboard.writeText(data.url); showMessage("Link imenakiliwa."); }
+  } catch (e) {}
+}
+
+async function clearHistory() {
+  if (!currentUser) return;
+  if (!confirm("Futa historia yote ya kutazama (Endelea kutazama na mapendekezo)?")) return;
+  try {
+    const base = db.collection("users").doc(currentUser.uid);
+    const [p, w] = await Promise.all([base.collection("progress").get(), base.collection("watched").get()]);
+    const batch = db.batch();
+    p.forEach(d => batch.delete(d.ref));
+    w.forEach(d => batch.delete(d.ref));
+    await batch.commit();
+    watchedMap = {}; progressList = [];
+    renderContinue(); renderRecs();
+    showMessage("Historia imefutwa.");
+  } catch (error) { showMessage(friendlyError(error), true); }
+}
+
 /* ---------- FILAMU ZETU ---------- */
 async function getMovieUrl(m) {
-  if (!(m.price > 0)) return m.videoUrl;
+  if (!(m.price > 0)) return { url: m.videoUrl, q720: m.video720 || "", q480: m.video480 || "" };
   const snap = await db.collection("movieSecrets").doc(m.id).get();
-  return snap.exists ? (snap.data().videoUrl || "") : "";
+  const d = snap.exists ? snap.data() : {};
+  return { url: d.videoUrl || "", q720: d.video720 || "", q480: d.video480 || "" };
 }
 
 async function playOwn(m, seek) {
   if (!isUnlocked(m)) return openPay(m);
   try {
-    const url = await getMovieUrl(m);
+    const src = await getMovieUrl(m);
+    const url = src.url;
     if (!url) return showMessage("Filamu hii haina link ya video.", true);
     currentImdbID = null;
     $("playerTitle").textContent = m.title || "Filamu";
@@ -1636,7 +1963,7 @@ async function playOwn(m, seek) {
     playCtx = { id: m.id, kind: "movie", title: m.title || "", poster: m.poster || "" };
     pendingSeek = seek || 0;
     $("pNext").classList.add("hidden");
-    startPlayback(m, () => loadInPlayer(url, m.subtitleUrl));
+    startPlayback(m, () => loadInPlayer(url, m.subtitleUrl, src));
     openModal("playerModal");
     countView(m, "movie");
   } catch (error) {
@@ -1663,6 +1990,7 @@ function renderOwn() {
   renderGenres();
   renderContinue();
   renderRecs();
+  buildHero();
 }
 
 async function loadOwnMovies() {
@@ -1709,6 +2037,7 @@ function renderSeriesList() {
   renderGenres();
   renderContinue();
   renderRecs();
+  buildHero();
 }
 
 async function loadSeries() {
@@ -1747,7 +2076,10 @@ async function openSeries(s, resume) {
       const sec = await db.collection("seriesSecrets").doc(s.id).get();
       const urls = sec.exists ? (sec.data().urls || {}) : {};
       seasons.forEach(se => (se.episodes || []).forEach(ep => {
-        ep.videoUrl = urls[se.number + "_" + ep.number] || "";
+        const k = se.number + "_" + ep.number;
+        ep.videoUrl = urls[k] || "";
+        ep.q720 = urls[k + "_720"] || "";
+        ep.q480 = urls[k + "_480"] || "";
       }));
     } catch (error) {
       return showMessage(error.code === "permission-denied"
@@ -1792,7 +2124,7 @@ function selectEpisode(s, seasons, si, ei, seek) {
   pendingSeek = seek || 0;
   if (ep.videoUrl) {
     const go = () => {
-      loadInPlayer(ep.videoUrl, ep.sub);
+      loadInPlayer(ep.videoUrl, ep.sub, { q720: ep.q720, q480: ep.q480 });
       $("episodePanel").classList.remove("hidden");
     };
     if (adPending) { adPending = false; startPlayback(s, go); }
@@ -1918,6 +2250,15 @@ function openDetailOwn(item, kind) {
     if (kind === "series") openSeries(item); else playOwn(item);
   });
   row.append(play);
+  const sid = "own_" + item.id;
+  const save = el("button", "ghost", savedOwn.has(sid) ? "♥ Imehifadhiwa" : "♡ Hifadhi");
+  save.addEventListener("click", async () => {
+    const on = await toggleSaveOwn(item, kind);
+    save.textContent = on ? "♥ Imehifadhiwa" : "♡ Hifadhi";
+  });
+  const share = el("button", "ghost", "Shiriki");
+  share.addEventListener("click", () => shareItem(item));
+  row.append(save, share);
   info.append(row);
 
   layout.append(poster, info);
@@ -1958,11 +2299,12 @@ async function loadSaved() {
       const movie = d.data();
       const wrap = el("div");
       wrap.append(makeCard({ title: movie.title || "Filamu", sub: movie.year || "", poster: movie.poster,
-        onClick: () => showMovieDetails(movie.imdbID) }));
+        onClick: () => openSaved(movie) }));
       const rm = el("button", "ghost sm rm", "Ondoa");
       rm.addEventListener("click", async () => {
         try {
-          await db.collection("users").doc(currentUser.uid).collection("savedMovies").doc(movie.imdbID).delete();
+          await db.collection("users").doc(currentUser.uid).collection("savedMovies").doc(d.id).delete();
+          savedOwn.delete(d.id);
           wrap.remove();
           showMessage("Filamu imeondolewa.");
         } catch (error) { showMessage(friendlyError(error), true); }
@@ -1996,6 +2338,35 @@ async function loadIntro() {
     }
   } catch (error) { console.info("Intro haijapakiwa.", error); }
 }
+
+/* =====================================================
+   SAKINISHA APP (PWA), MTANDAO, FUNGA KWA ESC
+===================================================== */
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  deferredInstall = e;
+  renderAccount();
+});
+window.addEventListener("appinstalled", () => {
+  deferredInstall = null;
+  renderAccount();
+  showMessage("App imesakinishwa.");
+});
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+window.addEventListener("offline", () => showMessage("Huna intaneti. Baadhi ya vitu havitafanya kazi.", true));
+window.addEventListener("online", () => showMessage("Intaneti imerudi."));
+
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (!$("playerModal").classList.contains("hidden")) return closePlayer();
+  ["payModal", "detailModal", "authModal"].forEach(id => {
+    if (!$(id).classList.contains("hidden")) closeModal(id);
+  });
+});
 
 </script>
 </body>
