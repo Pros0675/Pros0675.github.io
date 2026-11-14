@@ -312,7 +312,9 @@ function render() {
       fields.append(
         field(ep.title, "Jina la episode (hiari)", v => ep.title = v),
         field(ep.videoUrl, "URL ya video (HTTPS: Dropbox, .mp4, YouTube)", v => ep.videoUrl = v),
-        field(ep.sub, "Manukuu hiari (subs/jina.srt au https://...)", v => ep.sub = v)
+        field(ep.sub, "Manukuu hiari (subs/jina.srt au https://...)", v => ep.sub = v),
+        field(ep.q720, "Video 720p (hiari, HTTPS)", v => ep.q720 = v),
+        field(ep.q480, "Video 480p (hiari, HTTPS)", v => ep.q480 = v)
       );
 
       const t = document.createElement("div");
@@ -387,6 +389,8 @@ $("saveBtn").addEventListener("click", async () => {
   for (const s of seasons) {
     if (!s.episodes.length) return msg(s.label + " haina episode.", true);
     for (const ep of s.episodes) {
+      if ((ep.q720 && !isHttps(ep.q720.trim())) || (ep.q480 && !isHttps(ep.q480.trim())))
+        return msg(s.label + " Episode " + ep.number + ": video za 720p/480p lazima ziwe HTTPS.", true);
       if (!subOk((ep.sub || "").trim()))
         return msg(s.label + " Episode " + ep.number + ": manukuu yatumie subs/jina.srt au HTTPS.", true);
       if (!isHttps((ep.videoUrl || "").trim()))
@@ -415,12 +419,19 @@ $("saveBtn").addEventListener("click", async () => {
       label: s.label,
       episodes: s.episodes.map(ep => {
         const url = ep.videoUrl.trim();
-        if (paid) secretUrls[urlKey(s, ep)] = url;
+        const q7 = (ep.q720 || "").trim(), q4 = (ep.q480 || "").trim();
+        if (paid) {
+          secretUrls[urlKey(s, ep)] = url;
+          if (q7) secretUrls[urlKey(s, ep) + "_720"] = q7;
+          if (q4) secretUrls[urlKey(s, ep) + "_480"] = q4;
+        }
         return {
           number: ep.number,
           title: (ep.title || "").trim(),
           sub: (ep.sub || "").trim(),
-          videoUrl: paid ? "" : url
+          videoUrl: paid ? "" : url,
+          q720: paid ? "" : q7,
+          q480: paid ? "" : q4
         };
       })
     })),
@@ -498,6 +509,8 @@ async function loadList() {
               const urls = sec.exists ? (sec.data().urls || {}) : {};
               copy.forEach(s => s.episodes.forEach(ep => {
                 ep.videoUrl = urls[urlKey(s, ep)] || "";
+                ep.q720 = urls[urlKey(s, ep) + "_720"] || "";
+                ep.q480 = urls[urlKey(s, ep) + "_480"] || "";
               }));
             } catch (err) {
               return msg("Imeshindikana kusoma link za siri: " + err.message, true);
