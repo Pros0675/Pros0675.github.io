@@ -363,6 +363,7 @@
       <button type="button" data-tab="pay" class="secondary">💰 Malipo</button>
       <button type="button" data-tab="users" class="secondary">👥 Watumiaji</button>
       <button type="button" data-tab="views" class="secondary">👁️ Tazama</button>
+      <button type="button" data-tab="tools" class="secondary">⚙️ Zana</button>
       <button type="button" data-tab="ads" class="secondary">💸 Matangazo</button>
       <button type="button" data-tab="notice" class="secondary">📣 Tangazo</button>
       <button type="button" data-tab="intro" class="secondary">🖼️ Intro</button>
@@ -443,6 +444,17 @@
             maxlength="2000"
             placeholder="https://example.com/video"
           >
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <label for="video720">Video ubora 720p (hiari)</label>
+            <input id="video720" type="url" maxlength="2000" placeholder="https://...">
+          </div>
+          <div class="field">
+            <label for="video480">Video ubora 480p (hiari)</label>
+            <input id="video480" type="url" maxlength="2000" placeholder="https://...">
+          </div>
         </div>
 
         <div class="field">
@@ -576,6 +588,16 @@
       <div id="movieList">
         Inapakia filamu...
       </div>
+    </section>
+
+    <!-- ZANA -->
+    <section class="panel tab" data-tab="tools">
+      <h2>⚙️ Zana</h2>
+      <p class="muted">
+        Pakua nakala ya filamu na series zako (JSON) kama kumbukumbu.
+        Link za siri za video za kulipia haziingii kwenye nakala hii.
+      </p>
+      <button type="button" id="exportBtn">Pakua nakala (JSON)</button>
     </section>
 
     <!-- MATANGAZO (ADS) -->
@@ -912,6 +934,14 @@ $("movieForm").addEventListener("submit", async event => {
     return;
   }
 
+  const v720 = $("video720").value.trim();
+  const v480 = $("video480").value.trim();
+
+  if (!validHttps(v720, true) || !validHttps(v480, true)) {
+    showMessage("Video za 720p na 480p lazima ziwe HTTPS.", true);
+    return;
+  }
+
   const subUrl = $("subtitleUrl").value.trim();
 
   if (!validSub(subUrl)) {
@@ -939,6 +969,8 @@ $("movieForm").addEventListener("submit", async event => {
     poster: poster,
     description: $("description").value.trim(),
     videoUrl: paid ? "" : videoUrl,
+    video720: paid ? "" : v720,
+    video480: paid ? "" : v480,
     subtitleUrl: subUrl,
     price: price,
     genres: getGenres(),
@@ -960,7 +992,9 @@ $("movieForm").addEventListener("submit", async event => {
 
     if (paid) {
       batch.set(db.collection("movieSecrets").doc(ref.id), {
-        videoUrl: videoUrl
+        videoUrl: videoUrl,
+        video720: v720,
+        video480: v480
       });
     } else if (isEdit) {
       batch.delete(db.collection("movieSecrets").doc(ref.id));
@@ -999,11 +1033,15 @@ $("cancelEditBtn").addEventListener("click", resetMovieForm);
 
 async function startEdit(id, movie) {
   let url = movie.videoUrl || "";
+  let q720 = movie.video720 || "";
+  let q480 = movie.video480 || "";
 
   if (movie.price > 0) {
     try {
       const sec = await db.collection("movieSecrets").doc(id).get();
       url = sec.exists ? (sec.data().videoUrl || "") : "";
+      q720 = sec.exists ? (sec.data().video720 || "") : "";
+      q480 = sec.exists ? (sec.data().video480 || "") : "";
     } catch (error) {
       showMessage(getErrorMessage(error), true);
       return;
@@ -1019,6 +1057,8 @@ async function startEdit(id, movie) {
   $("description").value = movie.description || "";
   $("videoUrl").value = url;
   $("subtitleUrl").value = movie.subtitleUrl || "";
+  $("video720").value = q720;
+  $("video480").value = q480;
   $("price").value = movie.price || 0;
   $("runtime").value = movie.runtime || "";
   $("age").value = movie.age || "";
@@ -1425,6 +1465,31 @@ async function loadViews() {
     showMessage(getErrorMessage(error), true);
   }
 }
+
+$("exportBtn").addEventListener("click", async () => {
+  if (!isAdmin) return;
+  try {
+    const [m, s2] = await Promise.all([
+      db.collection("movies").get(),
+      db.collection("series").get()
+    ]);
+    const data = {
+      exportedAt: new Date().toISOString(),
+      movies: m.docs.map(d => ({ id: d.id, ...d.data() })),
+      series: s2.docs.map(d => ({ id: d.id, ...d.data() }))
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "prosper-backup.json";
+    document.body.append(a);
+    a.click();
+    a.remove();
+    showMessage("Nakala imepakuliwa.");
+  } catch (error) {
+    showMessage(getErrorMessage(error), true);
+  }
+});
 
 async function loadAdsAdmin() {
   try {
