@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Tangazo</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+</style>
+</head>
+<body>
+<script>
+/* Ukurasa huu unapokea code ya tangazo kutoka index.html kupitia postMessage
+   na kuionyesha ndani ya iframe iliyotengwa (sandbox). Usiufute. */
+window.addEventListener("message", function (e) {
+  if (e.source !== window.parent) return;
+  var html = e.data && e.data.html;
+  if (typeof html !== "string" || !html) return;
+  document.open();
+  document.write(
+    '<!doctype html><html><head><meta charset="utf-8">' +
+    '<style>html,body{margin:0;height:100%;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}</style>' +
+    '</head><body>' + html + '</body></html>'
+  );
+  document.close();
+});
+try { window.parent.postMessage({ adReady: true }, "*"); } catch (e) {}
+</script>
+</body>
+</html>
