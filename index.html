@@ -180,6 +180,14 @@ body.pfs #pBackBtn,#pwrap:fullscreen #pBackBtn,#pwrap:-webkit-full-screen #pBack
 body.pfs #pwrap{position:fixed!important;z-index:100;margin:0!important;border-radius:0!important;aspect-ratio:auto!important}
 body.pfs.land #pwrap{left:0;top:0;width:100vw;height:100vh}
 body.pfs.port #pwrap{top:0;left:100vw;width:100vh;height:100vw;transform-origin:top left;transform:rotate(90deg)}
+/* matangazo */
+.adlayer{position:fixed;inset:0;z-index:120;background:#000f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}
+.adlayer .adhead{display:flex;gap:12px;align-items:center;color:#fffb;font-size:13px}
+.adlayer iframe{border:0;background:#000;max-width:100%}
+.adlayer #adSkip{margin-top:6px}
+.adbox{margin-top:10px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.adbox small{color:var(--muted);font-size:11px}
+.adbox iframe{border:0;background:transparent;max-width:100%}
 /* manukuu */
 video::cue{background:rgba(0,0,0,.68);color:#fff;font-size:1.05em}
 .pc #pCC{font-weight:800;font-size:12px;border:2px solid #fff9;border-radius:6px;padding:3px 7px;opacity:.75}
@@ -212,6 +220,12 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
 
 <div id="toast" class="toast hidden" role="status"></div>
 
+<div id="adLayer" class="adlayer hidden">
+  <div class="adhead"><span>Tangazo</span><span id="adCount"></span></div>
+  <iframe id="adFrame" title="Tangazo" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox" scrolling="no"></iframe>
+  <button type="button" id="adSkip" class="ghost hidden">Ruka tangazo ⏭</button>
+</div>
+
 <section id="gate" class="gate">
   <h1>Ingia ili kuendelea</h1>
   <p id="gateText">Inapakia...</p>
@@ -240,20 +254,6 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
       <button type="button" id="noticeX" class="ghost sm" aria-label="Funga tangazo">✕</button>
     </div>
 
-    <!-- Ad Banner 320x50 -->
-    <div class="ad-slot" style="display:flex;justify-content:center;padding:10px 14px 4px;overflow:hidden">
-      <script>
-        atOptions = {
-          'key' : '235020b97a2802f519de9864699dd3f3',
-          'format' : 'iframe',
-          'height' : 50,
-          'width' : 320,
-          'params' : {}
-        };
-      </script>
-      <script src="https://bancadeltempoidea.org/22/235020b97a2802f519de9864699dd3f3"></script>
-    </div>
-
     <section id="hero" class="hero">
       <div class="hero-bg"></div>
       <div class="hero-body">
@@ -279,12 +279,6 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
 
     <h2>Filamu Zetu</h2>
     <div id="ownGrid" class="rail"><div class="empty">Inapakia...</div></div>
-
-    <!-- Ad Container -->
-    <div class="ad-slot" style="display:flex;justify-content:center;padding:12px 14px;overflow:hidden">
-      <script async="async" data-cfasync="false" src="https://bancadeltempoidea.org/21/58451a20e53a32d1bc27fce117403c33"></script>
-      <div id="container-58451a20e53a32d1bc27fce117403c33"></div>
-    </div>
 
     <h2>Series</h2>
     <div id="seriesGrid" class="rail"><div class="empty">Inapakia...</div></div>
@@ -497,6 +491,11 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
       </div>
     </div>
 
+    <div id="adBelow" class="adbox hidden">
+      <small>Tangazo</small>
+      <iframe id="adBelowFrame" title="Tangazo" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox" scrolling="no"></iframe>
+    </div>
+
     <div id="episodePanel" class="hidden" style="margin-top:14px"></div>
   </div>
 </div>
@@ -538,6 +537,8 @@ let pendingSeek = 0;            // sekunde za kuendelea
 let lastSave = 0;
 let speedIdx = 2;               // 1x
 let watchedMap = {};            // id -> makundi (kwa mapendekezo)
+let adsCfg = null;              // mipangilio ya matangazo
+let adPending = false;          // onyesha pre-roll kwa episode ya kwanza
 
 $("yearNow").textContent = new Date().getFullYear();
 
@@ -879,6 +880,7 @@ function loadContent() {
   if (contentLoaded) return;
   contentLoaded = true;
   loadIntro();
+  loadAds();
   loadNotice();
   loadWatched();
   loadOwnMovies();
@@ -1067,6 +1069,8 @@ function loadInPlayer(url, sub) {
 function closePlayer() {
   saveProgress(true);
   exitPfs();
+  cancelPreroll();
+  hideBelow();
   playCtx = null; seriesCtx = null; pendingSeek = 0;
   $("pwrap").style.display = "none";
   setSubtitle("");
@@ -1085,6 +1089,7 @@ function setServers(show) { $("serverRow").classList.toggle("hidden", !show); }
 
 function openVideo(title, imdbID) {
   currentImdbID = imdbID;
+  hideBelow();
   playCtx = null; seriesCtx = null; pendingSeek = 0;
   $("pNext").classList.add("hidden");
   $("playerTitle").textContent = title;
@@ -1526,6 +1531,92 @@ function renderRecs() {
   })));
 }
 
+/* =====================================================
+   MATANGAZO KWENYE KICHEZA (pre-roll na banner chini ya video)
+   Hayaonekani kwa admin wala kwa filamu/series za kulipia.
+===================================================== */
+let adTimer = null, adToken = 0;
+
+async function loadAds() {
+  try {
+    const snap = await db.collection("settings").doc("ads").get();
+    adsCfg = snap.exists ? snap.data() : null;
+  } catch (e) { adsCfg = null; }
+}
+
+function adsActive(item) {
+  return !!(adsCfg && adsCfg.enabled && item && !(item.price > 0) && !isAdminUser(currentUser));
+}
+
+function sendAd(frame, html) {
+  frame.onload = () => {
+    try { frame.contentWindow.postMessage({ html: html }, "*"); } catch (e) {}
+  };
+  frame.src = "ad.html?t=" + Date.now();
+}
+
+function startPlayback(item, go) {
+  if (!adsActive(item)) { hideBelow(); go(); return; }
+  showBelow();
+  if (adsCfg.preroll) showPreroll(go); else go();
+}
+
+function showPreroll(done) {
+  const my = ++adToken;
+  const layer = $("adLayer"), frame = $("adFrame"), skip = $("adSkip"), count = $("adCount");
+  const total = Math.min(Math.max(parseInt(adsCfg.prerollSeconds, 10) || 8, 5), 20);
+  const skipAt = Math.min(Math.max(parseInt(adsCfg.skipAfter, 10) || 5, 3), total);
+  let left = total, elapsed = 0;
+
+  frame.style.width = (parseInt(adsCfg.prerollW, 10) || 300) + "px";
+  frame.style.height = (parseInt(adsCfg.prerollH, 10) || 250) + "px";
+  skip.classList.add("hidden");
+  count.textContent = "Video inaanza baada ya " + left + "s";
+  layer.classList.remove("hidden");
+  sendAd(frame, adsCfg.preroll);
+
+  function finish() {
+    if (my !== adToken) return;
+    clearInterval(adTimer); adTimer = null;
+    layer.classList.add("hidden");
+    frame.onload = null;
+    frame.src = "about:blank";
+    done();
+  }
+
+  clearInterval(adTimer);
+  adTimer = setInterval(() => {
+    left--; elapsed++;
+    count.textContent = left > 0 ? "Video inaanza baada ya " + left + "s" : "Inaanza...";
+    if (elapsed >= skipAt) skip.classList.remove("hidden");
+    if (left <= 0) finish();
+  }, 1000);
+  skip.onclick = finish;
+}
+
+function cancelPreroll() {
+  adToken++;
+  clearInterval(adTimer); adTimer = null;
+  $("adLayer").classList.add("hidden");
+  $("adFrame").onload = null;
+  $("adFrame").src = "about:blank";
+}
+
+function showBelow() {
+  if (!adsCfg || !adsCfg.below) return hideBelow();
+  const box = $("adBelow"), frame = $("adBelowFrame");
+  frame.style.width = (parseInt(adsCfg.belowW, 10) || 320) + "px";
+  frame.style.height = (parseInt(adsCfg.belowH, 10) || 50) + "px";
+  box.classList.remove("hidden");
+  sendAd(frame, adsCfg.below);
+}
+
+function hideBelow() {
+  $("adBelow").classList.add("hidden");
+  $("adBelowFrame").onload = null;
+  $("adBelowFrame").src = "about:blank";
+}
+
 /* ---------- FILAMU ZETU ---------- */
 async function getMovieUrl(m) {
   if (!(m.price > 0)) return m.videoUrl;
@@ -1545,7 +1636,7 @@ async function playOwn(m, seek) {
     playCtx = { id: m.id, kind: "movie", title: m.title || "", poster: m.poster || "" };
     pendingSeek = seek || 0;
     $("pNext").classList.add("hidden");
-    loadInPlayer(url, m.subtitleUrl);
+    startPlayback(m, () => loadInPlayer(url, m.subtitleUrl));
     openModal("playerModal");
     countView(m, "movie");
   } catch (error) {
@@ -1675,6 +1766,7 @@ async function openSeries(s, resume) {
     ei = Math.min(Math.max(resume.ei || 0, 0), Math.max(n - 1, 0));
     seek = resume.seek || 0;
   }
+  adPending = true;
   selectEpisode(s, seasons, si, ei, seek);
   countView(s, "series");
 }
@@ -1698,7 +1790,14 @@ function selectEpisode(s, seasons, si, ei, seek) {
   $("pNext").classList.toggle("hidden", !hasNext);
   savePointer(seek);
   pendingSeek = seek || 0;
-  if (ep.videoUrl) loadInPlayer(ep.videoUrl, ep.sub);
+  if (ep.videoUrl) {
+    const go = () => {
+      loadInPlayer(ep.videoUrl, ep.sub);
+      $("episodePanel").classList.remove("hidden");
+    };
+    if (adPending) { adPending = false; startPlayback(s, go); }
+    else go();
+  }
   else showMessage("Episode hii haina link ya video.", true);
 
   const panel = $("episodePanel");
@@ -1899,15 +1998,5 @@ async function loadIntro() {
 }
 
 </script>
-
-<!-- Ad Script 3 -->
-<script data-cfasync="false" src="https://bancadeltempoidea.org/14/56dfe38565e667be96a90d27a5b2e2f8"></script>
-
-<!-- Ad Script 4 -->
-<script data-cfasync="false" src="https://aarems.org/1/2a177a9b90317a581989c7e5fb9278ca"></script>
-
-<!-- Ad / Smartlink 5 -->
-<script data-cfasync="false" src="https://directyp.org/4/881c8845bd20318905a0d02d14d31609"></script>
-
 </body>
 </html>
