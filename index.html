@@ -4,9 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0c0a14">
+<script>(function(){try{var t=localStorage.getItem("pm_theme");if(t&&t!=="violet")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta property="og:title" content="Prosper Movies">
@@ -22,9 +26,17 @@
 :root{
   --bg:#0c0a14; --panel:#15122a; --panel2:#1e1a38; --text:#f6f3ff; --muted:#a29dbd;
   --accent:#8b6bff; --gold:#ffc857; --border:#2a2548; --danger:#ff7a93; --ok:#6be3b4;
+  --bg-rgb:12,10,20; --nav-rgb:26,22,54; --acc-rgb:139,107,255; --glow:#3a2b86; --skel:#2c2656;
   --display:"Bricolage Grotesque","Trebuchet MS",Arial,sans-serif;
   --body:"DM Sans",Arial,sans-serif;
 }
+/* ===== mandhari (themes) ===== */
+html[data-theme="ocean"]{--bg:#07111c;--panel:#0e1d2e;--panel2:#152a40;--border:#1e3a57;--accent:#3aa0ff;--gold:#ffd166;--muted:#9db4c9;--bg-rgb:7,17,28;--nav-rgb:14,29,46;--acc-rgb:58,160,255;--glow:#14507f;--skel:#1d3b5c}
+html[data-theme="sunset"]{--bg:#140b0a;--panel:#24120f;--panel2:#321a14;--border:#4a2a20;--accent:#ff7a45;--gold:#ffd166;--muted:#c9aa9d;--bg-rgb:20,11,10;--nav-rgb:36,18,15;--acc-rgb:255,122,69;--glow:#8a3a1a;--skel:#4a2a20}
+html[data-theme="forest"]{--bg:#08140e;--panel:#0f2118;--panel2:#162f23;--border:#234434;--accent:#35c98a;--gold:#ffd166;--muted:#9cbfae;--bg-rgb:8,20,14;--nav-rgb:15,33,24;--acc-rgb:53,201,138;--glow:#17694a;--skel:#234434}
+html[data-theme="rose"]{--bg:#150a12;--panel:#24101f;--panel2:#331830;--border:#4d2646;--accent:#ff5fa2;--gold:#ffc857;--muted:#c9a1bd;--bg-rgb:21,10,18;--nav-rgb:36,16,31;--acc-rgb:255,95,162;--glow:#8a2a63;--skel:#4d2646}
+html[data-theme="amoled"]{--bg:#000000;--panel:#0d0d12;--panel2:#16161d;--border:#24242e;--accent:#8b6bff;--muted:#9a9aa8;--bg-rgb:0,0,0;--nav-rgb:13,13,18;--acc-rgb:139,107,255;--glow:#2a2060;--skel:#22222c}
+
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);line-height:1.45;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
@@ -41,7 +53,7 @@ a{color:inherit}
 
 /* top bar */
 .topbar{position:sticky;top:0;z-index:15;display:flex;align-items:center;justify-content:space-between;
-  padding:calc(12px + env(safe-area-inset-top)) 18px 12px;background:linear-gradient(#0c0a14ee,#0c0a14aa);backdrop-filter:blur(12px)}
+  padding:calc(12px + env(safe-area-inset-top)) 18px 12px;background:linear-gradient(rgba(var(--bg-rgb),.93),rgba(var(--bg-rgb),.67));backdrop-filter:blur(12px)}
 .logo{display:flex;align-items:center;gap:9px;font-family:var(--display);font-weight:800;font-size:23px;letter-spacing:-.02em}
 .logo svg{width:26px;height:26px}
 .logo b{color:var(--accent);font-weight:800}
@@ -55,8 +67,8 @@ h2{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01
 
 /* hero */
 .hero{position:relative;margin:0 14px;border-radius:26px;overflow:hidden;min-height:430px;display:flex;align-items:flex-end;background:var(--panel)}
-.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center 18%;background-color:#241d4d}
-.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#0c0a1400 25%,#0c0a14d9 78%,#0c0a14)}
+.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center 18%;background-color:var(--panel2)}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(var(--bg-rgb),0) 25%,rgba(var(--bg-rgb),.85) 78%,var(--bg))}
 .hero-body{position:relative;z-index:1;padding:22px;width:100%}
 .hero-tag{display:inline-block;background:#ffffff1f;backdrop-filter:blur(6px);padding:5px 11px;border-radius:99px;font-size:12.5px;font-weight:700;margin-bottom:10px}
 .hero h1{font-family:var(--display);font-weight:800;font-size:clamp(32px,8vw,54px);line-height:1.02;letter-spacing:-.03em;margin:0 0 8px;max-width:14ch;text-wrap:balance}
@@ -73,7 +85,7 @@ h2{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01
 .card{background:none;padding:0;text-align:left;color:inherit;border-radius:16px;font-weight:400;display:block;width:100%}
 .card .poster{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:2/3;background:var(--panel2);border:1px solid var(--border)}
 .card img{display:block;width:100%;height:100%;object-fit:cover}
-.card .badge{position:absolute;left:8px;bottom:8px;background:#0c0a14cc;backdrop-filter:blur(6px);padding:3px 9px;border-radius:99px;font-size:12px;font-weight:700}
+.card .badge{position:absolute;left:8px;bottom:8px;background:rgba(var(--bg-rgb),.8);backdrop-filter:blur(6px);padding:3px 9px;border-radius:99px;font-size:12px;font-weight:700}
 .card .badge.paid{background:var(--gold);color:#241a00}
 .card .badge.open{background:var(--ok);color:#06281c}
 .card .t{font-weight:700;margin-top:8px;font-size:14.5px;line-height:1.25}
@@ -96,7 +108,7 @@ h2{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01
 
 /* bottom nav */
 .nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom));z-index:18;
-  width:min(440px,calc(100% - 24px));display:flex;background:#1a1636ee;backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:22px;padding:6px}
+  width:min(440px,calc(100% - 24px));display:flex;background:rgba(var(--nav-rgb),.93);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:22px;padding:6px}
 .nav button{flex:1;background:none;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;padding:8px 4px;border-radius:16px}
 .nav button svg{width:22px;height:22px}
 .nav button.on{color:#fff;background:var(--accent)}
@@ -192,8 +204,8 @@ body.pfs.port #pwrap{top:0;left:100vw;width:100vh;height:100vw;transform-origin:
 @keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes kb{from{transform:scale(1)}to{transform:scale(1.09)}}
-.sk{flex:0 0 138px;aspect-ratio:2/3;border-radius:16px;background:linear-gradient(90deg,var(--panel2) 25%,#2c2656 50%,var(--panel2) 75%);background-size:200% 100%;animation:sh 1.3s linear infinite}
-.sk-tile{height:88px;border-radius:16px;background:linear-gradient(90deg,var(--panel2) 25%,#2c2656 50%,var(--panel2) 75%);background-size:200% 100%;animation:sh 1.3s linear infinite}
+.sk{flex:0 0 138px;aspect-ratio:2/3;border-radius:16px;background:linear-gradient(90deg,var(--panel2) 25%,var(--skel) 50%,var(--panel2) 75%);background-size:200% 100%;animation:sh 1.3s linear infinite}
+.sk-tile{height:88px;border-radius:16px;background:linear-gradient(90deg,var(--panel2) 25%,var(--skel) 50%,var(--panel2) 75%);background-size:200% 100%;animation:sh 1.3s linear infinite}
 .view.active{animation:fadeUp .3s ease both}
 .card .poster{transition:transform .25s ease,box-shadow .25s ease}
 .card:active .poster{transform:scale(.96)}
@@ -211,7 +223,7 @@ body.pfs.port #pwrap{top:0;left:100vw;width:100vh;height:100vw;transform-origin:
 .footlinks a{color:var(--muted);font-size:12.5px;text-decoration:none}
 .footlinks a:hover{color:var(--text)}
 .pc #pQual{border-radius:99px;padding:6px 11px;background:#0008;font-weight:700;font-size:12px}
-body.locked{background:radial-gradient(900px 520px at 50% -8%,#3a2b8677,transparent),var(--bg)}
+body.locked{background:radial-gradient(900px 520px at 50% -8%,rgba(var(--acc-rgb),.3),transparent),var(--bg)}
 .landing-logo{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:-.02em}
 .landing-logo svg{width:40px;height:40px}
 .landing-logo b{color:var(--accent)}
@@ -233,8 +245,6 @@ video::cue{background:rgba(0,0,0,.68);color:#fff;font-size:1.05em}
 .pc #pCC{font-weight:800;font-size:12px;border:2px solid #fff9;border-radius:6px;padding:3px 7px;opacity:.75}
 .pc #pCC.on{opacity:1;border-color:var(--gold);color:var(--gold)}
 /* tangazo */
-.notice{margin:0 14px 12px;display:flex;gap:10px;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#3a2b86,#241d4d);border:1px solid var(--accent);border-radius:16px;padding:12px 14px}
-.notice span{flex:1;min-width:0;overflow-wrap:anywhere}
 /* player bar */
 .pbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .card .prog{position:absolute;left:0;right:0;bottom:0;height:5px;background:#0009}
@@ -253,12 +263,74 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
   .detail{grid-template-columns:1fr}
   .detail img{max-width:160px}
 }
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* ===== mpangilio na mwendo ===== */
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes boxIn{from{opacity:0;transform:translateY(22px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes drift{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(-3%,4%,0) scale(1.08)}}
+@keyframes bump{0%{transform:scale(1)}45%{transform:scale(1.25)}100%{transform:scale(1)}}
+@keyframes ring{0%,100%{transform:rotate(0)}15%{transform:rotate(14deg)}30%{transform:rotate(-12deg)}45%{transform:rotate(9deg)}60%{transform:rotate(-6deg)}75%{transform:rotate(0)}}
+body::before{content:"";position:fixed;inset:-10%;z-index:-1;pointer-events:none;background:radial-gradient(520px 380px at 15% 8%,rgba(var(--acc-rgb),.17),transparent 70%),radial-gradient(460px 340px at 90% 72%,rgba(255,200,87,.06),transparent 70%);animation:drift 24s ease-in-out infinite alternate}
+button{transition:transform .15s ease,filter .2s ease,background .25s ease}
+button:active:not(:disabled){transform:scale(.96)}
+.rail>.card,.grid>.card{animation:pop .5s cubic-bezier(.2,.8,.2,1) both}
+.rail>.card:nth-child(2),.grid>.card:nth-child(2){animation-delay:90ms}
+.rail>.card:nth-child(3),.grid>.card:nth-child(3){animation-delay:135ms}
+.rail>.card:nth-child(4),.grid>.card:nth-child(4){animation-delay:180ms}
+.rail>.card:nth-child(5),.grid>.card:nth-child(5){animation-delay:225ms}
+.rail>.card:nth-child(6),.grid>.card:nth-child(6){animation-delay:270ms}
+.rail>.card:nth-child(7),.grid>.card:nth-child(7){animation-delay:315ms}
+.rail>.card:nth-child(8),.grid>.card:nth-child(8){animation-delay:360ms}
+.rail>.card:nth-child(9),.grid>.card:nth-child(9){animation-delay:405ms}
+.rail>.card:nth-child(10),.grid>.card:nth-child(10){animation-delay:450ms}
+.tile{transition:transform .2s ease}
+.tile:active{transform:scale(.95)}
+.modal:not(.hidden){animation:fadeIn .2s ease both}
+.modal:not(.hidden) .box{animation:boxIn .3s cubic-bezier(.2,.9,.25,1) both}
+.nav button{transition:background .25s,color .25s,transform .2s}
+.nav button:active{transform:scale(.9)}
+.nav button.on svg{animation:bump .4s ease}
+main h2{position:relative;padding-left:12px}
+main h2::before{content:"";position:absolute;left:0;top:.18em;bottom:.18em;width:4px;border-radius:4px;background:linear-gradient(var(--accent),var(--gold))}
+body.locked .topbar{display:none}
+
+/* ===== kengele na taarifa za juu ===== */
+.bell{position:relative;background:var(--panel2);color:var(--text);width:42px;height:42px;padding:0;border-radius:50%;display:grid;place-items:center}
+.bell svg{width:22px;height:22px}
+.bell.ring svg{animation:ring 1.6s ease-in-out infinite;transform-origin:50% 12%}
+#bellDot{position:absolute;top:-3px;right:-3px;min-width:19px;height:19px;border-radius:99px;background:var(--gold);color:#241a00;font-size:11px;font-weight:800;display:grid;place-items:center;padding:0 5px}
+.notif{position:fixed;top:calc(10px + env(safe-area-inset-top));left:50%;transform:translate(-50%,-150%);z-index:60;width:min(460px,calc(100% - 20px));display:flex;gap:12px;align-items:flex-start;background:linear-gradient(135deg,rgba(var(--acc-rgb),.96),rgba(var(--nav-rgb),.98));border:1px solid rgba(255,255,255,.2);border-radius:18px;padding:12px 14px;box-shadow:0 16px 44px #000b;transition:transform .55s cubic-bezier(.2,1.25,.3,1);cursor:pointer;color:#fff}
+.notif.show{transform:translate(-50%,0)}
+.notif:not(.show){pointer-events:none}
+.notif-ic{font-size:22px;line-height:1.2}
+.notif-body{flex:1;min-width:0}
+.notif-body b{display:block}
+.notif-body span{display:block;font-size:13.5px;opacity:.93;overflow-wrap:anywhere;max-height:4.5em;overflow:hidden}
+#notifX{background:none;padding:2px 8px;border-radius:8px;opacity:.85;color:#fff}
+.inbox-item{padding:12px 0;border-top:1px solid var(--border)}
+.inbox-item:first-child{border-top:0}
+.inbox-item p{margin:4px 0;overflow-wrap:anywhere}
+.inbox-item small{color:var(--muted)}
+.inbox-item.new{border-left:3px solid var(--gold);padding-left:10px}
+
+/* ===== mandhari: chaguo ===== */
+.themes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.sw{padding:12px 6px;border-radius:14px;background:var(--panel2);color:var(--text);display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12.5px;font-weight:700}
+.sw i{width:36px;height:36px;border-radius:50%;display:block;box-shadow:0 4px 12px #0006}
+.sw.on{outline:2px solid var(--gold)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body class="locked">
 
 <div id="toast" class="toast hidden" role="status"></div>
+
+<div id="notif" class="notif" role="alert">
+  <div class="notif-ic">🔔</div>
+  <div class="notif-body"><b id="notifTitle"></b><span id="notifText"></span></div>
+  <button type="button" id="notifX" aria-label="Funga">✕</button>
+</div>
 
 <div id="adLayer" class="adlayer hidden">
   <div class="adhead"><span>Tangazo</span><span id="adCount"></span></div>
@@ -302,17 +374,16 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
     <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#8b6bff"/><path d="M12 9.5v13l11-6.5z" fill="#ffc857"/></svg>
     Prosper<b>Movies</b>
   </div>
+  <button type="button" id="bellBtn" class="bell" aria-label="Taarifa">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0112 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 20a2 2 0 003.4 0"/></svg>
+    <span id="bellDot" class="hidden"></span>
+  </button>
 </div>
 
 <div class="wrap">
 
   <!-- ============ MWANZO ============ -->
   <main id="viewHome" class="view active">
-    <div id="notice" class="notice hidden">
-      <span id="noticeText"></span>
-      <button type="button" id="noticeX" class="ghost sm" aria-label="Funga tangazo">✕</button>
-    </div>
-
     <section id="hero" class="hero">
       <div class="hero-bg"></div>
       <div class="hero-body">
@@ -394,6 +465,12 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
       <p class="muted" style="margin:6px 0 10px;font-size:13.5px">Malipo yakiidhinishwa, filamu au series itafunguka yenyewe.</p>
       <div id="myPayments"><span class="muted">Inapakia...</span></div>
     </div>
+
+    <div id="themeBox" class="pay-card">
+      <h3>Mandhari</h3>
+      <p class="muted" style="margin:6px 0 0;font-size:13.5px">Chagua muonekano unaoupenda.</p>
+      <div id="themeGrid" class="themes"></div>
+    </div>
   </main>
 </div>
 
@@ -425,6 +502,14 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:34px 0 10px}
       </div>
     </form>
     <button id="resetPassword" class="ghost sm" style="margin-top:14px">Nimesahau nenosiri</button>
+  </div>
+</div>
+
+<!-- TAARIFA -->
+<div id="inboxModal" class="modal hidden">
+  <div class="box">
+    <div class="bar"><h2>Taarifa</h2><button type="button" class="ghost sm" data-close="inboxModal">Funga</button></div>
+    <div id="inboxList" style="margin-top:12px"></div>
   </div>
 </div>
 
@@ -1024,7 +1109,6 @@ function loadContent() {
   contentLoaded = true;
   loadIntro();
   loadAds();
-  loadNotice();
   loadWatched();
   loadSavedOwnIds();
   loadOwnMovies();
@@ -1070,6 +1154,7 @@ auth.onAuthStateChanged(async user => {
     document.body.classList.remove("locked");
     $("payBox").classList.remove("hidden");
     startLive();
+    startAnnouncements();
     db.collection("profiles").doc(user.uid).set({
       uid: user.uid, email: user.email || "",
       lastLogin: firebase.firestore.FieldValue.serverTimestamp()
@@ -1078,6 +1163,7 @@ auth.onAuthStateChanged(async user => {
     if ($("viewSaved").classList.contains("active")) loadSaved();
   } else {
     stopLive();
+    stopAnnouncements();
     document.body.classList.add("locked");
     contentLoaded = false;
     heroSet = false;
@@ -1674,25 +1760,6 @@ function isNew(item) {
   return !!sec && (Date.now() / 1000 - sec) < 7 * 86400;
 }
 
-async function loadNotice() {
-  try {
-    const snap = await db.collection("settings").doc("announcement").get();
-    if (!snap.exists) return;
-    const d = snap.data();
-    if (!d || !d.text) return;
-    const key = "notice_" + ((d.createdAt && d.createdAt.seconds) || 0);
-    let seen = false;
-    try { seen = localStorage.getItem(key) === "1"; } catch (e) {}
-    if (seen) return;
-    $("noticeText").textContent = d.text;
-    $("notice").classList.remove("hidden");
-    $("noticeX").onclick = () => {
-      $("notice").classList.add("hidden");
-      try { localStorage.setItem(key, "1"); } catch (e) {}
-    };
-  } catch (e) { console.info("Tangazo", e); }
-}
-
 async function loadWatched() {
   if (!currentUser) return;
   try {
@@ -1942,6 +2009,150 @@ async function clearHistory() {
   } catch (error) { showMessage(friendlyError(error), true); }
 }
 
+/* =====================================================
+   TAARIFA (matangazo ya admin): zinaonekana juu papo hapo
+===================================================== */
+let annList = [], annUnsub = null, annFirst = true, notifQueue = [], notifBusy = false, notifTimer = null;
+
+function seenKey() { return "ann_seen_" + (currentUser ? currentUser.uid : "x"); }
+function getSeen() { try { return parseInt(localStorage.getItem(seenKey()), 10) || 0; } catch (e) { return 0; } }
+function setSeen(v) { try { localStorage.setItem(seenKey(), String(v)); } catch (e) {} }
+function annSec(a) { return (a.createdAt && a.createdAt.seconds) || 0; }
+function unreadCount() { const s = getSeen(); return annList.filter(a => annSec(a) > s).length; }
+
+function updateBell() {
+  const n = unreadCount();
+  const dot = $("bellDot");
+  dot.textContent = n > 9 ? "9+" : String(n);
+  dot.classList.toggle("hidden", !n);
+  $("bellBtn").classList.toggle("ring", n > 0);
+}
+
+function agoStr(sec) {
+  const d = Math.max(0, Date.now() / 1000 - sec);
+  if (d < 60) return "sasa hivi";
+  if (d < 3600) return "dakika " + Math.floor(d / 60) + " zilizopita";
+  if (d < 86400) return "saa " + Math.floor(d / 3600) + " zilizopita";
+  return "siku " + Math.floor(d / 86400) + " zilizopita";
+}
+
+function showNotif(a) {
+  notifQueue.push(a);
+  if (!notifBusy) nextNotif();
+}
+
+function nextNotif() {
+  const a = notifQueue.shift();
+  if (!a) { notifBusy = false; return; }
+  notifBusy = true;
+  $("notifTitle").textContent = a.title || "Taarifa mpya";
+  $("notifText").textContent = a.text || "";
+  $("notif").classList.add("show");
+  try { if (navigator.vibrate) navigator.vibrate(60); } catch (e) {}
+  clearTimeout(notifTimer);
+  notifTimer = setTimeout(hideNotif, 8000);
+}
+
+function hideNotif() {
+  $("notif").classList.remove("show");
+  clearTimeout(notifTimer);
+  setTimeout(nextNotif, 450);
+}
+
+function startAnnouncements() {
+  stopAnnouncements();
+  if (!currentUser) return;
+  annFirst = true;
+  annUnsub = db.collection("announcements").orderBy("createdAt", "desc").limit(30)
+    .onSnapshot(snap => {
+      annList = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(a => a.createdAt);
+      if (annFirst) {
+        annFirst = false;
+        let seen = getSeen();
+        if (!seen) { seen = Math.floor(Date.now() / 1000) - 3 * 86400; setSeen(seen); }
+        annList.filter(a => annSec(a) > seen).slice(0, 2).reverse().forEach(showNotif);
+      } else {
+        snap.docChanges().forEach(ch => {
+          if (ch.type === "added") {
+            const a = { id: ch.doc.id, ...ch.doc.data() };
+            if (a.createdAt) showNotif(a);
+          }
+        });
+      }
+      updateBell();
+    }, err => console.info("Taarifa", err));
+}
+
+function stopAnnouncements() {
+  if (annUnsub) { annUnsub(); annUnsub = null; }
+  annList = []; notifQueue = [];
+  hideNotif();
+  updateBell();
+}
+
+function openInbox() {
+  const list = $("inboxList");
+  list.replaceChildren();
+  if (!annList.length) list.append(el("p", "muted", "Hakuna taarifa bado."));
+  const seen = getSeen();
+  annList.forEach(a => {
+    const row = el("div", "inbox-item" + (annSec(a) > seen ? " new" : ""));
+    row.append(el("strong", "", a.title || "Taarifa"), el("p", "", a.text || ""), el("small", "", agoStr(annSec(a))));
+    list.append(row);
+  });
+  openModal("inboxModal");
+  const latest = annList.reduce((m, a) => Math.max(m, annSec(a)), 0);
+  if (latest) { setSeen(latest); updateBell(); }
+}
+
+$("bellBtn").addEventListener("click", openInbox);
+$("notif").addEventListener("click", e => {
+  hideNotif();
+  if (!e.target.closest("#notifX")) openInbox();
+});
+
+/* =====================================================
+   MANDHARI (themes)
+===================================================== */
+const THEMES = [
+  ["violet", "Violet", "#8b6bff", "#ffc857"],
+  ["ocean", "Bahari", "#3aa0ff", "#ffd166"],
+  ["sunset", "Machweo", "#ff7a45", "#ffd166"],
+  ["forest", "Msitu", "#35c98a", "#ffd166"],
+  ["rose", "Waridi", "#ff5fa2", "#ffc857"],
+  ["amoled", "Usiku", "#8b6bff", "#16161d"]
+];
+
+function applyTheme(key) {
+  if (!THEMES.some(t => t[0] === key)) key = "violet";
+  if (key === "violet") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme", key);
+  try { localStorage.setItem("pm_theme", key); } catch (e) {}
+  const bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
+  const m = document.querySelector('meta[name="theme-color"]');
+  if (m && bg) m.setAttribute("content", bg);
+  document.querySelectorAll("#themeGrid .sw").forEach(b => b.classList.toggle("on", b.dataset.k === key));
+}
+
+function buildThemes() {
+  const g = $("themeGrid");
+  g.replaceChildren();
+  THEMES.forEach(([k, label, c1, c2]) => {
+    const b = el("button", "sw");
+    b.type = "button";
+    b.dataset.k = k;
+    const i = document.createElement("i");
+    i.style.background = "linear-gradient(135deg," + c1 + "," + c2 + ")";
+    b.append(i, document.createTextNode(label));
+    b.addEventListener("click", () => applyTheme(k));
+    g.append(b);
+  });
+  let cur = "violet";
+  try { cur = localStorage.getItem("pm_theme") || "violet"; } catch (e) {}
+  applyTheme(cur);
+}
+buildThemes();
+
 /* ---------- FILAMU ZETU ---------- */
 async function getMovieUrl(m) {
   if (!(m.price > 0)) return { url: m.videoUrl, q720: m.video720 || "", q480: m.video480 || "" };
@@ -1997,7 +2208,7 @@ async function loadOwnMovies() {
   const grid = $("ownGrid");
   try {
     const snap = await db.collection("movies").get();
-    ownList = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) =>
+    ownList = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(m => (m.title || "").trim()).sort((a, b) =>
       (b.createdAt ? b.createdAt.seconds : 0) - (a.createdAt ? a.createdAt.seconds : 0));
     if (!ownList.length) { grid.innerHTML = '<div class="empty">Bado hakuna filamu zetu.</div>'; return; }
 
@@ -2044,7 +2255,7 @@ async function loadSeries() {
   const grid = $("seriesGrid");
   try {
     const snap = await db.collection("series").get();
-    seriesList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    seriesList = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(x => (x.title || "").trim());
     if (!seriesList.length) { grid.innerHTML = '<div class="empty">Bado hakuna series.</div>'; return; }
 
     renderSeriesList();
@@ -2363,7 +2574,7 @@ window.addEventListener("online", () => showMessage("Intaneti imerudi."));
 document.addEventListener("keydown", e => {
   if (e.key !== "Escape") return;
   if (!$("playerModal").classList.contains("hidden")) return closePlayer();
-  ["payModal", "detailModal", "authModal"].forEach(id => {
+  ["payModal", "detailModal", "authModal", "inboxModal"].forEach(id => {
     if (!$(id).classList.contains("hidden")) closeModal(id);
   });
 });
