@@ -1,5 +1,5 @@
 /* Prosper Movies service worker: mtandao kwanza, akiba kama hakuna intaneti */
-const VER = "pm-v1";
+const VER = "pm-v2";
 const SHELL = ["./", "index.html", "manifest.json", "icons/icon-192.png"];
 
 self.addEventListener("install", e => {
