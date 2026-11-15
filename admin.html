@@ -644,19 +644,28 @@
 
     <!-- TANGAZO -->
     <section class="panel tab" data-tab="notice">
-      <h2>📣 Tangazo kwa Watumiaji</h2>
+      <h2>📣 Matangazo kwa Watumiaji</h2>
       <p class="muted">
-        Ujumbe mfupi unaoonekana juu ya ukurasa wa Mwanzo. Mfano: "Filamu mpya imeongezwa!".
-        Kila tangazo jipya linaonekana tena hata kwa waliofunga la zamani.
+        Tuma ujumbe unaoonekana juu ya skrini ya kila mtumiaji papo hapo, na kubaki kwenye kengele (🔔) yao.
+        Unaweza kutuma mengi. Yote yanaorodheshwa hapa chini, na unaweza kufuta yoyote.
       </p>
+
+      <div class="field">
+        <label for="noticeTitle">Kichwa (hiari)</label>
+        <input id="noticeTitle" maxlength="80" placeholder="Mfano: Filamu mpya!">
+      </div>
+
       <div class="field">
         <label for="noticeText">Ujumbe</label>
         <textarea id="noticeText" maxlength="300"></textarea>
       </div>
+
       <div class="actions">
         <button type="button" id="saveNoticeBtn">Tuma Tangazo</button>
-        <button type="button" id="removeNoticeBtn" class="danger">Ondoa Tangazo</button>
       </div>
+
+      <h3 style="margin-top:24px">Yaliyotumwa</h3>
+      <div id="noticeList">Inapakia...</div>
     </section>
 
     <!-- SERIES -->
@@ -1083,11 +1092,10 @@ async function loadMovies() {
   list.textContent = "Inapakia filamu...";
 
   try {
-    const snapshot = await db
-      .collection("movies")
-      .orderBy("createdAt", "desc")
-      .limit(100)
-      .get();
+    const snapshot = await db.collection("movies").get();
+
+    const docsSorted = snapshot.docs.slice().sort((a, b) =>
+      ((b.data().createdAt || {}).seconds || 0) - ((a.data().createdAt || {}).seconds || 0));
 
     list.replaceChildren();
 
@@ -1096,7 +1104,7 @@ async function loadMovies() {
       return;
     }
 
-    snapshot.forEach(documentSnapshot => {
+    docsSorted.forEach(documentSnapshot => {
       const movie = documentSnapshot.data();
 
       const row = document.createElement("div");
@@ -1116,7 +1124,7 @@ async function loadMovies() {
       info.className = "movie-info";
 
       const title = document.createElement("strong");
-      title.textContent = movie.title || "Filamu";
+      title.textContent = movie.title || "⚠️ Bila jina (bonyeza Futa)";
 
       const year = document.createElement("small");
       year.textContent =
@@ -1533,37 +1541,84 @@ $("saveAdsBtn").addEventListener("click", async () => {
 });
 
 async function loadNoticeAdmin() {
+  const list = $("noticeList");
+  list.textContent = "Inapakia...";
+
   try {
-    const snap = await db.collection("settings").doc("announcement").get();
-    $("noticeText").value = snap.exists ? (snap.data().text || "") : "";
+    const snap = await db.collection("announcements").get();
+    list.replaceChildren();
+
+    if (snap.empty) {
+      list.textContent = "Bado hujatuma tangazo.";
+      return;
+    }
+
+    snap.docs
+      .sort((a, b) => ((b.data().createdAt || {}).seconds || 0) - ((a.data().createdAt || {}).seconds || 0))
+      .forEach(d => {
+        const a = d.data();
+
+        const row = document.createElement("div");
+        row.className = "movie-item";
+
+        const info = document.createElement("div");
+        info.className = "movie-info";
+
+        const t = document.createElement("strong");
+        t.textContent = a.title || "Taarifa";
+
+        const p = document.createElement("div");
+        p.textContent = a.text || "";
+
+        const s = document.createElement("small");
+        s.textContent = tsStr(a.createdAt);
+
+        info.append(t, p, s);
+
+        const del = document.createElement("button");
+        del.className = "danger";
+        del.textContent = "Futa";
+        del.addEventListener("click", async () => {
+          if (!confirm("Futa tangazo hili?")) return;
+          try {
+            await db.collection("announcements").doc(d.id).delete();
+            showMessage("Tangazo limefutwa.");
+            loadNoticeAdmin();
+          } catch (error) {
+            showMessage(getErrorMessage(error), true);
+          }
+        });
+
+        row.append(info, del);
+        list.append(row);
+      });
   } catch (error) {
+    list.textContent = "Imeshindikana kupakia matangazo.";
     showMessage(getErrorMessage(error), true);
   }
 }
 
 $("saveNoticeBtn").addEventListener("click", async () => {
   if (!isAdmin) return;
+
+  const title = $("noticeTitle").value.trim();
   const text = $("noticeText").value.trim();
+
   if (!text) return showMessage("Andika ujumbe kwanza.", true);
+
   try {
-    await db.collection("settings").doc("announcement").set({
+    await db.collection("announcements").add({
+      title: title,
       text: text,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       createdBy: auth.currentUser.uid
     });
-    showMessage("Tangazo limetumwa.");
-  } catch (error) {
-    showMessage(getErrorMessage(error), true);
-  }
-});
 
-$("removeNoticeBtn").addEventListener("click", async () => {
-  if (!isAdmin) return;
-  if (!confirm("Ondoa tangazo la sasa?")) return;
-  try {
-    await db.collection("settings").doc("announcement").delete();
+    $("noticeTitle").value = "";
     $("noticeText").value = "";
-    showMessage("Tangazo limeondolewa.");
+
+    showMessage("Tangazo limetumwa. Watumiaji wataliona papo hapo.");
+    loadNoticeAdmin();
   } catch (error) {
     showMessage(getErrorMessage(error), true);
   }
