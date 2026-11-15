@@ -314,6 +314,28 @@ body.locked .topbar{display:none}
 .inbox-item small{color:var(--muted)}
 .inbox-item.new{border-left:3px solid var(--gold);padding-left:10px}
 
+/* ===== chat ===== */
+.chat-box{margin:0 14px;height:calc(100vh - 372px);min-height:250px;overflow-y:auto;background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:12px;overscroll-behavior:contain}
+.chat-list{display:flex;flex-direction:column;gap:8px}
+.chat-list .empty{margin:6px 0}
+.chat-more{text-align:center;margin-bottom:10px}
+.cmsg{display:flex;gap:8px;align-items:flex-end;max-width:90%}
+.cmsg.me{align-self:flex-end;flex-direction:row-reverse}
+.cav{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--gold));display:grid;place-items:center;font-weight:800;font-size:13px;color:#1a1033;flex:none}
+.cbub{background:var(--panel2);border-radius:16px 16px 16px 4px;padding:8px 12px;min-width:84px;animation:pop .3s both}
+.cmsg.me .cbub{background:linear-gradient(135deg,var(--accent),rgba(var(--acc-rgb),.72));border-radius:16px 16px 4px 16px;color:#fff}
+.cname{font-size:12px;font-weight:800;color:var(--gold);margin-bottom:2px}
+.ctext{overflow-wrap:anywhere;white-space:pre-wrap;font-size:15px}
+.cmeta{display:flex;justify-content:flex-end;align-items:center;gap:6px;font-size:11px;opacity:.75;margin-top:2px}
+.cmore{background:none;color:inherit;padding:0 4px;font-size:16px;line-height:1;opacity:.8;border-radius:6px}
+.csys{align-self:center;font-size:12px;color:var(--muted);background:var(--panel2);padding:3px 11px;border-radius:99px}
+.chat-note{margin:10px 14px 0;background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:10px 14px;font-size:13.5px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.chat-form{display:flex;gap:8px;align-items:flex-end;margin:10px 14px 0}
+.chat-form textarea{flex:1;resize:none;max-height:110px;padding:12px 14px;background:var(--panel);color:#fff;border:1px solid var(--border);border-radius:18px;font:inherit;line-height:1.35}
+.chat-form button{width:46px;height:46px;padding:0;border-radius:50%;display:grid;place-items:center;flex:none}
+.chat-form svg{width:22px;height:22px}
+.chat-count{margin:4px 22px 0;text-align:right;font-size:11.5px;color:var(--muted)}
+.stack-btns{display:grid;gap:8px;margin-top:10px}
 /* ===== mandhari: chaguo ===== */
 .themes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
 .sw{padding:12px 6px;border-radius:14px;background:var(--panel2);color:var(--text);display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12.5px;font-weight:700}
@@ -446,6 +468,24 @@ body.locked .topbar{display:none}
     <div id="movieGrid" class="grid"><div class="empty">Andika jina la filamu ili kuona matokeo.</div></div>
   </main>
 
+  <!-- ============ CHAT ============ -->
+  <main id="viewChat" class="view">
+    <h2 class="page-title" style="margin-bottom:4px">Chat ya wote</h2>
+    <p class="muted" style="margin:0 18px 10px;font-size:13px">Maandishi tu. Heshima kwanza: matusi, links na matangazo haviruhusiwi.</p>
+    <div id="chatBox" class="chat-box">
+      <div id="chatMore" class="chat-more hidden"><button type="button" id="chatLoadMore" class="ghost sm">Pakia za zamani</button></div>
+      <div id="chatList" class="chat-list"></div>
+    </div>
+    <div id="chatNote" class="chat-note hidden"></div>
+    <form id="chatForm" class="chat-form hidden">
+      <textarea id="chatInput" rows="1" maxlength="300" placeholder="Andika ujumbe..." aria-label="Ujumbe"></textarea>
+      <button id="chatSend" type="submit" aria-label="Tuma">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 20.5v-6.7l9-1.8-9-1.8V3.5L22 12z"/></svg>
+      </button>
+    </form>
+    <div id="chatCountRow" class="chat-count hidden"><span id="chatCount">0/300</span></div>
+  </main>
+
   <!-- ============ ZILIZOHIFADHIWA ============ -->
   <main id="viewSaved" class="view">
     <h2 class="page-title">Zilizohifadhiwa</h2>
@@ -480,6 +520,8 @@ body.locked .topbar{display:none}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Mwanzo</button>
   <button data-view="Search">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Tafuta</button>
+  <button data-view="Chat">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/></svg>Chat</button>
   <button data-view="Saved">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.600-7 10-7 10z"/></svg>Hifadhi</button>
   <button data-view="Account">
@@ -502,6 +544,31 @@ body.locked .topbar{display:none}
       </div>
     </form>
     <button id="resetPassword" class="ghost sm" style="margin-top:14px">Nimesahau nenosiri</button>
+  </div>
+</div>
+
+<!-- JINA LA CHAT -->
+<div id="nickModal" class="modal hidden">
+  <div class="box">
+    <h2>Jina la chat</h2>
+    <p class="muted" style="margin:8px 0 0;font-size:13.5px">Litaonekana kwa wote. Herufi, namba na nafasi tu (herufi 2 hadi 20).</p>
+    <form id="nickForm">
+      <label for="nickInput">Jina</label>
+      <input id="nickInput" maxlength="20" autocomplete="nickname" required>
+      <div class="actions-row">
+        <button type="submit" id="nickSave">Hifadhi</button>
+        <button type="button" class="ghost" data-close="nickModal">Funga</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- UJUMBE WA CHAT -->
+<div id="msgModal" class="modal hidden">
+  <div class="box">
+    <div class="bar"><h2>Ujumbe</h2><button type="button" class="ghost sm" data-close="msgModal">Funga</button></div>
+    <p id="msgPreview" class="muted" style="margin:10px 0 0;overflow-wrap:anywhere"></p>
+    <div id="msgActions" class="stack-btns"></div>
   </div>
 </div>
 
@@ -754,6 +821,7 @@ function showView(name) {
   if (name === "Saved") loadSaved();
   if (name === "Search") $("searchInput").focus();
   if (name === "Account") refreshMine();
+  if (name === "Chat") startChat(); else stopChat();
 }
 document.querySelectorAll(".nav button").forEach(b =>
   b.addEventListener("click", () => showView(b.dataset.view)));
@@ -1164,6 +1232,7 @@ auth.onAuthStateChanged(async user => {
   } else {
     stopLive();
     stopAnnouncements();
+    stopChat();
     document.body.classList.add("locked");
     contentLoaded = false;
     heroSet = false;
@@ -2153,6 +2222,334 @@ function buildThemes() {
 }
 buildThemes();
 
+/* =====================================================
+   CHAT YA WOTE (maandishi tu): salama na ya bure
+   - Lazima uthibitishe barua pepe na uchague jina
+   - Ujumbe hadi herufi 300, bila links, kila sekunde 6
+   - Ripoti, zuia mtu, na admin kufuta/kuzuia
+===================================================== */
+const BAD_WORDS = ["fuck", "shit", "bitch", "asshole", "dick", "pussy", "kuma", "malaya", "mwanaharamu", "kumamayako", "kunguru wewe"];
+const LINK_RE = /(https?:|www\.|\.com|\.net|\.org|wa\.me|t\.me)/i;
+
+let chatUnsub = null, chatCur = [], chatOld = [], chatFirst = true;
+let chatEnabled = false, chatBanned = false, myNick = "", hasNickDoc = false;
+let blockedSet = new Set(), lastSend = 0, chatSeq = 0;
+
+function maskBad(t) {
+  let out = t || "";
+  BAD_WORDS.forEach(w => {
+    const re = new RegExp(w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+    out = out.replace(re, m => "*".repeat(m.length));
+  });
+  return out;
+}
+
+function dayLabel(d) {
+  const t = new Date(), y = new Date(Date.now() - 86400000);
+  if (d.toDateString() === t.toDateString()) return "Leo";
+  if (d.toDateString() === y.toDateString()) return "Jana";
+  return d.toLocaleDateString();
+}
+
+async function loadChatState() {
+  const uid = currentUser.uid;
+  const [cfg, nick, ban, blk] = await Promise.all([
+    db.collection("settings").doc("chat").get().catch(() => null),
+    db.collection("chatUsers").doc(uid).get().catch(() => null),
+    db.collection("chatBans").doc(uid).get().catch(() => null),
+    db.collection("users").doc(uid).collection("blocked").get().catch(() => null)
+  ]);
+  chatEnabled = !!(cfg && cfg.exists && cfg.data().enabled);
+  hasNickDoc = !!(nick && nick.exists);
+  myNick = hasNickDoc ? (nick.data().name || "") : "";
+  chatBanned = !!(ban && ban.exists);
+  blockedSet = new Set();
+  if (blk) blk.forEach(d => blockedSet.add(d.id));
+  updateChatNote();
+}
+
+function updateChatNote() {
+  const note = $("chatNote"), form = $("chatForm"), cnt = $("chatCountRow");
+  note.replaceChildren();
+  let canWrite = false;
+
+  function msg(text, btnText, onClick) {
+    note.append(el("span", "", text));
+    if (btnText) {
+      const b = el("button", "ghost sm", btnText);
+      b.type = "button";
+      b.addEventListener("click", onClick);
+      note.append(b);
+    }
+  }
+
+  if (!chatEnabled) msg("Chat imezimwa kwa sasa na msimamizi.");
+  else if (chatBanned) msg("Umezuiwa kuandika kwenye chat.");
+  else if (!currentUser.emailVerified) {
+    msg("Thibitisha barua pepe yako ili uandike. Angalia kisanduku chako cha barua.", "Tuma tena", async () => {
+      try { await currentUser.sendEmailVerification(); showMessage("Kiungo kimetumwa. Kisha rudi hapa."); }
+      catch (e) { showMessage(friendlyError(e), true); }
+    });
+  }
+  else if (!myNick) msg("Chagua jina la chat ili uanze.", "Chagua jina", openNick);
+  else { msg("Unaandika kama " + myNick, "Badilisha jina", openNick); canWrite = true; }
+
+  if (canWrite && blockedSet.size) {
+    const b = el("button", "ghost sm", "Ondoa vizuizi (" + blockedSet.size + ")");
+    b.type = "button";
+    b.addEventListener("click", unblockAll);
+    note.append(b);
+  }
+
+  note.classList.remove("hidden");
+  form.classList.toggle("hidden", !canWrite);
+  cnt.classList.toggle("hidden", !canWrite);
+}
+
+async function startChat() {
+  if (!currentUser) return;
+  const my = ++chatSeq;
+  if (chatUnsub) { chatUnsub(); chatUnsub = null; }
+  $("chatList").replaceChildren(el("div", "empty", "Inapakia..."));
+
+  if (!currentUser.emailVerified) {
+    try { await currentUser.reload(); if (currentUser.emailVerified) await currentUser.getIdToken(true); } catch (e) {}
+  }
+  await loadChatState();
+  if (my !== chatSeq) return;
+
+  chatFirst = true; chatCur = []; chatOld = [];
+  chatUnsub = db.collection("globalChat").orderBy("createdAt", "desc").limit(30)
+    .onSnapshot(snap => {
+      chatCur = snap.docs;
+      $("chatMore").classList.toggle("hidden", snap.size < 30 && !chatOld.length);
+      renderChat(false);
+    }, err => {
+      $("chatList").replaceChildren(el("div", "empty", "Imeshindikana kupakia chat."));
+      console.info("Chat", err);
+    });
+}
+
+function stopChat() {
+  chatSeq++;
+  if (chatUnsub) { chatUnsub(); chatUnsub = null; }
+}
+
+function renderChat(keepPos) {
+  const box = $("chatBox"), list = $("chatList");
+  const prevH = box.scrollHeight;
+  const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 140;
+
+  const seen = new Set(), all = [];
+  chatCur.concat(chatOld).forEach(d => { if (!seen.has(d.id)) { seen.add(d.id); all.push(d); } });
+  all.reverse();
+
+  list.replaceChildren();
+  let lastDay = "";
+  all.forEach(d => {
+    const m = d.data({ serverTimestamps: "estimate" });
+    if (!m || blockedSet.has(m.uid)) return;
+    const dt = m.createdAt && m.createdAt.toDate ? m.createdAt.toDate() : new Date();
+    const day = dt.toDateString();
+    if (day !== lastDay) { lastDay = day; list.append(el("div", "csys", dayLabel(dt))); }
+
+    const mine = currentUser && m.uid === currentUser.uid;
+    const row = el("div", "cmsg" + (mine ? " me" : ""));
+    row.append(el("div", "cav", ((m.name || "?")[0] || "?").toUpperCase()));
+
+    const bub = el("div", "cbub");
+    if (!mine) bub.append(el("div", "cname", m.name || "Mtumiaji"));
+    bub.append(el("div", "ctext", maskBad(m.text)));
+
+    const meta = el("div", "cmeta");
+    meta.append(el("span", "", dt.getHours().toString().padStart(2, "0") + ":" + dt.getMinutes().toString().padStart(2, "0")));
+    const more = el("button", "cmore", "⋯");
+    more.type = "button";
+    more.setAttribute("aria-label", "Chaguzi");
+    more.addEventListener("click", () => openMsgMenu(d.id, m, mine));
+    meta.append(more);
+    bub.append(meta);
+
+    row.append(bub);
+    list.append(row);
+  });
+
+  if (!list.children.length) list.append(el("div", "empty", "Hakuna ujumbe bado. Karibu uanze mazungumzo!"));
+
+  if (keepPos) box.scrollTop += box.scrollHeight - prevH;
+  else if (chatFirst || nearBottom) { box.scrollTop = box.scrollHeight; chatFirst = false; }
+}
+
+$("chatLoadMore").addEventListener("click", async () => {
+  const oldest = (chatOld.length ? chatOld : chatCur).slice(-1)[0];
+  if (!oldest) return;
+  try {
+    const snap = await db.collection("globalChat").orderBy("createdAt", "desc").startAfter(oldest).limit(30).get();
+    chatOld = chatOld.concat(snap.docs);
+    if (snap.size < 30) $("chatMore").classList.add("hidden");
+    renderChat(true);
+  } catch (e) { showMessage(friendlyError(e), true); }
+});
+
+/* ---- kuandika ---- */
+function updateCount() {
+  const n = $("chatInput").value.length;
+  $("chatCount").textContent = n + "/300";
+  const ta = $("chatInput");
+  ta.style.height = "auto";
+  ta.style.height = Math.min(ta.scrollHeight, 110) + "px";
+}
+$("chatInput").addEventListener("input", updateCount);
+$("chatInput").addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("chatForm").requestSubmit(); }
+});
+
+$("chatForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!currentUser || !myNick) return;
+
+  const text = $("chatInput").value.replace(/\s+/g, " ").trim();
+  if (!text) return;
+  if (text.length > 300) return showMessage("Ujumbe ni mrefu mno (herufi 300).", true);
+  if (LINK_RE.test(text)) return showMessage("Links hazaruhusiwi kwenye chat.", true);
+
+  const wait = 6000 - (Date.now() - lastSend);
+  if (wait > 0) return showMessage("Subiri sekunde " + Math.ceil(wait / 1000) + " kisha utume tena.", true);
+
+  $("chatSend").disabled = true;
+  try {
+    const ts = firebase.firestore.FieldValue.serverTimestamp();
+    const batch = db.batch();
+    batch.set(db.collection("globalChat").doc(), { uid: currentUser.uid, name: myNick, text: text, createdAt: ts });
+    batch.update(db.collection("chatUsers").doc(currentUser.uid), { lastMsgAt: ts });
+    await batch.commit();
+    lastSend = Date.now();
+    $("chatInput").value = "";
+    updateCount();
+  } catch (error) {
+    if (error.code === "permission-denied") {
+      showMessage("Imekataliwa: huenda chat imezimwa, umezuiwa, au unatuma haraka sana. Jaribu tena baada ya muda.", true);
+      loadChatState();
+    } else showMessage(friendlyError(error), true);
+  } finally {
+    $("chatSend").disabled = false;
+  }
+});
+
+/* ---- jina la chat ---- */
+function openNick() {
+  $("nickInput").value = myNick || "";
+  openModal("nickModal");
+}
+
+$("nickForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const name = $("nickInput").value.trim().replace(/\s+/g, " ");
+  if (!/^[A-Za-z0-9 ._-]{2,20}$/.test(name)) {
+    return showMessage("Jina: herufi 2 hadi 20 (herufi za kawaida, namba, nafasi, . _ -).", true);
+  }
+  if (!isAdminUser(currentUser) && /admin|prosper|msimamizi/i.test(name)) {
+    return showMessage("Jina hilo haliruhusiwi. Chagua jingine.", true);
+  }
+  $("nickSave").disabled = true;
+  try {
+    const ref = db.collection("chatUsers").doc(currentUser.uid);
+    if (hasNickDoc) await ref.update({ name: name });
+    else await ref.set({ uid: currentUser.uid, name: name, lastMsgAt: firebase.firestore.Timestamp.fromMillis(0) });
+    myNick = name; hasNickDoc = true;
+    closeModal("nickModal");
+    updateChatNote();
+    showMessage("Jina limehifadhiwa.");
+  } catch (error) {
+    showMessage(error.code === "permission-denied"
+      ? "Imekataliwa. Thibitisha barua pepe yako na uchague jina linaloruhusiwa."
+      : friendlyError(error), true);
+  } finally { $("nickSave").disabled = false; }
+});
+
+/* ---- chaguzi za ujumbe: ripoti, zuia, admin ---- */
+function openMsgMenu(id, m, mine) {
+  $("msgPreview").textContent = (m.name || "Mtumiaji") + ": " + maskBad(m.text);
+  const box = $("msgActions");
+  box.replaceChildren();
+
+  const add = (label, cls, fn) => {
+    const b = el("button", cls, label);
+    b.type = "button";
+    b.addEventListener("click", fn);
+    box.append(b);
+  };
+
+  if (!mine) {
+    add("🚩 Ripoti: matusi", "ghost", () => reportMsg(id, m, "matusi"));
+    add("🚩 Ripoti: spam au utapeli", "ghost", () => reportMsg(id, m, "spam"));
+    add("🚩 Ripoti: maudhui yasiyofaa", "ghost", () => reportMsg(id, m, "mengineyo"));
+    add("🙈 Usinionyeshe mtu huyu", "ghost", () => blockUser(m.uid));
+  }
+  if (isAdminUser(currentUser)) {
+    add("🗑 Futa ujumbe (admin)", "ghost", async () => {
+      try { await db.collection("globalChat").doc(id).delete(); closeModal("msgModal"); showMessage("Ujumbe umefutwa."); }
+      catch (e) { showMessage(friendlyError(e), true); }
+    });
+    if (!mine) add("⛔ Mzuie kuandika (admin)", "ghost", async () => {
+      if (!confirm("Mzuie " + (m.name || "mtu huyu") + " kuandika kwenye chat?")) return;
+      try {
+        await db.collection("chatBans").doc(m.uid).set({
+          uid: m.uid, reason: "admin", by: currentUser.uid,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        closeModal("msgModal");
+        showMessage("Amezuiwa kuandika.");
+      } catch (e) { showMessage(friendlyError(e), true); }
+    });
+  }
+  openModal("msgModal");
+}
+
+async function reportMsg(id, m, reason) {
+  try {
+    await db.collection("chatReports").doc(currentUser.uid + "_" + id).set({
+      reporterId: currentUser.uid, reportedUid: m.uid, msgId: id,
+      text: (m.text || "").slice(0, 300), reason: reason,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(), status: "pending"
+    });
+    closeModal("msgModal");
+    showMessage("Ripoti imetumwa. Asante.");
+  } catch (error) {
+    showMessage(error.code === "permission-denied"
+      ? "Umesharipoti ujumbe huu, au huwezi kuuripoti."
+      : friendlyError(error), true);
+  }
+}
+
+async function blockUser(uid) {
+  try {
+    await db.collection("users").doc(currentUser.uid).collection("blocked").doc(uid).set({
+      uid: uid, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    blockedSet.add(uid);
+    closeModal("msgModal");
+    updateChatNote();
+    renderChat(true);
+    showMessage("Hutamwona tena mtu huyu kwenye chat.");
+  } catch (error) { showMessage(friendlyError(error), true); }
+}
+
+async function unblockAll() {
+  if (!confirm("Ondoa vizuizi vyote?")) return;
+  try {
+    const col = db.collection("users").doc(currentUser.uid).collection("blocked");
+    const snap = await col.get();
+    const b = db.batch();
+    snap.forEach(d => b.delete(d.ref));
+    await b.commit();
+    blockedSet = new Set();
+    updateChatNote();
+    renderChat(true);
+    showMessage("Vizuizi vimeondolewa.");
+  } catch (error) { showMessage(friendlyError(error), true); }
+}
+
 /* ---------- FILAMU ZETU ---------- */
 async function getMovieUrl(m) {
   if (!(m.price > 0)) return { url: m.videoUrl, q720: m.video720 || "", q480: m.video480 || "" };
@@ -2574,7 +2971,7 @@ window.addEventListener("online", () => showMessage("Intaneti imerudi."));
 document.addEventListener("keydown", e => {
   if (e.key !== "Escape") return;
   if (!$("playerModal").classList.contains("hidden")) return closePlayer();
-  ["payModal", "detailModal", "authModal", "inboxModal"].forEach(id => {
+  ["payModal", "detailModal", "authModal", "inboxModal", "nickModal", "msgModal"].forEach(id => {
     if (!$(id).classList.contains("hidden")) closeModal(id);
   });
 });
