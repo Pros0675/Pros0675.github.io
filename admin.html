@@ -363,6 +363,7 @@
       <button type="button" data-tab="pay" class="secondary">💰 Malipo</button>
       <button type="button" data-tab="users" class="secondary">👥 Watumiaji</button>
       <button type="button" data-tab="views" class="secondary">👁️ Tazama</button>
+      <button type="button" data-tab="chat" class="secondary">💬 Chat</button>
       <button type="button" data-tab="tools" class="secondary">⚙️ Zana</button>
       <button type="button" data-tab="ads" class="secondary">💸 Matangazo</button>
       <button type="button" data-tab="notice" class="secondary">📣 Tangazo</button>
@@ -588,6 +589,32 @@
       <div id="movieList">
         Inapakia filamu...
       </div>
+    </section>
+
+    <!-- CHAT -->
+    <section class="panel tab" data-tab="chat">
+      <h2>💬 Chat ya Wote</h2>
+      <p class="muted">
+        Chat inabaki imezimwa hadi uiwashe hapa. Watumiaji wanaripoti ujumbe usiofaa, na hapa unaufuta
+        au kumzuia mtu. Unaweza pia kufuta ujumbe moja kwa moja ndani ya app (kitufe cha ⋯ kwenye ujumbe).
+      </p>
+
+      <div class="field">
+        <label style="display:flex;align-items:center;gap:8px">
+          <input id="chatEnabled" type="checkbox" style="width:auto;margin:0"> Chat imewashwa
+        </label>
+      </div>
+
+      <div class="actions">
+        <button type="button" id="saveChatCfg">Hifadhi</button>
+        <button type="button" id="cleanChatBtn" class="secondary">Futa ujumbe wa zamani (siku 7+)</button>
+      </div>
+
+      <h3 style="margin-top:24px">🚩 Ripoti zinazosubiri</h3>
+      <div id="chatReportsList">Inapakia...</div>
+
+      <h3 style="margin-top:24px">⛔ Waliozuiwa</h3>
+      <div id="chatBansList">Inapakia...</div>
     </section>
 
     <!-- ZANA -->
@@ -1624,6 +1651,180 @@ $("saveNoticeBtn").addEventListener("click", async () => {
   }
 });
 
+/* =========================================
+   CHAT: usimamizi
+========================================= */
+
+const REASONS = { matusi: "Matusi", spam: "Spam au utapeli", mengineyo: "Maudhui yasiyofaa" };
+
+async function loadChatAdmin() {
+  try {
+    const cfg = await db.collection("settings").doc("chat").get();
+    $("chatEnabled").checked = cfg.exists && !!cfg.data().enabled;
+  } catch (error) {
+    showMessage(getErrorMessage(error), true);
+  }
+  loadChatReports();
+  loadChatBans();
+}
+
+$("saveChatCfg").addEventListener("click", async () => {
+  if (!isAdmin) return;
+  try {
+    await db.collection("settings").doc("chat").set({
+      enabled: $("chatEnabled").checked,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedBy: auth.currentUser.uid
+    });
+    showMessage($("chatEnabled").checked ? "Chat imewashwa." : "Chat imezimwa.");
+  } catch (error) {
+    showMessage(getErrorMessage(error), true);
+  }
+});
+
+async function loadChatReports() {
+  const list = $("chatReportsList");
+  list.textContent = "Inapakia...";
+  try {
+    const snap = await db.collection("chatReports").where("status", "==", "pending").get();
+    list.replaceChildren();
+    if (snap.empty) { list.textContent = "Hakuna ripoti. 🎉"; return; }
+
+    snap.docs
+      .sort((a, b) => ((b.data().createdAt || {}).seconds || 0) - ((a.data().createdAt || {}).seconds || 0))
+      .forEach(d => {
+        const r = d.data();
+
+        const row = document.createElement("div");
+        row.className = "movie-item pay-item";
+
+        const info = document.createElement("div");
+        info.className = "movie-info";
+        const t = document.createElement("strong");
+        t.textContent = (REASONS[r.reason] || r.reason) + ": " + (r.text || "");
+        const s = document.createElement("small");
+        s.textContent = "Mtumiaji: " + r.reportedUid + " · " + tsStr(r.createdAt);
+        info.append(t, s);
+
+        const del = document.createElement("button");
+        del.textContent = "Futa ujumbe";
+        del.addEventListener("click", async () => {
+          try {
+            const b = db.batch();
+            b.delete(db.collection("globalChat").doc(r.msgId));
+            b.delete(d.ref);
+            await b.commit();
+            showMessage("Ujumbe umefutwa.");
+            loadChatReports();
+          } catch (error) { showMessage(getErrorMessage(error), true); }
+        });
+
+        const ban = document.createElement("button");
+        ban.className = "danger";
+        ban.textContent = "Mzuie mtu";
+        ban.addEventListener("click", async () => {
+          if (!confirm("Mzuie mtu huyu kuandika kwenye chat?")) return;
+          try {
+            const b = db.batch();
+            b.set(db.collection("chatBans").doc(r.reportedUid), {
+              uid: r.reportedUid, reason: r.reason || "ripoti", by: auth.currentUser.uid,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            b.delete(db.collection("globalChat").doc(r.msgId));
+            b.delete(d.ref);
+            await b.commit();
+            showMessage("Amezuiwa na ujumbe umefutwa.");
+            loadChatReports();
+            loadChatBans();
+          } catch (error) { showMessage(getErrorMessage(error), true); }
+        });
+
+        const skip = document.createElement("button");
+        skip.className = "secondary";
+        skip.textContent = "Puuza";
+        skip.addEventListener("click", async () => {
+          try {
+            await d.ref.delete();
+            loadChatReports();
+          } catch (error) { showMessage(getErrorMessage(error), true); }
+        });
+
+        row.append(info, del, ban, skip);
+        list.append(row);
+      });
+  } catch (error) {
+    list.textContent = "Imeshindikana kupakia ripoti.";
+    showMessage(getErrorMessage(error), true);
+  }
+}
+
+async function loadChatBans() {
+  const list = $("chatBansList");
+  list.textContent = "Inapakia...";
+  try {
+    const snap = await db.collection("chatBans").get();
+    list.replaceChildren();
+    if (snap.empty) { list.textContent = "Hakuna aliyezuiwa."; return; }
+
+    for (const d of snap.docs) {
+      let email = d.id;
+      try {
+        const p = await db.collection("profiles").doc(d.id).get();
+        if (p.exists && p.data().email) email = p.data().email;
+      } catch (e) {}
+
+      const row = document.createElement("div");
+      row.className = "movie-item";
+
+      const info = document.createElement("div");
+      info.className = "movie-info";
+      const t = document.createElement("strong");
+      t.textContent = email;
+      const s = document.createElement("small");
+      s.textContent = "Alizuiwa: " + tsStr(d.data().createdAt);
+      info.append(t, s);
+
+      const un = document.createElement("button");
+      un.className = "secondary";
+      un.textContent = "Ondoa kizuizi";
+      un.addEventListener("click", async () => {
+        try {
+          await d.ref.delete();
+          showMessage("Kizuizi kimeondolewa.");
+          loadChatBans();
+        } catch (error) { showMessage(getErrorMessage(error), true); }
+      });
+
+      row.append(info, un);
+      list.append(row);
+    }
+  } catch (error) {
+    list.textContent = "Imeshindikana kupakia.";
+    showMessage(getErrorMessage(error), true);
+  }
+}
+
+$("cleanChatBtn").addEventListener("click", async () => {
+  if (!isAdmin) return;
+  if (!confirm("Futa ujumbe wote wa zaidi ya siku 7?")) return;
+  try {
+    const cutoff = firebase.firestore.Timestamp.fromMillis(Date.now() - 7 * 86400000);
+    let total = 0;
+    for (;;) {
+      const snap = await db.collection("globalChat").where("createdAt", "<", cutoff).limit(200).get();
+      if (snap.empty) break;
+      const b = db.batch();
+      snap.forEach(x => b.delete(x.ref));
+      await b.commit();
+      total += snap.size;
+      if (snap.size < 200) break;
+    }
+    showMessage("Ujumbe uliofutwa: " + total + ".");
+  } catch (error) {
+    showMessage(getErrorMessage(error), true);
+  }
+});
+
 function showTab(name) {
   document.querySelectorAll(".tab").forEach(p =>
     p.classList.toggle("hidden", p.dataset.tab !== name));
@@ -1643,6 +1844,7 @@ function showTab(name) {
   if (name === "views") loadViews();
   if (name === "notice") loadNoticeAdmin();
   if (name === "ads") loadAdsAdmin();
+  if (name === "chat") loadChatAdmin();
 }
 
 document.querySelectorAll("#tabs button").forEach(b =>
