@@ -231,6 +231,19 @@
       background: var(--accent);
     }
 
+    .chk {
+      display: flex;
+      gap: 10px;
+      padding: 10px 0;
+      border-top: 1px solid var(--border);
+      overflow-wrap: anywhere;
+    }
+
+    .chk small {
+      display: block;
+      color: var(--muted);
+    }
+
     .row2 {
       display: flex;
       justify-content: space-between;
@@ -363,6 +376,7 @@
       <button type="button" data-tab="pay" class="secondary">💰 Malipo</button>
       <button type="button" data-tab="users" class="secondary">👥 Watumiaji</button>
       <button type="button" data-tab="views" class="secondary">👁️ Tazama</button>
+      <button type="button" data-tab="check" class="secondary">✅ Hakiki</button>
       <button type="button" data-tab="chat" class="secondary">💬 Chat</button>
       <button type="button" data-tab="tools" class="secondary">⚙️ Zana</button>
       <button type="button" data-tab="ads" class="secondary">💸 Matangazo</button>
@@ -589,6 +603,18 @@
       <div id="movieList">
         Inapakia filamu...
       </div>
+    </section>
+
+    <!-- HAKIKI MFUMO -->
+    <section class="panel tab" data-tab="check">
+      <h2>✅ Hakiki Mfumo</h2>
+      <p class="muted">
+        Inakagua kama faili zote zimepakiwa, matoleo ni ya mwisho, rules za Firebase zimewekwa,
+        na data yako ina makosa yoyote. Kila tatizo linaambatana na jinsi ya kulirekebisha.
+      </p>
+      <button type="button" id="runCheckBtn">Hakiki sasa</button>
+      <div id="checkSummary" style="margin:14px 0 4px;font-weight:700"></div>
+      <div id="checkList"></div>
     </section>
 
     <!-- CHAT -->
@@ -1825,6 +1851,181 @@ $("cleanChatBtn").addEventListener("click", async () => {
   }
 });
 
+/* =========================================
+   HAKIKI MFUMO
+========================================= */
+
+const CHECK_FILES = [
+  "index.html", "admin.html", "series-admin.html", "ad.html",
+  "privacy.html", "terms.html", "404.html",
+  "manifest.json", "sw.js", "robots.txt", "sitemap.xml",
+  "icons/icon-152.png", "icons/icon-180.png", "icons/icon-192.png",
+  "icons/icon-512.png", "icons/icon-maskable-512.png",
+  "icons/favicon.ico", "icons/favicon-48.png"
+];
+
+async function fetchText(path) {
+  const r = await fetch(path + "?t=" + Date.now(), { cache: "no-store" });
+  if (!r.ok) throw new Error(String(r.status));
+  return r.text();
+}
+
+async function fileOk(path) {
+  try {
+    const r = await fetch(path + "?t=" + Date.now(), { cache: "no-store" });
+    return r.ok;
+  } catch (e) { return false; }
+}
+
+async function runChecks() {
+  if (!isAdmin) return;
+  const list = $("checkList");
+  list.textContent = "Inakagua... (sekunde chache)";
+  $("checkSummary").textContent = "";
+
+  const res = [];
+  const add = (st, title, hint) => res.push({ st: st, title: title, hint: hint || "" });
+
+  /* 1. Faili */
+  const flags = await Promise.all(CHECK_FILES.map(fileOk));
+  CHECK_FILES.forEach((f, i) => add(flags[i] ? "ok" : "bad", "Faili: " + f,
+    flags[i] ? "" : "Halipo kwenye GitHub. Lipakie kwa jina lilelile (herufi ndogo; picha ziwe ndani ya folder ya icons)."));
+
+  /* 2. Matoleo ya faili */
+  async function version(path, markers, fixName) {
+    try {
+      const t = await fetchText(path);
+      const miss = markers.filter(m => t.indexOf(m[0]) < 0).map(m => m[1]);
+      add(miss.length ? "bad" : "ok", path + " ni toleo la mwisho",
+        miss.length ? "Inakosa: " + miss.join(", ") + ". Pakia " + (fixName || path) + " mpya, kisha ufute cache." : "");
+    } catch (e) { /* tayari imeripotiwa kama faili halipo */ }
+  }
+  await version("index.html", [
+    ['id="viewChat"', "Chat"], ['id="bellBtn"', "Taarifa"], ["pm_theme", "Mandhari"],
+    ['id="adLayer"', "Matangazo ya kicheza"], ["icon-180.png", "icon za iPhone"], ["favicon.ico", "favicon"], ["function goHash", "viungo vya haraka"]
+  ]);
+  await version("series-admin.html", [["q720", "ubora wa video"], ["subs/", "manukuu"], ["connection", "connection"]]);
+  await version("sw.js", [["pm-v4", "toleo la sw.js"]]);
+
+  /* 3. Manifest */
+  try {
+    const mf = JSON.parse(await fetchText("manifest.json"));
+    const icons = mf.icons || [];
+    add(icons.length >= 4 ? "ok" : "bad", "manifest.json ina icon " + icons.length, icons.length >= 4 ? "" : "Pakia manifest.json mpya.");
+    add(icons.some(i => i.purpose === "maskable") ? "ok" : "warn", "Icon ya maskable (Android)", "Pakia manifest.json mpya na icons/icon-maskable-512.png.");
+    add((mf.shortcuts || []).length ? "ok" : "warn", "Njia za mkato za icon (Tafuta, Chat, Hifadhi)", "Pakia manifest.json mpya.");
+  } catch (e) { /* tayari imeripotiwa */ }
+
+  /* 4. Service worker */
+  try {
+    const reg = navigator.serviceWorker ? await navigator.serviceWorker.getRegistration("./") : null;
+    add(reg ? "ok" : "warn", "Service worker (kuwezesha kusakinisha app)",
+      reg ? "" : "Fungua index.html mara moja kisha urudi hapa. Ikiendelea, hakikisha sw.js imepakiwa.");
+  } catch (e) { add("warn", "Service worker haijaweza kukaguliwa"); }
+
+  /* 5. Akaunti ya admin */
+  const u = auth.currentUser;
+  add(u && u.emailVerified ? "ok" : "bad", "Barua pepe ya admin imethibitishwa",
+    "Bila hii, rules zinakataa kuhifadhi na kuidhinisha malipo. Fungua kiungo cha uthibitisho ulichotumiwa na Firebase.");
+
+  /* 6. Rules (kila mkusanyiko unasomeka) */
+  async function can(label, fn) {
+    try { await fn(); add("ok", "Rules: " + label); }
+    catch (e) {
+      add(e.code === "permission-denied" ? "bad" : "warn", "Rules: " + label,
+        e.code === "permission-denied"
+          ? "Imekataliwa. Bandika rules mpya za Firestore na ubonyeze Publish."
+          : (e.message || ""));
+    }
+  }
+  await can("movies", () => db.collection("movies").limit(1).get());
+  await can("series", () => db.collection("series").limit(1).get());
+  await can("announcements", () => db.collection("announcements").limit(1).get());
+  await can("profiles", () => db.collection("profiles").limit(1).get());
+  await can("viewCounts", () => db.collection("viewCounts").limit(1).get());
+  await can("globalChat", () => db.collection("globalChat").limit(1).get());
+  await can("chatReports", () => db.collection("chatReports").limit(1).get());
+  await can("chatBans", () => db.collection("chatBans").limit(1).get());
+  await can("chatUsers", () => db.collection("chatUsers").limit(1).get());
+
+  /* 7. Data ya filamu */
+  try {
+    const ms = await db.collection("movies").get();
+    const blank = ms.docs.filter(d => !(d.data().title || "").trim()).length;
+    add(blank ? "warn" : "ok", "Filamu zisizo na jina: " + blank, blank ? "Zifute kwenye tab ya Filamu (zinaitwa 'Bila jina')." : "");
+
+    const paid = ms.docs.filter(d => d.data().price > 0);
+    const leaks = paid.filter(d => (d.data().videoUrl || "").trim()).length;
+    add(leaks ? "bad" : "ok", "Filamu za kulipia zenye link wazi: " + leaks,
+      leaks ? "Link ya video inaonekana kwa kila mtu. Hariri filamu hizo kisha uzihifadhi tena." : "");
+
+    let missing = 0;
+    for (const d of paid) {
+      const sec = await db.collection("movieSecrets").doc(d.id).get();
+      if (!sec.exists || !(sec.data().videoUrl || "")) missing++;
+    }
+    add(missing ? "bad" : "ok", "Filamu za kulipia zisizo na link ya siri: " + missing,
+      missing ? "Zihariri kwenye tab ya Filamu, weka link ya video, na uhifadhi." : "");
+
+    const nop = ms.docs.filter(d => (d.data().title || "").trim() && !(d.data().poster || "").trim()).length;
+    add(nop ? "warn" : "ok", "Filamu zisizo na poster: " + nop, nop ? "Weka Poster URL ili zionekane vizuri." : "");
+  } catch (e) { add("warn", "Data ya filamu haijaweza kukaguliwa", e.message || ""); }
+
+  /* 8. Data ya series */
+  try {
+    const ss = await db.collection("series").get();
+    const paidS = ss.docs.filter(d => d.data().price > 0);
+    let missS = 0;
+    for (const d of paidS) {
+      const sec = await db.collection("seriesSecrets").doc(d.id).get();
+      if (!sec.exists) missS++;
+    }
+    add(missS ? "bad" : "ok", "Series za kulipia zisizo na link za siri: " + missS,
+      missS ? "Zifungue kwenye Series Admin na uzihifadhi tena." : "");
+    const noEp = ss.docs.filter(d => !(d.data().seasons || []).length).length;
+    add(noEp ? "warn" : "ok", "Series zisizo na season: " + noEp, noEp ? "Ongeza season na episodes au zifute." : "");
+  } catch (e) { add("warn", "Data ya series haijaweza kukaguliwa", e.message || ""); }
+
+  /* 9. Mipangilio */
+  try {
+    const ch = await db.collection("settings").doc("chat").get();
+    add(ch.exists && ch.data().enabled ? "ok" : "warn", "Chat " + (ch.exists && ch.data().enabled ? "imewashwa" : "imezimwa"),
+      ch.exists && ch.data().enabled ? "" : "Washa kwenye tab ya Chat ukiwa tayari.");
+    const ad = await db.collection("settings").doc("ads").get();
+    if (!ad.exists || !ad.data().enabled) add("warn", "Matangazo yamezimwa", "Washa kwenye tab ya Matangazo ukishapata code kutoka kwa mtandao wa matangazo.");
+    else if (!ad.data().preroll && !ad.data().below) add("warn", "Matangazo yamewashwa lakini hakuna code", "Bandika code ya tangazo.");
+    else add("ok", "Matangazo yamewashwa");
+  } catch (e) { add("warn", "Mipangilio haijaweza kukaguliwa", e.message || ""); }
+
+  /* Onyesha */
+  list.replaceChildren();
+  const icon = { ok: "✅", warn: "⚠️", bad: "❌" };
+  const order = { bad: 0, warn: 1, ok: 2 };
+  res.sort((a, b) => order[a.st] - order[b.st]).forEach(r => {
+    const row = document.createElement("div");
+    row.className = "chk";
+    const ic = document.createElement("span");
+    ic.textContent = icon[r.st];
+    const body = document.createElement("div");
+    const t = document.createElement("strong");
+    t.textContent = r.title;
+    body.append(t);
+    if (r.hint && r.st !== "ok") {
+      const h = document.createElement("small");
+      h.textContent = r.hint;
+      body.append(h);
+    }
+    row.append(ic, body);
+    list.append(row);
+  });
+
+  const c = { ok: 0, warn: 0, bad: 0 };
+  res.forEach(r => c[r.st]++);
+  $("checkSummary").textContent = "✅ " + c.ok + "   ⚠️ " + c.warn + "   ❌ " + c.bad;
+}
+
+$("runCheckBtn").addEventListener("click", runChecks);
+
 function showTab(name) {
   document.querySelectorAll(".tab").forEach(p =>
     p.classList.toggle("hidden", p.dataset.tab !== name));
@@ -1845,6 +2046,7 @@ function showTab(name) {
   if (name === "notice") loadNoticeAdmin();
   if (name === "ads") loadAdsAdmin();
   if (name === "chat") loadChatAdmin();
+  if (name === "check") runChecks();
 }
 
 document.querySelectorAll("#tabs button").forEach(b =>
