@@ -315,6 +315,23 @@ body.locked .topbar{display:none}
 .inbox-item small{color:var(--muted)}
 .inbox-item.new{border-left:3px solid var(--gold);padding-left:10px}
 
+/* ===== kifurushi, nyota, wasifu, vifaa ===== */
+.card .badge.soon{background:var(--accent);color:#fff}
+.stars{display:flex;align-items:center;gap:2px;margin:6px 0 2px;flex-wrap:wrap}
+.star{background:none;color:#4b4668;font-size:28px;padding:0 2px;line-height:1;border-radius:6px}
+.star.on{color:var(--gold)}
+.hist-row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--border);text-align:left;width:100%;background:none;color:inherit;border-radius:0;font-weight:400}
+.hist-row:first-of-type{border-top:0}
+.hist-row small{display:block;color:var(--muted)}
+.avs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px}
+.av-opt{width:100%;aspect-ratio:1;border-radius:50%;padding:0;border:3px solid transparent}
+.av-opt.on{border-color:var(--gold)}
+.dev-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--border)}
+.dev-row small{display:block;color:var(--muted)}
+.pc #pSleep,.pc #pIntro{font-size:12px;padding:5px 10px;border-radius:99px;background:#0008;font-weight:700}
+.pc #pSleep.on{color:var(--gold)}
+.phint{position:absolute;left:50%;top:20%;transform:translateX(-50%);z-index:5;background:#000b;padding:6px 16px;border-radius:99px;font-weight:800;pointer-events:none}
+.paypass{width:100%;margin-top:10px}
 /* ===== mipangilio na ruhusa ===== */
 .set-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--border)}
 .set-row.first{border-top:0}
@@ -384,6 +401,7 @@ body.locked .topbar{display:none}
   </div>
   <h1>Ingia ili kuendelea</h1>
   <p id="gateText">Inapakia...</p>
+  <button id="gateDevices" type="button" class="hidden">Dhibiti vifaa</button>
   <div class="feats">
     <div class="feat">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9.5v5l4.5-2.5z" fill="currentColor"/></svg>
@@ -523,6 +541,10 @@ body.locked .topbar{display:none}
       <div id="myPayments"><span class="muted">Inapakia...</span></div>
     </div>
 
+    <div id="passBox" class="pay-card hidden"></div>
+
+    <div id="historyBox" class="pay-card"></div>
+
     <div id="settingsBox" class="pay-card"></div>
 
     <div id="themeBox" class="pay-card">
@@ -563,6 +585,37 @@ body.locked .topbar{display:none}
       </div>
     </form>
     <button id="resetPassword" class="ghost sm" style="margin-top:14px">Nimesahau nenosiri</button>
+  </div>
+</div>
+
+<!-- WASIFU -->
+<div id="profileModal" class="modal hidden">
+  <div class="box">
+    <h2>Wasifu wangu</h2>
+    <form id="profileForm">
+      <label for="profName">Jina la kuonyesha</label>
+      <input id="profName" maxlength="20" placeholder="Mfano: Prosper">
+      <label>Rangi ya picha yako</label>
+      <div id="avatarPick" class="avs"></div>
+      <div class="actions-row">
+        <button type="submit" id="profSave">Hifadhi</button>
+        <button type="button" class="ghost" data-close="profileModal">Funga</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- VIFAA -->
+<div id="deviceModal" class="modal hidden">
+  <div class="box">
+    <h2>Vifaa vingi mno</h2>
+    <p class="muted" style="margin:8px 0 0;font-size:13.5px">
+      Akaunti hii imefikia kikomo cha vifaa. Ondoa kifaa ambacho hukitumii ili uendelee kwenye kifaa hiki.
+    </p>
+    <div id="deviceList" style="margin-top:10px"></div>
+    <div class="actions-row">
+      <button type="button" class="ghost" id="deviceSignOut">Toka</button>
+    </div>
   </div>
 </div>
 
@@ -621,6 +674,8 @@ body.locked .topbar{display:none}
     <div id="payPendingNote" class="note hidden">
       Una ombi la malipo la hii linalosubiri idhini. Subiri kidogo kisha bonyeza "Onyesha upya" kwenye Akaunti.
     </div>
+
+    <button id="payPassLink" type="button" class="ghost paypass hidden"></button>
 
     <div class="paybox">
       <div class="line"><span class="k">Mtandao</span><span class="v">Tigo Pesa (Mixx by Yas)</span></div>
@@ -686,6 +741,7 @@ body.locked .topbar{display:none}
       referrerpolicy="strict-origin-when-cross-origin"></iframe>
     <div id="pwrap" class="pwrap" style="display:none">
       <video id="playerVideo" playsinline disablePictureInPicture></video>
+      <div id="pHint" class="phint hidden"></div>
 
       <div id="pc" class="pc show">
         <div class="ptop">
@@ -717,6 +773,8 @@ body.locked .topbar{display:none}
           <div class="prow">
             <div class="g">
               <button type="button" id="pCC" class="hidden" aria-label="Manukuu">CC</button>
+              <button type="button" id="pSleep" aria-label="Kipima muda cha kulala">🌙</button>
+              <button type="button" id="pIntro" class="hidden" aria-label="Ruka intro">Ruka intro</button>
             </div>
             <div class="g">
               <button type="button" id="pNext" class="hidden" aria-label="Ep inayofuata">
@@ -839,7 +897,7 @@ function showView(name) {
   window.scrollTo({ top: 0 });
   if (name === "Saved") loadSaved();
   if (name === "Search") $("searchInput").focus();
-  if (name === "Account") refreshMine();
+  if (name === "Account") { refreshMine(); loadHistory(); }
   if (name === "Chat") startChat(); else stopChat();
 }
 document.querySelectorAll(".nav button").forEach(b =>
@@ -869,6 +927,7 @@ let heroItems = [], heroIdx = 0, heroTimer = null, heroKey = "";
 function setHero() { /* imebadilishwa na buildHero() */ }
 
 function heroPlayLabel(item, kind) {
+  if (isComing(item)) return "Inakuja";
   return item.price > 0 && !isUnlocked(item)
     ? "Lipia " + fmtPrice(item.price)
     : (kind === "series" ? "Tazama" : "Cheza sasa");
@@ -901,8 +960,16 @@ function renderHero() {
 
 function buildHero() {
   const items = [];
-  ownList.slice(0, 3).forEach(x => items.push({ item: x, kind: "movie" }));
-  seriesList.slice(0, 3).forEach(x => items.push({ item: x, kind: "series" }));
+  featuredIds.forEach(id => {
+    const m = ownList.find(x => x.id === id);
+    if (m) { items.push({ item: m, kind: "movie" }); return; }
+    const sr = seriesList.find(x => x.id === id);
+    if (sr) items.push({ item: sr, kind: "series" });
+  });
+  if (!items.length) {
+    ownList.slice(0, 3).forEach(x => items.push({ item: x, kind: "movie" }));
+    seriesList.slice(0, 3).forEach(x => items.push({ item: x, kind: "series" }));
+  }
   if (!items.length) return;
 
   const key = items.map(x => x.item.id).join(",");
@@ -933,6 +1000,7 @@ $("heroPlay").onclick = () => showView("Search");
 function isUnlocked(item) {
   if (!(item.price > 0)) return true;
   if (isAdminUser(currentUser)) return true;
+  if (passActive()) return true;
   return purchased.has(item.id);
 }
 
@@ -988,12 +1056,13 @@ $("refreshMine").addEventListener("click", async () => {
 });
 
 /* ---- Usasishaji wa moja kwa moja ---- */
-let unsubPay = null, unsubPur = null, unsubProg = null;
+let unsubPay = null, unsubPur = null, unsubProg = null, unsubPass = null;
 
 function stopLive() {
   if (unsubPay) { unsubPay(); unsubPay = null; }
   if (unsubPur) { unsubPur(); unsubPur = null; }
   if (unsubProg) { unsubProg(); unsubProg = null; }
+  if (unsubPass) { unsubPass(); unsubPass = null; }
 }
 
 function startLive() {
@@ -1029,6 +1098,19 @@ function startLive() {
       renderContinue();
       renderRecs();
     }, err => console.error("Progress live", err));
+
+  unsubPass = db.collection("users").doc(currentUser.uid).collection("pass").doc("current")
+    .onSnapshot(snap => {
+      const e = snap.exists && snap.data().expiresAt && snap.data().expiresAt.toMillis ? snap.data().expiresAt.toMillis() : 0;
+      const wasActive = passActive();
+      passExpiry = e;
+      renderPass();
+      renderOwn();
+      renderSeriesList();
+      buildHero();
+      if (!wasActive && passActive()) showMessage("Kifurushi chako kimewashwa! Unaweza kutazama zote.");
+      if (payItem && payItem.id === "pass" && passActive()) closeModal("payModal");
+    }, err => console.error("Pass live", err));
 }
 
 function pendingFor(id) {
@@ -1037,7 +1119,11 @@ function pendingFor(id) {
 
 function openPay(item) {
   payItem = item;
-  $("payTitle").textContent = "Lipia kutazama";
+  $("payTitle").textContent = item.id === "pass" ? "Lipia kifurushi" : "Lipia kutazama";
+  const pi = passItem();
+  const pl = $("payPassLink");
+  pl.classList.toggle("hidden", !(pi && item.id !== "pass"));
+  if (pi) pl.textContent = "💳 Au nunua kifurushi cha mwezi (" + fmtPrice(pi.price) + ") kufungua zote";
   $("payItemName").textContent = item.title;
   $("payAmount").textContent = fmtPrice(item.price);
   $("payAmount2").textContent = fmtPrice(item.price);
@@ -1139,8 +1225,12 @@ function renderAccount() {
   const admin = isAdminUser(currentUser);
   const email = currentUser.email || "";
 
-  box.append(el("div", "avatar", (email[0] || "?").toUpperCase()));
-  box.append(el("h3", "", email));
+  const dn = ((myProfile && myProfile.displayName) || "").trim();
+  const av = el("div", "avatar", ((dn || email)[0] || "?").toUpperCase());
+  av.style.background = AVATARS[(myProfile && myProfile.avatar) || 0] || AVATARS[0];
+  box.append(av);
+  box.append(el("h3", "", dn || email));
+  if (dn) { const em = el("p", "muted", email); em.style.cssText = "margin:0 0 6px;font-size:13px"; box.append(em); }
   box.append(el("span", "role" + (admin ? " admin" : ""), admin ? "Admin" : "Mtumiaji"));
   const stack = el("div", "stack");
   const out = el("button", "ghost", "Toka");
@@ -1159,7 +1249,9 @@ function renderAccount() {
   }
   const hist = el("button", "ghost", "Futa historia ya kutazama");
   hist.addEventListener("click", clearHistory);
-  stack.append(hist, out);
+  const prof = el("button", "ghost", "✏️ Hariri wasifu");
+  prof.addEventListener("click", openProfile);
+  stack.append(prof, hist, out);
 
   const links = el("div", "footlinks");
   links.style.marginTop = "14px";
@@ -1198,6 +1290,8 @@ function loadContent() {
   loadAds();
   loadWatched();
   loadSavedOwnIds();
+  loadPassCfg();
+  loadFeatured();
   loadOwnMovies();
   loadSeries();
 }
@@ -1238,17 +1332,8 @@ auth.onAuthStateChanged(async user => {
   renderAccount();
 
   if (user) {
-    document.body.classList.remove("locked");
-    $("payBox").classList.remove("hidden");
-    startLive();
-    startAnnouncements();
-    db.collection("profiles").doc(user.uid).set({
-      uid: user.uid, email: user.email || "",
-      lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge: true }).catch(() => {});
-    loadContent();
-    goHash();
-    if ($("viewSaved").classList.contains("active")) loadSaved();
+    if (!(await deviceGate(user))) return;
+    enterApp(user);
   } else {
     stopLive();
     stopAnnouncements();
@@ -1264,6 +1349,8 @@ auth.onAuthStateChanged(async user => {
     progressList = [];
     watchedMap = {};
     savedOwn = new Set();
+    passExpiry = 0; passCfg = null; myProfile = {}; featuredIds = [];
+    renderPass();
     $("payBox").classList.add("hidden");
     closePlayer();
     closeModal("payModal");
@@ -1418,6 +1505,8 @@ function toEmbedUrl(url) {
 
 function loadInPlayer(url, sub, q) {
   const frame = $("playerFrame"), video = $("playerVideo");
+  introEnd = Number(q && q.intro) || 0;
+  hideIntro();
   let r = toEmbedUrl(url);
   if (r.type === "video") {
     setupQuality(url, q);
@@ -1432,6 +1521,7 @@ function loadInPlayer(url, sub, q) {
     frame.style.display = "none";
     $("pwrap").style.display = "block";
     video.controls = false;
+    video.muted = prefOn("pm_muted", false);
     video.disablePictureInPicture = true;
     video.oncontextmenu = ev => ev.preventDefault();
     video.src = r.src;
@@ -1455,6 +1545,7 @@ function closePlayer() {
   exitPfs();
   cancelPreroll();
   hideBelow();
+  resetSleep();
   playCtx = null; seriesCtx = null; pendingSeek = 0;
   $("pwrap").style.display = "none";
   setSubtitle("");
@@ -1517,6 +1608,7 @@ $("playerVideo").addEventListener("loadedmetadata", () => {
    KICHEZA CHA KISASA: vidhibiti vyake vyenyewe
 ===================================================== */
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
+let swipeDone = false, introEnd = 0, sleepIdx = 0, sleepTimer = null;
 const IC = {
   play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>',
   pause: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>',
@@ -1566,6 +1658,7 @@ function skip(sec) {
 
 /* gusa video: onyesha/ficha vidhibiti; gusa mara mbili kushoto/kulia: ruka sekunde 10 */
 $("pc").addEventListener("click", e => {
+  if (swipeDone) { swipeDone = false; return; }
   if (e.target.closest("button, input")) return showControls();
   const now = Date.now();
   if (now - lastTap < 300) {
@@ -1589,10 +1682,12 @@ $("pFwd").addEventListener("click", () => skip(10));
 $("pMute").addEventListener("click", () => {
   const v = $("playerVideo");
   v.muted = !v.muted;
+  setPref("pm_muted", v.muted);
   syncMute();
 });
 $("pSpeed").addEventListener("click", () => {
   speedIdx = (speedIdx + 1) % SPEEDS.length;
+  try { localStorage.setItem("pm_speed", String(SPEEDS[speedIdx])); } catch (e) {}
   applySpeed();
 });
 
@@ -1678,7 +1773,7 @@ $("playerVideo").addEventListener("volumechange", syncMute);
 $("playerVideo").addEventListener("play", () => { syncPlay(); showControls(); });
 $("playerVideo").addEventListener("pause", () => { syncPlay(); showControls(); saveProgress(true); });
 $("playerVideo").addEventListener("durationchange", updateSeek);
-$("playerVideo").addEventListener("timeupdate", () => { updateSeek(); saveProgress(false); });
+$("playerVideo").addEventListener("timeupdate", () => { updateSeek(); updateIntro(); saveProgress(false); });
 $("playerVideo").addEventListener("loadedmetadata", () => {
   const v = $("playerVideo");
   if (pendingSeek > 0) {
@@ -2774,6 +2869,420 @@ try {
 } catch (e) {}
 renderSettings();
 
+/* =====================================================
+   KICHEZA: kumbukumbu ya kasi/sauti, kuruka intro, kuteleza, kipima muda
+===================================================== */
+try {
+  const sv = parseFloat(localStorage.getItem("pm_speed"));
+  const si = SPEEDS.indexOf(sv);
+  if (si >= 0) speedIdx = si;
+} catch (e) {}
+
+function hideIntro() { $("pIntro").classList.add("hidden"); }
+
+function updateIntro() {
+  const t = $("playerVideo").currentTime || 0;
+  let show = false;
+  if (introEnd > 0) show = t >= 2 && t < introEnd - 1;
+  else show = !!seriesCtx && t >= 5 && t < 180;
+  $("pIntro").textContent = introEnd > 0 ? "Ruka intro" : "+85s";
+  $("pIntro").classList.toggle("hidden", !show);
+}
+$("pIntro").addEventListener("click", () => {
+  if (introEnd > 0) $("playerVideo").currentTime = introEnd;
+  else skip(85);
+});
+
+const SLEEPS = [0, 15, 30, 60];
+function syncSleep() {
+  const m = SLEEPS[sleepIdx];
+  $("pSleep").textContent = m ? "🌙 " + m + "d" : "🌙";
+  $("pSleep").classList.toggle("on", !!m);
+}
+function resetSleep() {
+  clearTimeout(sleepTimer);
+  sleepTimer = null;
+  sleepIdx = 0;
+  syncSleep();
+}
+$("pSleep").addEventListener("click", () => {
+  clearTimeout(sleepTimer);
+  sleepIdx = (sleepIdx + 1) % SLEEPS.length;
+  const m = SLEEPS[sleepIdx];
+  if (m) {
+    sleepTimer = setTimeout(() => {
+      $("playerVideo").pause();
+      sleepIdx = 0;
+      syncSleep();
+      showMessage("Kipima muda kimeisha: video imesimamishwa. Lala salama! 🌙");
+    }, m * 60000);
+    showMessage("Video itajisimamisha baada ya dakika " + m + ".");
+  } else showMessage("Kipima muda kimezimwa.");
+  syncSleep();
+});
+syncSleep();
+
+/* kuteleza kidole kushoto/kulia kuruka video (4px = sekunde 1) */
+let tStart = null, swipeDelta = 0;
+function showHint(text) {
+  const h = $("pHint");
+  h.textContent = text;
+  h.classList.remove("hidden");
+}
+$("pc").addEventListener("touchstart", e => {
+  if (e.target.closest("button, input")) { tStart = null; return; }
+  const t = e.touches[0];
+  tStart = { x: t.clientX, y: t.clientY };
+  swipeDelta = 0;
+}, { passive: true });
+$("pc").addEventListener("touchmove", e => {
+  if (!tStart) return;
+  const t = e.touches[0];
+  let dx = t.clientX - tStart.x, dy = t.clientY - tStart.y;
+  if (document.body.classList.contains("pfs") && document.body.classList.contains("port")) {
+    const nx = dy, ny = -dx;
+    dx = nx; dy = ny;
+  }
+  if (Math.abs(dx) < 24 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+  swipeDelta = Math.round(dx / 4);
+  showHint((swipeDelta > 0 ? "+" : "") + swipeDelta + "s");
+}, { passive: true });
+$("pc").addEventListener("touchend", () => {
+  if (tStart && swipeDelta) { skip(swipeDelta); swipeDone = true; showControls(); }
+  tStart = null;
+  swipeDelta = 0;
+  $("pHint").classList.add("hidden");
+}, { passive: true });
+
+/* =====================================================
+   INAKUJA HIVI KARIBUNI
+===================================================== */
+function relMs(item) {
+  const r = item && item.releaseAt;
+  return r && r.toMillis ? r.toMillis() : 0;
+}
+function isComing(item) { return relMs(item) > Date.now(); }
+function comingStr(item) {
+  const ms = relMs(item) - Date.now();
+  const d = Math.floor(ms / 86400000), h = Math.floor(ms % 86400000 / 3600000);
+  if (d > 0) return "siku " + d + (h ? " saa " + h : "");
+  if (h > 0) return "saa " + h;
+  return "dakika " + Math.max(1, Math.floor(ms / 60000));
+}
+
+/* =====================================================
+   KIFURUSHI CHA MWEZI
+===================================================== */
+let passCfg = null, passExpiry = 0;
+function passActive() { return passExpiry > Date.now(); }
+function passItem() {
+  return passCfg ? { id: "pass", title: "Kifurushi cha mwezi", price: passCfg.price } : null;
+}
+
+async function loadPassCfg() {
+  try {
+    const sn = await db.collection("settings").doc("pass").get();
+    passCfg = sn.exists && sn.data().enabled && sn.data().price > 0 ? sn.data() : null;
+  } catch (e) { passCfg = null; }
+  renderPass();
+}
+
+function renderPass() {
+  const box = $("passBox");
+  if (!box) return;
+  box.replaceChildren();
+  if (!currentUser || !passCfg) { box.classList.add("hidden"); return; }
+  box.classList.remove("hidden");
+
+  box.append(el("h3", "", "Kifurushi cha mwezi"));
+  const days = passCfg.days || 30;
+  const p = el("p", "muted", "Fungua filamu na series zote za kulipia kwa siku " + days + " kwa " + fmtPrice(passCfg.price) + ".");
+  p.style.cssText = "margin:6px 0 10px;font-size:13.5px";
+  box.append(p);
+
+  const st = passActive()
+    ? el("span", "pill ok", "Kipo hai hadi " + new Date(passExpiry).toLocaleDateString())
+    : el("span", "pill", "Huna kifurushi");
+  box.append(st);
+
+  const b = el("button", "", passActive() ? "Ongeza muda" : "Nunua kifurushi");
+  b.type = "button";
+  b.style.cssText = "display:block;margin-top:12px;width:100%";
+  b.addEventListener("click", () => openPay(passItem()));
+  box.append(b);
+}
+
+/* =====================================================
+   BANNER ILIYOPANGWA NA ADMIN
+===================================================== */
+let featuredIds = [];
+async function loadFeatured() {
+  try {
+    const sn = await db.collection("settings").doc("featured").get();
+    featuredIds = sn.exists ? (sn.data().ids || []) : [];
+  } catch (e) { featuredIds = []; }
+  buildHero();
+}
+
+/* =====================================================
+   UKADIRIAJI KWA NYOTA
+===================================================== */
+async function renderStars(box, item) {
+  box.replaceChildren();
+  let stat = { sum: 0, count: 0 }, mine = 0;
+  try {
+    const [a, b] = await Promise.all([
+      db.collection("ratingStats").doc(item.id).get(),
+      currentUser ? db.collection("users").doc(currentUser.uid).collection("ratings").doc(item.id).get() : Promise.resolve(null)
+    ]);
+    if (a.exists) stat = a.data();
+    if (b && b.exists) mine = b.data().value || 0;
+  } catch (e) {}
+
+  const row = el("div", "stars");
+  for (let i = 1; i <= 5; i++) {
+    const star = el("button", "star" + (i <= mine ? " on" : ""), "★");
+    star.type = "button";
+    star.setAttribute("aria-label", i + " nyota");
+    star.addEventListener("click", async () => {
+      if (await rateItem(item, i)) renderStars(box, item);
+    });
+    row.append(star);
+  }
+  const avg = stat.count ? (stat.sum / stat.count).toFixed(1) + " (" + stat.count + ")" : "Bado hakuna ukadiriaji";
+  row.append(el("span", "muted", " " + avg));
+  box.append(row);
+  if (mine) box.append(el("small", "muted", "Ukadiriaji wako: " + mine + "/5. Bonyeza nyota kubadilisha."));
+}
+
+async function rateItem(item, value) {
+  if (!currentUser) { showMessage("Ingia kwanza ili ukadirie.", true); return false; }
+  const sRef = db.collection("ratingStats").doc(item.id);
+  const rRef = db.collection("users").doc(currentUser.uid).collection("ratings").doc(item.id);
+  try {
+    await db.runTransaction(async tx => {
+      const [s2, r2] = await Promise.all([tx.get(sRef), tx.get(rRef)]);
+      const old = r2.exists ? (r2.data().value || 0) : 0;
+      if (s2.exists) {
+        tx.update(sRef, { sum: s2.data().sum + value - old, count: s2.data().count + (r2.exists ? 0 : 1) });
+      } else {
+        tx.set(sRef, { sum: value, count: 1 });
+      }
+      tx.set(rRef, { value: value, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    });
+    showMessage("Asante kwa ukadiriaji wako ★" + value);
+    return true;
+  } catch (error) {
+    showMessage(error.code === "permission-denied" ? "Imeshindikana kuhifadhi ukadiriaji." : friendlyError(error), true);
+    return false;
+  }
+}
+
+/* =====================================================
+   WASIFU NA HISTORIA
+===================================================== */
+const AVATARS = [
+  "linear-gradient(135deg,#8b6bff,#3a2b86)", "linear-gradient(135deg,#3aa0ff,#14507f)",
+  "linear-gradient(135deg,#ff7a45,#8a3a1a)", "linear-gradient(135deg,#35c98a,#17694a)",
+  "linear-gradient(135deg,#ff5fa2,#8a2a63)", "linear-gradient(135deg,#ffc857,#b8721a)",
+  "linear-gradient(135deg,#9aa4b2,#3b4452)", "linear-gradient(135deg,#00d4c8,#0a6b72)"
+];
+let myProfile = {}, pickAvatar = 0;
+
+async function loadProfile() {
+  try {
+    const sn = await db.collection("profiles").doc(currentUser.uid).get();
+    myProfile = sn.exists ? sn.data() : {};
+  } catch (e) { myProfile = {}; }
+  renderAccount();
+}
+
+function openProfile() {
+  $("profName").value = (myProfile && myProfile.displayName) || "";
+  pickAvatar = (myProfile && myProfile.avatar) || 0;
+  const g = $("avatarPick");
+  g.replaceChildren();
+  AVATARS.forEach((bg, i) => {
+    const b = el("button", "av-opt" + (i === pickAvatar ? " on" : ""));
+    b.type = "button";
+    b.style.background = bg;
+    b.setAttribute("aria-label", "Rangi " + (i + 1));
+    b.addEventListener("click", () => {
+      pickAvatar = i;
+      g.querySelectorAll(".av-opt").forEach((x, j) => x.classList.toggle("on", j === i));
+    });
+    g.append(b);
+  });
+  openModal("profileModal");
+}
+
+$("profileForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const name = $("profName").value.trim().replace(/\s+/g, " ");
+  if (name.length > 20) return showMessage("Jina lisizidi herufi 20.", true);
+  $("profSave").disabled = true;
+  try {
+    await db.collection("profiles").doc(currentUser.uid).set({
+      uid: currentUser.uid, email: currentUser.email || "",
+      displayName: name, avatar: pickAvatar
+    }, { merge: true });
+    myProfile = Object.assign({}, myProfile, { displayName: name, avatar: pickAvatar });
+    closeModal("profileModal");
+    renderAccount();
+    showMessage("Wasifu umehifadhiwa.");
+  } catch (error) {
+    showMessage(friendlyError(error), true);
+  } finally { $("profSave").disabled = false; }
+});
+
+async function loadHistory() {
+  const box = $("historyBox");
+  if (!box || !currentUser) return;
+  box.replaceChildren(el("h3", "", "Ulichotazama"));
+  try {
+    const snap = await db.collection("users").doc(currentUser.uid).collection("watched").orderBy("at", "desc").limit(20).get();
+    if (snap.empty) {
+      const m = el("p", "muted", "Bado hujatazama kitu.");
+      m.style.cssText = "margin:6px 0 0;font-size:13.5px";
+      box.append(m);
+      return;
+    }
+    snap.docs.forEach(d => {
+      const w = d.data();
+      const item = (w.kind === "series" ? seriesList : ownList).find(x => x.id === d.id);
+      const row = el("button", "hist-row");
+      row.type = "button";
+      const left = el("div");
+      left.append(el("strong", "", w.title || "Bila jina"));
+      left.append(el("small", "", (w.kind === "series" ? "Series" : "Filamu") + " · " + (w.at && w.at.toDate ? w.at.toDate().toLocaleDateString() : "")));
+      row.append(left, el("span", "muted", "›"));
+      row.addEventListener("click", () => {
+        if (item) openDetailOwn(item, w.kind === "series" ? "series" : "movie");
+        else showMessage("Hii haipatikani tena.", true);
+      });
+      box.append(row);
+    });
+  } catch (e) {
+    box.append(el("p", "muted", "Imeshindikana kupakia historia."));
+  }
+}
+
+/* =====================================================
+   KIKOMO CHA VIFAA KWA AKAUNTI
+===================================================== */
+let deviceMax = 3, deviceCtx = null;
+
+function getDeviceId() {
+  try {
+    let id = localStorage.getItem("pm_dev");
+    if (!id) {
+      id = "d" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+      localStorage.setItem("pm_dev", id);
+    }
+    return id;
+  } catch (e) { return "d-session"; }
+}
+
+function deviceName() {
+  const ua = navigator.userAgent || "";
+  const os = /Android/i.test(ua) ? "Android" : /iPhone|iPad/i.test(ua) ? "iPhone/iPad" : /Windows/i.test(ua) ? "Windows" : /Mac/i.test(ua) ? "Mac" : /Linux/i.test(ua) ? "Linux" : "Kifaa";
+  const br = /Edg/i.test(ua) ? "Edge" : /Chrome/i.test(ua) ? "Chrome" : /Firefox/i.test(ua) ? "Firefox" : /Safari/i.test(ua) ? "Safari" : "Browser";
+  return os + " · " + br;
+}
+
+async function deviceGate(user) {
+  if (isAdminUser(user)) return true;
+  try {
+    try {
+      const l = await db.collection("settings").doc("limits").get();
+      if (l.exists && Number(l.data().maxDevices) > 0) deviceMax = Number(l.data().maxDevices);
+    } catch (e) {}
+    const ref = db.collection("users").doc(user.uid).collection("meta").doc("devices");
+    const snap = await ref.get();
+    let list = snap.exists ? (snap.data().list || []) : [];
+    const id = getDeviceId();
+    if (list.some(d => d.id === id)) return true;
+    if (list.length < deviceMax) {
+      list = list.concat([{ id: id, name: deviceName(), at: Date.now() }]);
+      await ref.set({ list: list, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+      return true;
+    }
+    deviceCtx = { user: user, ref: ref, list: list };
+    document.body.classList.add("locked");
+    $("gateForm").classList.add("hidden");
+    $("gateText").textContent = "Akaunti hii imefikia kikomo cha vifaa " + deviceMax + ".";
+    $("gateDevices").classList.remove("hidden");
+    showDeviceModal();
+    return false;
+  } catch (e) {
+    console.info("Device gate", e);
+    return true;       // usimfungie mtu nje kwa hitilafu ya mtandao au rules
+  }
+}
+
+function showDeviceModal() {
+  if (!deviceCtx) return;
+  const list = $("deviceList");
+  list.replaceChildren();
+  deviceCtx.list.forEach(d => {
+    const row = el("div", "dev-row");
+    const left = el("div");
+    left.append(el("strong", "", d.name || "Kifaa"));
+    left.append(el("small", "", "Kiliongezwa: " + (d.at ? new Date(d.at).toLocaleDateString() : "")));
+    const b = el("button", "ghost sm", "Ondoa");
+    b.type = "button";
+    b.addEventListener("click", () => removeDevice(d.id));
+    row.append(left, b);
+    list.append(row);
+  });
+  openModal("deviceModal");
+}
+
+async function removeDevice(id) {
+  if (!deviceCtx) return;
+  try {
+    let list = deviceCtx.list.filter(d => d.id !== id);
+    if (list.length < deviceMax) {
+      list = list.concat([{ id: getDeviceId(), name: deviceName(), at: Date.now() }]);
+    }
+    await deviceCtx.ref.set({ list: list, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    deviceCtx.list = list;
+    if (list.some(d => d.id === getDeviceId())) {
+      closeModal("deviceModal");
+      $("gateDevices").classList.add("hidden");
+      const u = deviceCtx.user;
+      deviceCtx = null;
+      enterApp(u);
+    } else {
+      showDeviceModal();
+    }
+  } catch (error) { showMessage(friendlyError(error), true); }
+}
+
+$("gateDevices").addEventListener("click", showDeviceModal);
+$("deviceSignOut").addEventListener("click", async () => {
+  closeModal("deviceModal");
+  $("gateDevices").classList.add("hidden");
+  deviceCtx = null;
+  try { await auth.signOut(); } catch (e) {}
+});
+
+function enterApp(user) {
+  document.body.classList.remove("locked");
+  $("payBox").classList.remove("hidden");
+  $("gateDevices").classList.add("hidden");
+  startLive();
+  startAnnouncements();
+  db.collection("profiles").doc(user.uid).set({
+    uid: user.uid, email: user.email || "",
+    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+  }, { merge: true }).catch(() => {});
+  loadProfile();
+  loadContent();
+  goHash();
+  if ($("viewSaved").classList.contains("active")) loadSaved();
+}
+
 /* ---------- FILAMU ZETU ---------- */
 async function getMovieUrl(m) {
   if (!(m.price > 0)) return { url: m.videoUrl, q720: m.video720 || "", q480: m.video480 || "" };
@@ -2783,6 +3292,7 @@ async function getMovieUrl(m) {
 }
 
 async function playOwn(m, seek) {
+  if (isComing(m)) return showMessage("Inakuja baada ya " + comingStr(m) + ".", true);
   if (!isUnlocked(m)) return openPay(m);
   try {
     const src = await getMovieUrl(m);
@@ -2814,8 +3324,8 @@ function renderOwn() {
     const open = paid && isUnlocked(m);
     grid.append(makeCard({
       title: m.title || "Filamu", sub: m.year || "", poster: m.poster,
-      badge: paid ? (open ? "Imefunguliwa" : fmtPrice(m.price)) : (isNew(m) ? "Mpya" : "Filamu"),
-      badgeClass: paid ? (open ? "open" : "paid") : "",
+      badge: isComing(m) ? "Inakuja" : paid ? (open ? "Imefunguliwa" : fmtPrice(m.price)) : (isNew(m) ? "Mpya" : "Filamu"),
+      badgeClass: isComing(m) ? "soon" : paid ? (open ? "open" : "paid") : "",
       onClick: () => openDetailOwn(m, "movie")
     }));
   });
@@ -2861,8 +3371,8 @@ function renderSeriesList() {
     grid.append(makeCard({
       title: s.title || "Series", sub: (s.year ? s.year + " · " : "") + n + " Season",
       poster: s.poster,
-      badge: paid ? (open ? "Imefunguliwa" : fmtPrice(s.price)) : (isNew(s) ? "Mpya" : "Series"),
-      badgeClass: paid ? (open ? "open" : "paid") : "",
+      badge: isComing(s) ? "Inakuja" : paid ? (open ? "Imefunguliwa" : fmtPrice(s.price)) : (isNew(s) ? "Mpya" : "Series"),
+      badgeClass: isComing(s) ? "soon" : paid ? (open ? "open" : "paid") : "",
       onClick: () => openDetailOwn(s, "series")
     }));
   });
@@ -2894,6 +3404,7 @@ async function loadSeries() {
 }
 
 async function openSeries(s, resume) {
+  if (isComing(s)) return showMessage("Inakuja baada ya " + comingStr(s) + ".", true);
   if (!isUnlocked(s)) return openPay(s);
 
   const seasons = JSON.parse(JSON.stringify(s.seasons || []))
@@ -3058,6 +3569,12 @@ function openDetailOwn(item, kind) {
     meta.push((all.length - conns) + " Season" + (conns ? " + " + conns + " Connection" : "") + " · " + eps + " Episodes");
   }
   if (meta.length) info.append(el("p", "muted", meta.join(" · ")));
+  if (isComing(item)) {
+    info.append(el("p", "", "⏳ Inatoka tarehe " + new Date(relMs(item)).toLocaleDateString() + " (baada ya " + comingStr(item) + ")"));
+  }
+  const starBox = el("div");
+  info.append(starBox);
+  renderStars(starBox, item);
 
   if ((item.genres || []).length) {
     const chips = el("div", "gchips");
@@ -3076,7 +3593,9 @@ function openDetailOwn(item, kind) {
   if (locked) info.append(el("div", "price-tag", fmtPrice(item.price)));
 
   const row = el("div", "actions-row");
-  const play = el("button", "", locked ? "Lipia kutazama" : (kind === "series" ? "▶ Tazama" : "▶ Cheza"));
+  const coming = isComing(item);
+  const play = el("button", "", coming ? "⏳ Inakuja" : locked ? "Lipia kutazama" : (kind === "series" ? "▶ Tazama" : "▶ Cheza"));
+  if (coming) play.disabled = true;
   play.addEventListener("click", () => {
     closeModal("detailModal");
     if (kind === "series") openSeries(item); else playOwn(item);
@@ -3197,7 +3716,7 @@ window.addEventListener("online", () => { showMessage("Intaneti imerudi."); rend
 document.addEventListener("keydown", e => {
   if (e.key !== "Escape") return;
   if (!$("playerModal").classList.contains("hidden")) return closePlayer();
-  ["payModal", "detailModal", "authModal", "inboxModal", "nickModal", "msgModal"].forEach(id => {
+  ["payModal", "detailModal", "authModal", "inboxModal", "nickModal", "msgModal", "profileModal"].forEach(id => {
     if (!$(id).classList.contains("hidden")) closeModal(id);
   });
 });
