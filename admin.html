@@ -231,6 +231,32 @@
       background: var(--accent);
     }
 
+    .bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 120px;
+      margin-top: 8px;
+    }
+
+    .bar-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      height: 100%;
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .bar-fill {
+      width: 100%;
+      min-height: 2px;
+      background: linear-gradient(var(--accent), #5b3fd6);
+      border-radius: 4px 4px 0 0;
+    }
+
     .chk {
       display: flex;
       gap: 10px;
@@ -376,6 +402,9 @@
       <button type="button" data-tab="pay" class="secondary">💰 Malipo</button>
       <button type="button" data-tab="users" class="secondary">👥 Watumiaji</button>
       <button type="button" data-tab="views" class="secondary">👁️ Tazama</button>
+      <button type="button" data-tab="pass" class="secondary">💳 Kifurushi</button>
+      <button type="button" data-tab="featured" class="secondary">⭐ Banner</button>
+      <button type="button" data-tab="report" class="secondary">📈 Ripoti</button>
       <button type="button" data-tab="check" class="secondary">✅ Hakiki</button>
       <button type="button" data-tab="chat" class="secondary">💬 Chat</button>
       <button type="button" data-tab="tools" class="secondary">⚙️ Zana</button>
@@ -481,6 +510,20 @@
             placeholder="subs/jina.srt  au  https://example.com/jina.vtt"
           >
         </div>
+
+        <div class="grid">
+          <div class="field">
+            <label for="releaseAt">Tarehe ya kutoka (hiari)</label>
+            <input id="releaseAt" type="datetime-local">
+          </div>
+          <div class="field">
+            <label for="introEnd">Ruka intro hadi sekunde (hiari)</label>
+            <input id="introEnd" type="number" min="0" max="900" placeholder="mfano 85">
+          </div>
+        </div>
+        <p class="muted" style="margin:-4px 0 10px;font-size:13px">
+          Ukiweka tarehe ya baadaye, filamu inaonekana kama "Inakuja". Acha link ya video tupu hadi siku ya kutoka kama hutaki ivuje.
+        </p>
 
         <div class="field">
           <label for="price">Bei (TSh), 0 = bure</label>
@@ -605,6 +648,55 @@
       </div>
     </section>
 
+    <!-- KIFURUSHI -->
+    <section class="panel tab" data-tab="pass">
+      <h2>💳 Kifurushi cha Mwezi</h2>
+      <p class="muted">
+        Mtumiaji akilipa kifurushi, anafungua filamu na series zote za kulipia kwa idadi ya siku ulizoweka.
+        Unaidhinisha malipo kwenye tab ya Malipo kama kawaida, na muda unaongezwa wenyewe
+        (akilipa tena kabla hakijaisha, siku zinaongezwa juu ya zilizobaki).
+      </p>
+      <div class="field">
+        <label style="display:flex;align-items:center;gap:8px">
+          <input id="passEnabled" type="checkbox" style="width:auto;margin:0"> Kifurushi kimewashwa
+        </label>
+      </div>
+      <div class="grid">
+        <div class="field"><label for="passPrice">Bei (TSh)</label><input id="passPrice" type="number" min="0" step="100" value="5000"></div>
+        <div class="field"><label for="passDays">Idadi ya siku</label><input id="passDays" type="number" min="1" max="365" value="30"></div>
+      </div>
+      <div class="actions"><button type="button" id="savePassBtn">Hifadhi Kifurushi</button></div>
+    </section>
+
+    <!-- BANNER -->
+    <section class="panel tab" data-tab="featured">
+      <h2>⭐ Banner ya Mwanzo</h2>
+      <p class="muted">
+        Chagua filamu au series (hadi 6) zitakazoonekana kwenye banner kubwa ya Mwanzo, kwa mpangilio wako.
+        Ukiacha tupu, app inatumia zilizo mpya zaidi.
+      </p>
+      <div class="actions">
+        <select id="featPick" style="flex:1;min-width:180px"></select>
+        <button type="button" id="featAdd" class="secondary">Ongeza</button>
+      </div>
+      <div id="featList" style="margin-top:12px"></div>
+      <div class="actions"><button type="button" id="featSave">Hifadhi Banner</button></div>
+    </section>
+
+    <!-- RIPOTI -->
+    <section class="panel tab" data-tab="report">
+      <h2>📈 Ripoti ya Mapato</h2>
+      <p class="muted">Inatokana na malipo yaliyoidhinishwa (filamu, series na vifurushi).</p>
+      <div id="reportCards" class="stats"></div>
+      <h3 style="margin-top:20px">Siku 14 zilizopita</h3>
+      <div id="reportDaily"></div>
+      <h3 style="margin-top:20px">Miezi 6 iliyopita</h3>
+      <div id="reportMonthly"></div>
+      <h3 style="margin-top:20px">Zinazoleta mapato zaidi</h3>
+      <div id="reportTop"></div>
+      <div class="actions"><button type="button" id="reportCsv" class="secondary">Pakua CSV</button></div>
+    </section>
+
     <!-- HAKIKI MFUMO -->
     <section class="panel tab" data-tab="check">
       <h2>✅ Hakiki Mfumo</h2>
@@ -651,6 +743,14 @@
         Link za siri za video za kulipia haziingii kwenye nakala hii.
       </p>
       <button type="button" id="exportBtn">Pakua nakala (JSON)</button>
+
+      <h3 style="margin-top:24px">Vifaa kwa akaunti</h3>
+      <p class="muted">Kuzuia watu kushiriki akaunti moja. Admin hawahusiki na kikomo hiki.</p>
+      <div class="field">
+        <label for="maxDevices">Idadi ya juu ya vifaa kwa akaunti (1 hadi 10)</label>
+        <input id="maxDevices" type="number" min="1" max="10" value="3">
+      </div>
+      <button type="button" id="saveLimitBtn">Hifadhi kikomo</button>
     </section>
 
     <!-- MATANGAZO (ADS) -->
@@ -1005,6 +1105,9 @@ $("movieForm").addEventListener("submit", async event => {
   }
 
   const subUrl = $("subtitleUrl").value.trim();
+  const relVal = $("releaseAt").value;
+  const releaseAt = relVal ? firebase.firestore.Timestamp.fromDate(new Date(relVal)) : null;
+  const introEnd = Math.max(0, parseInt($("introEnd").value, 10) || 0);
 
   if (!validSub(subUrl)) {
     showMessage("Manukuu: tumia subs/jina.srt (faili ndani ya repo) au link ya HTTPS.", true);
@@ -1034,6 +1137,8 @@ $("movieForm").addEventListener("submit", async event => {
     video720: paid ? "" : v720,
     video480: paid ? "" : v480,
     subtitleUrl: subUrl,
+    releaseAt: releaseAt,
+    introEnd: introEnd,
     price: price,
     genres: getGenres(),
     runtime: $("runtime").value.trim(),
@@ -1119,6 +1224,8 @@ async function startEdit(id, movie) {
   $("description").value = movie.description || "";
   $("videoUrl").value = url;
   $("subtitleUrl").value = movie.subtitleUrl || "";
+  $("releaseAt").value = movie.releaseAt && movie.releaseAt.toDate ? toLocalInput(movie.releaseAt.toDate()) : "";
+  $("introEnd").value = movie.introEnd || "";
   $("video720").value = q720;
   $("video480").value = q480;
   $("price").value = movie.price || 0;
@@ -1325,6 +1432,9 @@ async function decidePayment(id, p, approve) {
   if (!confirm(ask)) return;
 
   try {
+    let passInfo = null;
+    if (approve && p.movieId === "pass") passInfo = await computePassExpiry(p.uid);
+
     const ts = firebase.firestore.FieldValue.serverTimestamp();
     const batch = db.batch();
 
@@ -1334,7 +1444,18 @@ async function decidePayment(id, p, approve) {
       decidedAt: ts
     });
 
-    if (approve) {
+    if (approve && p.movieId === "pass") {
+      batch.set(
+        db.collection("users").doc(p.uid).collection("pass").doc("current"),
+        {
+          expiresAt: passInfo.ts,
+          days: passInfo.days,
+          lastTx: p.txCode,
+          amount: p.amount || 0,
+          updatedAt: ts
+        }
+      );
+    } else if (approve) {
       batch.set(
         db.collection("users").doc(p.uid).collection("purchases").doc(p.movieId),
         {
@@ -1499,7 +1620,20 @@ async function loadUsers() {
       .sort((a, b) => ((b.data().lastLogin || {}).seconds || 0) - ((a.data().lastLogin || {}).seconds || 0))
       .forEach(d => {
         const u = d.data();
-        addRow(list, u.email || d.id, "Aliingia mwisho: " + tsStr(u.lastLogin));
+        addRow(list, (u.displayName ? u.displayName + " · " : "") + (u.email || d.id), "Aliingia mwisho: " + tsStr(u.lastLogin));
+
+        const lastRow = list.lastChild;
+        const rb = document.createElement("button");
+        rb.className = "secondary";
+        rb.textContent = "Futa vifaa";
+        rb.addEventListener("click", async () => {
+          if (!confirm("Futa orodha ya vifaa vya mtumiaji huyu? Ataweza kuingia kwenye vifaa vipya.")) return;
+          try {
+            await db.collection("users").doc(d.id).collection("meta").doc("devices").delete();
+            showMessage("Vifaa vimefutwa.");
+          } catch (error) { showMessage(getErrorMessage(error), true); }
+        });
+        lastRow.append(rb);
       });
   } catch (error) {
     list.textContent = "Imeshindikana kupakia watumiaji. Hakikisha rules za \"profiles\" zimewekwa.";
@@ -1902,10 +2036,10 @@ async function runChecks() {
   }
   await version("index.html", [
     ['id="viewChat"', "Chat"], ['id="bellBtn"', "Taarifa"], ["pm_theme", "Mandhari"],
-    ['id="adLayer"', "Matangazo ya kicheza"], ["icon-180.png", "icon za iPhone"], ["favicon.ico", "favicon"], ["function goHash", "viungo vya haraka"], ["pm_notif", "mipangilio ya arifa"]
+    ['id="adLayer"', "Matangazo ya kicheza"], ["icon-180.png", "icon za iPhone"], ["favicon.ico", "favicon"], ["function goHash", "viungo vya haraka"], ["pm_notif", "mipangilio ya arifa"], ["function passActive", "kifurushi"], ["function renderStars", "ukadiriaji"], ["function deviceGate", "kikomo cha vifaa"]
   ]);
-  await version("series-admin.html", [["q720", "ubora wa video"], ["subs/", "manukuu"], ["connection", "connection"]]);
-  await version("sw.js", [["pm-v5", "toleo la sw.js"], ["notificationclick", "arifa"]]);
+  await version("series-admin.html", [["q720", "ubora wa video"], ["subs/", "manukuu"], ["connection", "connection"], ["releaseAt", "tarehe ya kutoka"]]);
+  await version("sw.js", [["pm-v6", "toleo la sw.js"], ["notificationclick", "arifa"]]);
 
   /* 3. Manifest */
   try {
@@ -1947,6 +2081,7 @@ async function runChecks() {
   await can("chatReports", () => db.collection("chatReports").limit(1).get());
   await can("chatBans", () => db.collection("chatBans").limit(1).get());
   await can("chatUsers", () => db.collection("chatUsers").limit(1).get());
+  await can("ratingStats", () => db.collection("ratingStats").limit(1).get());
 
   /* 7. Data ya filamu */
   try {
@@ -2026,6 +2161,254 @@ async function runChecks() {
 
 $("runCheckBtn").addEventListener("click", runChecks);
 
+/* =========================================
+   KIFURUSHI, BANNER, RIPOTI, VIFAA
+========================================= */
+
+function toLocalInput(d) {
+  const z = n => String(n).padStart(2, "0");
+  return d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate()) + "T" + z(d.getHours()) + ":" + z(d.getMinutes());
+}
+
+async function computePassExpiry(uid) {
+  let days = 30;
+  try {
+    const c = await db.collection("settings").doc("pass").get();
+    if (c.exists && Number(c.data().days) > 0) days = Number(c.data().days);
+  } catch (e) {}
+  let base = Date.now();
+  try {
+    const ex = await db.collection("users").doc(uid).collection("pass").doc("current").get();
+    if (ex.exists && ex.data().expiresAt && ex.data().expiresAt.toMillis) {
+      base = Math.max(base, ex.data().expiresAt.toMillis());
+    }
+  } catch (e) {}
+  return { ts: firebase.firestore.Timestamp.fromMillis(base + days * 86400000), days: days };
+}
+
+async function loadPassAdmin() {
+  try {
+    const c = await db.collection("settings").doc("pass").get();
+    const d = c.exists ? c.data() : {};
+    $("passEnabled").checked = !!d.enabled;
+    $("passPrice").value = d.price || 5000;
+    $("passDays").value = d.days || 30;
+  } catch (error) { showMessage(getErrorMessage(error), true); }
+}
+
+$("savePassBtn").addEventListener("click", async () => {
+  if (!isAdmin) return;
+  const price = Math.max(0, parseInt($("passPrice").value, 10) || 0);
+  const days = Math.min(Math.max(parseInt($("passDays").value, 10) || 30, 1), 365);
+  if ($("passEnabled").checked && price <= 0) return showMessage("Weka bei kubwa kuliko 0.", true);
+  try {
+    await db.collection("settings").doc("pass").set({
+      enabled: $("passEnabled").checked, price: price, days: days,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedBy: auth.currentUser.uid
+    });
+    showMessage("Kifurushi kimehifadhiwa.");
+  } catch (error) { showMessage(getErrorMessage(error), true); }
+});
+
+async function loadLimit() {
+  try {
+    const c = await db.collection("settings").doc("limits").get();
+    $("maxDevices").value = c.exists && c.data().maxDevices ? c.data().maxDevices : 3;
+  } catch (e) {}
+}
+
+$("saveLimitBtn").addEventListener("click", async () => {
+  if (!isAdmin) return;
+  const n = Math.min(Math.max(parseInt($("maxDevices").value, 10) || 3, 1), 10);
+  try {
+    await db.collection("settings").doc("limits").set({
+      maxDevices: n,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedBy: auth.currentUser.uid
+    });
+    showMessage("Kikomo cha vifaa: " + n + ".");
+  } catch (error) { showMessage(getErrorMessage(error), true); }
+});
+
+/* ---- Banner ---- */
+let featList = [], featItems = [];
+
+async function loadFeaturedAdmin() {
+  try {
+    const [m, s2, f] = await Promise.all([
+      db.collection("movies").get(),
+      db.collection("series").get(),
+      db.collection("settings").doc("featured").get()
+    ]);
+    featItems = m.docs.map(d => ({ id: d.id, title: d.data().title || "", kind: "Filamu" }))
+      .concat(s2.docs.map(d => ({ id: d.id, title: d.data().title || "", kind: "Series" })))
+      .filter(x => x.title.trim());
+    featList = f.exists ? (f.data().ids || []) : [];
+    renderFeatured();
+  } catch (error) { showMessage(getErrorMessage(error), true); }
+}
+
+function renderFeatured() {
+  const pick = $("featPick");
+  pick.replaceChildren();
+  featItems.filter(x => !featList.includes(x.id)).forEach(x => {
+    const o = document.createElement("option");
+    o.value = x.id;
+    o.textContent = x.kind + ": " + x.title;
+    pick.append(o);
+  });
+
+  const list = $("featList");
+  list.replaceChildren();
+  if (!featList.length) { list.textContent = "Hakuna zilizochaguliwa (app itatumia zilizo mpya zaidi)."; return; }
+
+  featList.forEach((id, i) => {
+    const it = featItems.find(x => x.id === id);
+    const row = document.createElement("div");
+    row.className = "row2";
+
+    const left = document.createElement("div");
+    const t = document.createElement("strong");
+    t.textContent = (i + 1) + ". " + (it ? it.title : id);
+    const s = document.createElement("small");
+    s.textContent = it ? it.kind : "Haipo tena";
+    left.append(t, s);
+
+    const tools = document.createElement("div");
+    tools.className = "actions";
+    tools.style.marginTop = "0";
+    const mk = (label, cls, fn) => {
+      const b = document.createElement("button");
+      b.className = cls;
+      b.textContent = label;
+      b.addEventListener("click", fn);
+      return b;
+    };
+    tools.append(
+      mk("▲", "secondary", () => { if (i > 0) { [featList[i - 1], featList[i]] = [featList[i], featList[i - 1]]; renderFeatured(); } }),
+      mk("▼", "secondary", () => { if (i < featList.length - 1) { [featList[i + 1], featList[i]] = [featList[i], featList[i + 1]]; renderFeatured(); } }),
+      mk("✕", "danger", () => { featList.splice(i, 1); renderFeatured(); })
+    );
+    row.append(left, tools);
+    list.append(row);
+  });
+}
+
+$("featAdd").addEventListener("click", () => {
+  const id = $("featPick").value;
+  if (!id) return;
+  if (featList.length >= 6) return showMessage("Hadi 6 tu.", true);
+  featList.push(id);
+  renderFeatured();
+});
+
+$("featSave").addEventListener("click", async () => {
+  if (!isAdmin) return;
+  try {
+    await db.collection("settings").doc("featured").set({
+      ids: featList.slice(0, 6),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedBy: auth.currentUser.uid
+    });
+    showMessage("Banner imehifadhiwa.");
+  } catch (error) { showMessage(getErrorMessage(error), true); }
+});
+
+/* ---- Ripoti ya mapato ---- */
+let reportRows = [];
+
+function fmtMoney(n) { return "TSh " + Number(n || 0).toLocaleString("en-US"); }
+
+async function loadReport() {
+  if (!isAdmin) return;
+  try {
+    const snap = await db.collection("payments").where("status", "==", "approved").get();
+    reportRows = snap.docs.map(d => {
+      const p = d.data();
+      const sec = ((p.decidedAt || p.createdAt || {}).seconds) || 0;
+      return { t: sec * 1000, amount: Number(p.amount) || 0, title: p.movieTitle || p.movieId || "-", code: p.txCode || "", email: p.email || "" };
+    });
+  } catch (error) { showMessage(getErrorMessage(error), true); return; }
+
+  const now = new Date();
+  const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const sum = f => reportRows.filter(f).reduce((n, r) => n + r.amount, 0);
+
+  const cards = $("reportCards");
+  cards.replaceChildren();
+  [["Leo", sum(r => r.t >= dayStart)],
+   ["Siku 7", sum(r => r.t >= dayStart - 6 * 86400000)],
+   ["Mwezi huu", sum(r => r.t >= new Date(now.getFullYear(), now.getMonth(), 1).getTime())],
+   ["Jumla", sum(() => true)],
+   ["Malipo", reportRows.length]].forEach(([k, v]) => {
+    const c = document.createElement("div");
+    c.className = "stat";
+    const sm = document.createElement("small");
+    sm.textContent = k;
+    const b = document.createElement("b");
+    b.textContent = k === "Malipo" ? v : fmtMoney(v);
+    c.append(sm, b);
+    cards.append(c);
+  });
+
+  /* siku 14 */
+  const days = [];
+  for (let i = 13; i >= 0; i--) {
+    const st = dayStart - i * 86400000;
+    days.push({ label: new Date(st).getDate(), v: sum(r => r.t >= st && r.t < st + 86400000) });
+  }
+  const mx = Math.max(1, ...days.map(d => d.v));
+  const bars = $("reportDaily");
+  bars.replaceChildren();
+  const wrap = document.createElement("div");
+  wrap.className = "bars";
+  days.forEach(d => {
+    const col = document.createElement("div");
+    col.className = "bar-col";
+    col.title = fmtMoney(d.v);
+    const fill = document.createElement("div");
+    fill.className = "bar-fill";
+    fill.style.height = Math.round(d.v / mx * 100) + "%";
+    col.append(fill, document.createTextNode(d.label));
+    wrap.append(col);
+  });
+  bars.append(wrap);
+
+  /* miezi 6 */
+  const months = $("reportMonthly");
+  months.replaceChildren();
+  for (let i = 0; i < 6; i++) {
+    const st = new Date(now.getFullYear(), now.getMonth() - i, 1).getTime();
+    const en = new Date(now.getFullYear(), now.getMonth() - i + 1, 1).getTime();
+    addRow(months, new Date(st).toLocaleDateString(undefined, { month: "long", year: "numeric" }), "", fmtMoney(sum(r => r.t >= st && r.t < en)));
+  }
+
+  /* zinazoongoza */
+  const groups = {};
+  reportRows.forEach(r => { groups[r.title] = (groups[r.title] || 0) + r.amount; });
+  const top = $("reportTop");
+  top.replaceChildren();
+  const entries = Object.entries(groups).sort((x, y) => y[1] - x[1]).slice(0, 5);
+  if (!entries.length) top.textContent = "Bado hakuna malipo yaliyoidhinishwa.";
+  entries.forEach(([k, v]) => addRow(top, k, "", fmtMoney(v)));
+}
+
+$("reportCsv").addEventListener("click", () => {
+  if (!reportRows.length) return showMessage("Hakuna data ya kupakua.", true);
+  const esc = v => '"' + String(v).replace(/"/g, '""') + '"';
+  const lines = ["tarehe,barua pepe,kitu,kiasi,code"].concat(
+    reportRows.slice().sort((a, b) => b.t - a.t).map(r =>
+      [new Date(r.t).toISOString(), r.email, r.title, r.amount, r.code].map(esc).join(",")));
+  const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "mapato-prosper.csv";
+  document.body.append(a);
+  a.click();
+  a.remove();
+});
+
 function showTab(name) {
   document.querySelectorAll(".tab").forEach(p =>
     p.classList.toggle("hidden", p.dataset.tab !== name));
@@ -2047,6 +2430,10 @@ function showTab(name) {
   if (name === "ads") loadAdsAdmin();
   if (name === "chat") loadChatAdmin();
   if (name === "check") runChecks();
+  if (name === "pass") loadPassAdmin();
+  if (name === "featured") loadFeaturedAdmin();
+  if (name === "report") loadReport();
+  if (name === "tools") loadLimit();
 }
 
 document.querySelectorAll("#tabs button").forEach(b =>
