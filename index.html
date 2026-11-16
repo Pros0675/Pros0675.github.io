@@ -315,6 +315,22 @@ body.locked .topbar{display:none}
 .inbox-item small{color:var(--muted)}
 .inbox-item.new{border-left:3px solid var(--gold);padding-left:10px}
 
+/* ===== mipangilio na ruhusa ===== */
+.set-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--border)}
+.set-row.first{border-top:0}
+.set-row small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.set-row .t{min-width:0}
+.set-row .t b{display:block}
+.pill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;background:var(--panel2)}
+.pill.ok{background:#103a2a;color:var(--ok)}
+.pill.no{background:#3f1a26;color:var(--danger)}
+.switch{position:relative;width:48px;height:28px;flex:none;display:block}
+.switch input{opacity:0;width:0;height:0;padding:0;border:0;position:absolute}
+.switch span{position:absolute;inset:0;background:var(--panel2);border:1px solid var(--border);border-radius:99px;transition:background .25s;cursor:pointer}
+.switch span::before{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .25s}
+.switch input:checked + span{background:var(--accent)}
+.switch input:checked + span::before{transform:translateX(20px)}
+.help{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;font-size:13px;margin-top:8px}
 /* ===== chat ===== */
 .chat-box{margin:0 14px;height:calc(100vh - 372px);min-height:250px;overflow-y:auto;background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:12px;overscroll-behavior:contain}
 .chat-list{display:flex;flex-direction:column;gap:8px}
@@ -506,6 +522,8 @@ body.locked .topbar{display:none}
       <p class="muted" style="margin:6px 0 10px;font-size:13.5px">Malipo yakiidhinishwa, filamu au series itafunguka yenyewe.</p>
       <div id="myPayments"><span class="muted">Inapakia...</span></div>
     </div>
+
+    <div id="settingsBox" class="pay-card"></div>
 
     <div id="themeBox" class="pay-card">
       <h3>Mandhari</h3>
@@ -2119,7 +2137,7 @@ function nextNotif() {
   $("notifTitle").textContent = a.title || "Taarifa mpya";
   $("notifText").textContent = a.text || "";
   $("notif").classList.add("show");
-  try { if (navigator.vibrate) navigator.vibrate(60); } catch (e) {}
+  try { if (navigator.vibrate && prefOn("pm_vibrate", true)) navigator.vibrate(60); } catch (e) {}
   clearTimeout(notifTimer);
   notifTimer = setTimeout(hideNotif, 8000);
 }
@@ -2146,7 +2164,7 @@ function startAnnouncements() {
         snap.docChanges().forEach(ch => {
           if (ch.type === "added") {
             const a = { id: ch.doc.id, ...ch.doc.data() };
-            if (a.createdAt) showNotif(a);
+            if (a.createdAt) { showNotif(a); if (document.hidden) systemNotify(a); }
           }
         });
       }
@@ -2557,10 +2575,204 @@ async function unblockAll() {
 ===================================================== */
 function goHash() {
   const map = { search: "Search", chat: "Chat", saved: "Saved", account: "Account", home: "Home" };
-  const v = map[(location.hash || "").replace("#", "").toLowerCase()];
+  const h = (location.hash || "").replace("#", "").toLowerCase();
+  if (h === "inbox" && currentUser) {
+    showView("Home");
+    let tries = 0;
+    const t = setInterval(() => {
+      if (annList.length || ++tries > 8) { clearInterval(t); openInbox(); }
+    }, 400);
+    return;
+  }
+  const v = map[h];
   if (v && currentUser) showView(v);
 }
 window.addEventListener("hashchange", goHash);
+
+/* =====================================================
+   MIPANGILIO: ARIFA NA RUHUSA ZA APP
+===================================================== */
+function prefOn(key, def) {
+  try { const v = localStorage.getItem(key); return v === null ? def : v === "on"; }
+  catch (e) { return def; }
+}
+function setPref(key, on) {
+  try { localStorage.setItem(key, on ? "on" : "off"); } catch (e) {}
+}
+
+function notifPerm() {
+  return ("Notification" in window) ? Notification.permission : "unsupported";
+}
+
+/* Arifa ya mfumo (inaonekana hata app ikiwa chini). Inahitaji ruhusa na swichi ya Arifa iwe ON. */
+async function systemNotify(a, force) {
+  if (notifPerm() !== "granted") return;
+  if (!force && !prefOn("pm_notif", true)) return;
+  const title = a.title || "Taarifa mpya";
+  const opts = {
+    body: a.text || "",
+    icon: "icons/icon-192.png",
+    badge: "icons/favicon-48.png",
+    tag: "pm-" + (a.id || Date.now()),
+    data: { url: "./index.html#inbox" }
+  };
+  try {
+    const reg = navigator.serviceWorker ? await navigator.serviceWorker.getRegistration() : null;
+    if (reg) { await reg.showNotification(title, opts); return; }
+  } catch (e) {}
+  try { new Notification(title, opts); } catch (e) {}
+}
+
+async function setNotifications(on) {
+  if (!on) {
+    setPref("pm_notif", false);
+    showMessage("Arifa za mfumo zimezimwa.");
+    return renderSettings();
+  }
+  const p = notifPerm();
+  if (p === "unsupported") {
+    showMessage("Kifaa hiki hakisapoti arifa.", true);
+    return renderSettings();
+  }
+  if (p === "denied") {
+    showMessage("Arifa zimekataliwa kwenye simu. Ziruhusu kupitia mipangilio ya browser.", true);
+    return renderSettings(true);
+  }
+  let res = p;
+  if (p === "default") {
+    try { res = await Notification.requestPermission(); } catch (e) { res = "default"; }
+  }
+  if (res === "granted") {
+    setPref("pm_notif", true);
+    showMessage("Arifa zimewashwa.");
+    systemNotify({ title: "Prosper Movies", text: "Arifa zinafanya kazi! 🎉", id: "welcome" }, true);
+  } else {
+    showMessage("Ruhusa ya arifa haikutolewa.", true);
+  }
+  renderSettings(res === "denied");
+}
+
+function settingRow(first, title, desc, right) {
+  const row = el("div", "set-row" + (first ? " first" : ""));
+  const t = el("div", "t");
+  t.append(el("b", "", title));
+  if (desc) t.append(el("small", "", desc));
+  row.append(t, right);
+  return row;
+}
+
+function makeSwitch(checked, disabled, onChange) {
+  const label = el("label", "switch");
+  const input = document.createElement("input");
+  input.type = "checkbox";
+  input.checked = checked;
+  input.disabled = !!disabled;
+  input.addEventListener("change", () => onChange(input.checked));
+  label.append(input, document.createElement("span"));
+  return label;
+}
+
+function pill(text, cls) { return el("span", "pill" + (cls ? " " + cls : ""), text); }
+
+async function renderSettings(showHelp) {
+  const box = $("settingsBox");
+  if (!box) return;
+  box.replaceChildren();
+  box.append(el("h3", "", "Mipangilio na Ruhusa"));
+  box.append(el("p", "muted", "Dhibiti arifa na ruhusa za app hapa."));
+  box.lastChild.style.cssText = "margin:6px 0 4px;font-size:13.5px";
+
+  /* Arifa */
+  const perm = notifPerm();
+  const on = perm === "granted" && prefOn("pm_notif", true);
+  box.append(settingRow(true, "Arifa za app",
+    perm === "unsupported" ? "Kifaa hiki hakisapoti arifa."
+      : perm === "denied" ? "Zimekataliwa kwenye simu."
+      : "Pata taarifa mpya za admin hata app ikiwa chini.",
+    makeSwitch(on, perm === "unsupported", setNotifications)));
+
+  if (showHelp || perm === "denied") {
+    const h = el("div", "help");
+    h.append(el("b", "", "Jinsi ya kuruhusu arifa:"));
+    const ol = document.createElement("ol");
+    ol.style.cssText = "margin:6px 0 0;padding-left:18px";
+    ["Fungua menyu ya browser (⋮) kisha Settings.",
+     "Chagua Site settings, kisha Notifications.",
+     "Tafuta pros0675.github.io na uchague Allow.",
+     "Kama umesakinisha app: bonyeza icon kwa muda mrefu, App info, Notifications, washa.",
+     "Rudi hapa na ubonyeze swichi ya Arifa tena."].forEach(x => ol.append(el("li", "", x)));
+    h.append(ol);
+    box.append(h);
+  }
+
+  const test = el("button", "ghost sm", "Jaribu arifa");
+  test.type = "button";
+  test.addEventListener("click", () => {
+    if (notifPerm() !== "granted") return showMessage("Washa arifa kwanza.", true);
+    systemNotify({ title: "Prosper Movies", text: "Hii ni arifa ya majaribio. ✅", id: "test" }, true);
+  });
+  box.append(settingRow(false, "Jaribu arifa", "Tuma arifa ya majaribio sasa.", test));
+
+  /* Mtetemo */
+  box.append(settingRow(false, "Mtetemo wa taarifa", "Simu itetemeke taarifa ya juu ikishuka.",
+    makeSwitch(prefOn("pm_vibrate", true), !navigator.vibrate, v => { setPref("pm_vibrate", v); showMessage(v ? "Mtetemo umewashwa." : "Mtetemo umezimwa."); })));
+
+  /* Ruhusa za app */
+  box.append(el("h3", "", "Ruhusa za app"));
+  box.lastChild.style.cssText = "margin:18px 0 0;font-size:16px";
+
+  const permPill = perm === "granted" ? pill("Imeruhusiwa", "ok")
+    : perm === "denied" ? pill("Imekataliwa", "no")
+    : perm === "unsupported" ? pill("Haisapotiwi")
+    : pill("Haijaulizwa");
+  box.append(settingRow(true, "Arifa", "Kuonyesha taarifa juu ya skrini.", permPill));
+
+  let persisted = false, canPersist = !!(navigator.storage && navigator.storage.persist);
+  try { if (navigator.storage && navigator.storage.persisted) persisted = await navigator.storage.persisted(); } catch (e) {}
+  let persistRight;
+  if (persisted) persistRight = pill("Imewashwa", "ok");
+  else if (canPersist) {
+    persistRight = el("button", "ghost sm", "Omba");
+    persistRight.type = "button";
+    persistRight.addEventListener("click", async () => {
+      let ok = false;
+      try { ok = await navigator.storage.persist(); } catch (e) {}
+      showMessage(ok ? "Hifadhi ya kudumu imewashwa." : "Browser haikuruhusu sasa. Jaribu baada ya kusakinisha app.", !ok);
+      renderSettings();
+    });
+  } else persistRight = pill("Haisapotiwi");
+  box.append(settingRow(false, "Hifadhi ya kudumu", "Kuzuia simu isifute login na data ya app.", persistRight));
+
+  const standalone = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
+  let instRight;
+  if (standalone) instRight = pill("Imesakinishwa", "ok");
+  else if (deferredInstall) {
+    instRight = el("button", "ghost sm", "Sakinisha");
+    instRight.type = "button";
+    instRight.addEventListener("click", async () => {
+      deferredInstall.prompt();
+      try { await deferredInstall.userChoice; } catch (e) {}
+      deferredInstall = null;
+      renderAccount(); renderSettings();
+    });
+  } else instRight = pill("Bado");
+  box.append(settingRow(false, "Sakinisha app", "Kuiweka kwenye skrini ya simu.", instRight));
+
+  box.append(settingRow(false, "Mtandao", "Hali ya intaneti sasa hivi.", navigator.onLine ? pill("Upo mtandaoni", "ok") : pill("Hakuna intaneti", "no")));
+
+  box.append(settingRow(false, "Skrini nzima na mzunguko", "Hazihitaji ruhusa. Zinafanya kazi ndani ya kicheza.", pill("Tayari", "ok")));
+
+  const note = el("p", "muted", "App haitumii kamera, maikrofoni wala eneo lako, kwa hiyo haihitaji ruhusa hizo.");
+  note.style.cssText = "margin:12px 0 0;font-size:12.5px";
+  box.append(note);
+}
+
+try {
+  if (navigator.permissions && navigator.permissions.query) {
+    navigator.permissions.query({ name: "notifications" }).then(p => { p.onchange = () => renderSettings(); }).catch(() => {});
+  }
+} catch (e) {}
+renderSettings();
 
 /* ---------- FILAMU ZETU ---------- */
 async function getMovieUrl(m) {
@@ -2966,10 +3178,12 @@ window.addEventListener("beforeinstallprompt", e => {
   e.preventDefault();
   deferredInstall = e;
   renderAccount();
+  renderSettings();
 });
 window.addEventListener("appinstalled", () => {
   deferredInstall = null;
   renderAccount();
+  renderSettings();
   showMessage("App imesakinishwa.");
 });
 if ("serviceWorker" in navigator) {
@@ -2977,8 +3191,8 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").catch(() => {});
   });
 }
-window.addEventListener("offline", () => showMessage("Huna intaneti. Baadhi ya vitu havitafanya kazi.", true));
-window.addEventListener("online", () => showMessage("Intaneti imerudi."));
+window.addEventListener("offline", () => { showMessage("Huna intaneti. Baadhi ya vitu havitafanya kazi.", true); renderSettings(); });
+window.addEventListener("online", () => { showMessage("Intaneti imerudi."); renderSettings(); });
 
 document.addEventListener("keydown", e => {
   if (e.key !== "Escape") return;
