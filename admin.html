@@ -1902,10 +1902,10 @@ async function runChecks() {
   }
   await version("index.html", [
     ['id="viewChat"', "Chat"], ['id="bellBtn"', "Taarifa"], ["pm_theme", "Mandhari"],
-    ['id="adLayer"', "Matangazo ya kicheza"], ["icon-180.png", "icon za iPhone"], ["favicon.ico", "favicon"], ["function goHash", "viungo vya haraka"]
+    ['id="adLayer"', "Matangazo ya kicheza"], ["icon-180.png", "icon za iPhone"], ["favicon.ico", "favicon"], ["function goHash", "viungo vya haraka"], ["pm_notif", "mipangilio ya arifa"]
   ]);
   await version("series-admin.html", [["q720", "ubora wa video"], ["subs/", "manukuu"], ["connection", "connection"]]);
-  await version("sw.js", [["pm-v4", "toleo la sw.js"]]);
+  await version("sw.js", [["pm-v5", "toleo la sw.js"], ["notificationclick", "arifa"]]);
 
   /* 3. Manifest */
   try {
