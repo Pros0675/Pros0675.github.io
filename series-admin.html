@@ -99,6 +99,9 @@
       <label>Makundi (chagua moja au zaidi)</label>
       <div id="genreBoxes" class="genre-boxes"></div>
 
+      <label for="releaseAt">Tarehe ya kutoka (hiari, inaonyesha "Inakuja")</label>
+      <input id="releaseAt" type="datetime-local">
+
     </div>
 
     <!-- SEASONS -->
@@ -314,7 +317,8 @@ function render() {
         field(ep.videoUrl, "URL ya video (HTTPS: Dropbox, .mp4, YouTube)", v => ep.videoUrl = v),
         field(ep.sub, "Manukuu hiari (subs/jina.srt au https://...)", v => ep.sub = v),
         field(ep.q720, "Video 720p (hiari, HTTPS)", v => ep.q720 = v),
-        field(ep.q480, "Video 480p (hiari, HTTPS)", v => ep.q480 = v)
+        field(ep.q480, "Video 480p (hiari, HTTPS)", v => ep.q480 = v),
+        field(ep.introEnd, "Ruka intro hadi sekunde (hiari, mfano 85)", v => ep.introEnd = v)
       );
 
       const t = document.createElement("div");
@@ -362,11 +366,17 @@ function newSeries() {
   $("runtime").value = "";
   $("age").value = "";
   setGenres([]);
+  $("releaseAt").value = "";
   $("formTitle").textContent = "Series mpya";
   $("newBtn").classList.add("hidden");
   render();
 }
 $("newBtn").addEventListener("click", newSeries);
+
+function toLocalInput(d) {
+  const z = n => String(n).padStart(2, "0");
+  return d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate()) + "T" + z(d.getHours()) + ":" + z(d.getMinutes());
+}
 
 function isHttps(u) {
   try { return new URL(u).protocol === "https:"; } catch (e) { return false; }
@@ -402,6 +412,9 @@ $("saveBtn").addEventListener("click", async () => {
   const paid = price > 0;
 
   /* Series ya malipo: link hazibaki kwenye "series", zinaenda "seriesSecrets" */
+  const relVal = $("releaseAt").value;
+  const relTs = relVal ? firebase.firestore.Timestamp.fromDate(new Date(relVal)) : null;
+
   const secretUrls = {};
   const data = {
     title,
@@ -411,6 +424,7 @@ $("saveBtn").addEventListener("click", async () => {
     description: $("desc").value.trim(),
     price: price,
     genres: getGenres(),
+    releaseAt: relTs,
     runtime: $("runtime").value.trim(),
     age: $("age").value,
     seasons: seasons.map(s => ({
@@ -429,6 +443,7 @@ $("saveBtn").addEventListener("click", async () => {
           number: ep.number,
           title: (ep.title || "").trim(),
           sub: (ep.sub || "").trim(),
+          introEnd: Math.max(0, parseInt(ep.introEnd, 10) || 0),
           videoUrl: paid ? "" : url,
           q720: paid ? "" : q7,
           q480: paid ? "" : q4
@@ -527,6 +542,7 @@ async function loadList() {
           $("runtime").value = d.runtime || "";
           $("age").value = d.age || "";
           setGenres(d.genres || []);
+          $("releaseAt").value = d.releaseAt && d.releaseAt.toDate ? toLocalInput(d.releaseAt.toDate()) : "";
           seasons = copy;
           relabel();
           $("formTitle").textContent = "Hariri: " + d.title;
