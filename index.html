@@ -6,8 +6,7 @@
 <meta name="theme-color" content="#0c0a14">
 <script>(function(){try{var t=localStorage.getItem("pm_theme");if(t&&t!=="violet")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icons/favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48.png">
+<link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
 <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
@@ -1229,7 +1228,6 @@ auth.onAuthStateChanged(async user => {
       lastLogin: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true }).catch(() => {});
     loadContent();
-    goHash();
     if ($("viewSaved").classList.contains("active")) loadSaved();
   } else {
     stopLive();
@@ -2552,16 +2550,6 @@ async function unblockAll() {
   } catch (error) { showMessage(friendlyError(error), true); }
 }
 
-/* =====================================================
-   VIUNGO VYA HARAKA (shortcuts za icon): #search #chat #saved
-===================================================== */
-function goHash() {
-  const map = { search: "Search", chat: "Chat", saved: "Saved", account: "Account", home: "Home" };
-  const v = map[(location.hash || "").replace("#", "").toLowerCase()];
-  if (v && currentUser) showView(v);
-}
-window.addEventListener("hashchange", goHash);
-
 /* ---------- FILAMU ZETU ---------- */
 async function getMovieUrl(m) {
   if (!(m.price > 0)) return { url: m.videoUrl, q720: m.video720 || "", q480: m.video480 || "" };
@@ -2977,4 +2965,17 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").catch(() => {});
   });
 }
-window.addEventListener("offline", () => showMessage("Huna intaneti. Baadhi ya vit
+window.addEventListener("offline", () => showMessage("Huna intaneti. Baadhi ya vitu havitafanya kazi.", true));
+window.addEventListener("online", () => showMessage("Intaneti imerudi."));
+
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (!$("playerModal").classList.contains("hidden")) return closePlayer();
+  ["payModal", "detailModal", "authModal", "inboxModal", "nickModal", "msgModal"].forEach(id => {
+    if (!$(id).classList.contains("hidden")) closeModal(id);
+  });
+});
+
+</script>
+</body>
+</html>
