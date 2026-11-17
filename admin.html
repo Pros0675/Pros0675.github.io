@@ -333,6 +333,7 @@
     <div class="actions">
       <a href="./index.html">← Rudi kwenye tovuti</a>
       <a href="./series-admin.html">📺 Series</a>
+      <a href="./connection-admin.html">🔗 Connection</a>
 
       <button id="logoutBtn" class="secondary hidden">
         Toka
@@ -826,6 +827,7 @@
       <h2>📺 Series</h2>
       <p class="muted">Kuongeza au kuhariri series (season, episodes, connection, bei), tumia Series Admin.</p>
       <a href="./series-admin.html"><button type="button">Fungua Series Admin</button></a>
+      <a href="./connection-admin.html"><button type="button" class="secondary">Fungua Connection Admin</button></a>
       <div id="seriesListAdmin" style="margin-top:12px">Inapakia...</div>
     </section>
 
@@ -1664,14 +1666,16 @@ async function loadViews() {
 $("exportBtn").addEventListener("click", async () => {
   if (!isAdmin) return;
   try {
-    const [m, s2] = await Promise.all([
+    const [m, s2, c4] = await Promise.all([
       db.collection("movies").get(),
-      db.collection("series").get()
+      db.collection("series").get(),
+      db.collection("connections").get().catch(() => ({ docs: [] }))
     ]);
     const data = {
       exportedAt: new Date().toISOString(),
       movies: m.docs.map(d => ({ id: d.id, ...d.data() })),
-      series: s2.docs.map(d => ({ id: d.id, ...d.data() }))
+      series: s2.docs.map(d => ({ id: d.id, ...d.data() })),
+      connections: c4.docs.map(d => ({ id: d.id, ...d.data() }))
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
@@ -1990,7 +1994,7 @@ $("cleanChatBtn").addEventListener("click", async () => {
 ========================================= */
 
 const CHECK_FILES = [
-  "index.html", "admin.html", "series-admin.html", "ad.html",
+  "index.html", "admin.html", "series-admin.html", "connection-admin.html", "ad.html",
   "privacy.html", "terms.html", "404.html",
   "manifest.json", "sw.js", "robots.txt", "sitemap.xml",
   "icons/icon-152.png", "icons/icon-180.png", "icons/icon-192.png",
@@ -2036,10 +2040,11 @@ async function runChecks() {
   }
   await version("index.html", [
     ['id="viewChat"', "Chat"], ['id="bellBtn"', "Taarifa"], ["pm_theme", "Mandhari"],
-    ['id="adLayer"', "Matangazo ya kicheza"], ["icon-180.png", "icon za iPhone"], ["favicon.ico", "favicon"], ["function goHash", "viungo vya haraka"], ["pm_notif", "mipangilio ya arifa"], ["function passActive", "kifurushi"], ["function renderStars", "ukadiriaji"], ["function deviceGate", "kikomo cha vifaa"]
+    ['id="adLayer"', "Matangazo ya kicheza"], ["icon-180.png", "icon za iPhone"], ["favicon.ico", "favicon"], ["function goHash", "viungo vya haraka"], ["pm_notif", "mipangilio ya arifa"], ["function passActive", "kifurushi"], ["function renderStars", "ukadiriaji"], ["function deviceGate", "kikomo cha vifaa"], ["function loadConnections", "connection"]
   ]);
   await version("series-admin.html", [["q720", "ubora wa video"], ["subs/", "manukuu"], ["connection", "connection"], ["releaseAt", "tarehe ya kutoka"]]);
-  await version("sw.js", [["pm-v6", "toleo la sw.js"], ["notificationclick", "arifa"]]);
+  await version("connection-admin.html", [["connectionSecrets", "connection"], ["seriesLink", "kiungo cha series"]]);
+  await version("sw.js", [["pm-v7", "toleo la sw.js"], ["notificationclick", "arifa"]]);
 
   /* 3. Manifest */
   try {
@@ -2082,6 +2087,7 @@ async function runChecks() {
   await can("chatBans", () => db.collection("chatBans").limit(1).get());
   await can("chatUsers", () => db.collection("chatUsers").limit(1).get());
   await can("ratingStats", () => db.collection("ratingStats").limit(1).get());
+  await can("connections", () => db.collection("connections").limit(1).get());
 
   /* 7. Data ya filamu */
   try {
@@ -2120,6 +2126,19 @@ async function runChecks() {
     const noEp = ss.docs.filter(d => !(d.data().seasons || []).length).length;
     add(noEp ? "warn" : "ok", "Series zisizo na season: " + noEp, noEp ? "Ongeza season na episodes au zifute." : "");
   } catch (e) { add("warn", "Data ya series haijaweza kukaguliwa", e.message || ""); }
+
+  /* 8b. Data ya connection */
+  try {
+    const cs = await db.collection("connections").get();
+    const paidC = cs.docs.filter(d => d.data().price > 0);
+    let missC = 0;
+    for (const d of paidC) {
+      const sec = await db.collection("connectionSecrets").doc(d.id).get();
+      if (!sec.exists) missC++;
+    }
+    add(missC ? "bad" : "ok", "Connection za kulipia zisizo na link za siri: " + missC,
+      missC ? "Zifungue kwenye Connection Admin na uzihifadhi tena." : "");
+  } catch (e) { add("warn", "Data ya connection haijaweza kukaguliwa", e.message || ""); }
 
   /* 9. Mipangilio */
   try {
@@ -2236,13 +2255,15 @@ let featList = [], featItems = [];
 
 async function loadFeaturedAdmin() {
   try {
-    const [m, s2, f] = await Promise.all([
+    const [m, s2, f, c3] = await Promise.all([
       db.collection("movies").get(),
       db.collection("series").get(),
-      db.collection("settings").doc("featured").get()
+      db.collection("settings").doc("featured").get(),
+      db.collection("connections").get().catch(() => ({ docs: [] }))
     ]);
     featItems = m.docs.map(d => ({ id: d.id, title: d.data().title || "", kind: "Filamu" }))
       .concat(s2.docs.map(d => ({ id: d.id, title: d.data().title || "", kind: "Series" })))
+      .concat(c3.docs.map(d => ({ id: d.id, title: d.data().title || "", kind: "Connection" })))
       .filter(x => x.title.trim());
     featList = f.exists ? (f.data().ids || []) : [];
     renderFeatured();
