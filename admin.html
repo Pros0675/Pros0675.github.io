@@ -408,6 +408,7 @@
       <button type="button" data-tab="report" class="secondary">📈 Ripoti</button>
       <button type="button" data-tab="check" class="secondary">✅ Hakiki</button>
       <button type="button" data-tab="chat" class="secondary">💬 Chat</button>
+      <button type="button" data-tab="requests" class="secondary">🙋 Maombi</button>
       <button type="button" data-tab="tools" class="secondary">⚙️ Zana</button>
       <button type="button" data-tab="ads" class="secondary">💸 Matangazo</button>
       <button type="button" data-tab="notice" class="secondary">📣 Tangazo</button>
@@ -710,6 +711,14 @@
       <div id="checkList"></div>
     </section>
 
+    <!-- MAOMBI -->
+    <section class="panel tab" data-tab="requests">
+      <h2>🙋 Maombi ya Watumiaji</h2>
+      <p class="muted">Watu wanaomba filamu, series au connection. Zenye kura nyingi ndizo zinazotakiwa zaidi. Likishawekwa, bonyeza "Imewekwa".</p>
+      <button type="button" id="reqRefresh" class="secondary">Onyesha upya</button>
+      <div id="reqAdminList" style="margin-top:12px">Inapakia...</div>
+    </section>
+
     <!-- CHAT -->
     <section class="panel tab" data-tab="chat">
       <h2>💬 Chat ya Wote</h2>
@@ -722,6 +731,11 @@
         <label style="display:flex;align-items:center;gap:8px">
           <input id="chatEnabled" type="checkbox" style="width:auto;margin:0"> Chat imewashwa
         </label>
+      </div>
+
+      <div class="field">
+        <label for="chatPinned">Ujumbe wa kubandika juu ya chat (hiari, herufi 200)</label>
+        <input id="chatPinned" maxlength="200" placeholder="Mfano: Karibuni! Heshima kwanza. Omba filamu kwenye kichupo cha Maombi.">
       </div>
 
       <div class="actions">
@@ -1825,6 +1839,7 @@ async function loadChatAdmin() {
   try {
     const cfg = await db.collection("settings").doc("chat").get();
     $("chatEnabled").checked = cfg.exists && !!cfg.data().enabled;
+    $("chatPinned").value = cfg.exists ? (cfg.data().pinned || "") : "";
   } catch (error) {
     showMessage(getErrorMessage(error), true);
   }
@@ -1837,6 +1852,7 @@ $("saveChatCfg").addEventListener("click", async () => {
   try {
     await db.collection("settings").doc("chat").set({
       enabled: $("chatEnabled").checked,
+      pinned: $("chatPinned").value.trim().slice(0, 200),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       updatedBy: auth.currentUser.uid
     });
@@ -2040,11 +2056,11 @@ async function runChecks() {
   }
   await version("index.html", [
     ['id="viewChat"', "Chat"], ['id="bellBtn"', "Taarifa"], ["pm_theme", "Mandhari"],
-    ['id="adLayer"', "Matangazo ya kicheza"], ["icon-180.png", "icon za iPhone"], ["favicon.ico", "favicon"], ["function goHash", "viungo vya haraka"], ["pm_notif", "mipangilio ya arifa"], ["function passActive", "kifurushi"], ["function renderStars", "ukadiriaji"], ["function deviceGate", "kikomo cha vifaa"], ["function loadConnections", "connection"]
+    ['id="adLayer"', "Matangazo ya kicheza"], ["icon-180.png", "icon za iPhone"], ["favicon.ico", "favicon"], ["function goHash", "viungo vya haraka"], ["pm_notif", "mipangilio ya arifa"], ["function passActive", "kifurushi"], ["function renderStars", "ukadiriaji"], ["function deviceGate", "kikomo cha vifaa"], ["function loadConnections", "connection"], ["function sendChatText", "stika na jibu"], ["function loadRequests", "maombi"]
   ]);
   await version("series-admin.html", [["q720", "ubora wa video"], ["subs/", "manukuu"], ["connection", "connection"], ["releaseAt", "tarehe ya kutoka"]]);
   await version("connection-admin.html", [["connectionSecrets", "connection"], ["seriesLink", "kiungo cha series"]]);
-  await version("sw.js", [["pm-v7", "toleo la sw.js"], ["notificationclick", "arifa"]]);
+  await version("sw.js", [["pm-v8", "toleo la sw.js"], ["notificationclick", "arifa"]]);
 
   /* 3. Manifest */
   try {
@@ -2088,6 +2104,7 @@ async function runChecks() {
   await can("chatUsers", () => db.collection("chatUsers").limit(1).get());
   await can("ratingStats", () => db.collection("ratingStats").limit(1).get());
   await can("connections", () => db.collection("connections").limit(1).get());
+  await can("requests", () => db.collection("requests").limit(1).get());
 
   /* 7. Data ya filamu */
   try {
@@ -2430,6 +2447,61 @@ $("reportCsv").addEventListener("click", () => {
   a.remove();
 });
 
+/* =========================================
+   MAOMBI: usimamizi
+========================================= */
+
+async function loadRequestsAdmin() {
+  const list = $("reqAdminList");
+  list.textContent = "Inapakia...";
+  try {
+    const snap = await db.collection("requests").orderBy("votes", "desc").limit(100).get();
+    list.replaceChildren();
+    if (snap.empty) { list.textContent = "Bado hakuna maombi."; return; }
+
+    snap.docs.forEach(d => {
+      const r = d.data();
+      const row = document.createElement("div");
+      row.className = "movie-item pay-item";
+
+      const info = document.createElement("div");
+      info.className = "movie-info";
+      const t = document.createElement("strong");
+      t.textContent = (r.votes || 0) + " 👍 · " + (r.text || "");
+      const s = document.createElement("small");
+      s.textContent = (r.kind || "") + " · " + (r.name || "") + " · " + tsStr(r.createdAt) + (r.status === "done" ? " · IMEWEKWA" : "");
+      info.append(t, s);
+
+      const done = document.createElement("button");
+      done.className = r.status === "done" ? "secondary" : "";
+      done.textContent = r.status === "done" ? "Fungua tena" : "Imewekwa ✅";
+      done.addEventListener("click", async () => {
+        try {
+          await d.ref.update({ status: r.status === "done" ? "open" : "done" });
+          loadRequestsAdmin();
+        } catch (error) { showMessage(getErrorMessage(error), true); }
+      });
+
+      const del = document.createElement("button");
+      del.className = "danger";
+      del.textContent = "Futa";
+      del.addEventListener("click", async () => {
+        if (!confirm("Futa ombi hili?")) return;
+        try { await d.ref.delete(); loadRequestsAdmin(); }
+        catch (error) { showMessage(getErrorMessage(error), true); }
+      });
+
+      row.append(info, done, del);
+      list.append(row);
+    });
+  } catch (error) {
+    list.textContent = "Imeshindikana kupakia maombi.";
+    showMessage(getErrorMessage(error), true);
+  }
+}
+
+$("reqRefresh").addEventListener("click", loadRequestsAdmin);
+
 function showTab(name) {
   document.querySelectorAll(".tab").forEach(p =>
     p.classList.toggle("hidden", p.dataset.tab !== name));
@@ -2450,6 +2522,7 @@ function showTab(name) {
   if (name === "notice") loadNoticeAdmin();
   if (name === "ads") loadAdsAdmin();
   if (name === "chat") loadChatAdmin();
+  if (name === "requests") loadRequestsAdmin();
   if (name === "check") runChecks();
   if (name === "pass") loadPassAdmin();
   if (name === "featured") loadFeaturedAdmin();
